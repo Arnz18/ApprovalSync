@@ -107,7 +107,8 @@ Use typed contracts, DTO validation, centralized errors, structured logs, reques
 | FND-01 | Architecture, threat model and demo scope decision | M1 | FND-00, FND-GIT-00 | `docs/architecture/`, decisions, threat model | COMMITTED |
 | FND-02 | Shared API/data contracts and repository skeleton | M1 + M2/M3/M4 contract review | FND-01 | `docs/contracts/`, skeleton only, API conventions | COMMITTED |
 | FND-03 | Docker, env templates, lint/test/CI baseline | M1 | FND-02 | compose, Dockerfiles, CI, `.env.example` | COMMITTED |
-| BE-01 | Backend app foundation, config, health, OpenAPI | M2 | FND-03 | `backend/src/core/`, bootstrap | PLANNED |
+| BE-01 | Backend app foundation, config, health, OpenAPI | M2 | FND-03 | `backend/src/core/`, bootstrap | COMMITTED |
+
 | BE-02 | Database schema and migrations | M2 | BE-01 | core entities, JSONB, migrations, seed framework | BLOCKED |
 | BE-03 | Authentication, session/JWT and RBAC | M2 | BE-02 | `auth/`, `users/`, permissions | BLOCKED |
 | BE-04 | Institution profiles and application intake | M2 | BE-03 | application CRUD, dynamic payload, attachments metadata | BLOCKED |
@@ -238,6 +239,21 @@ Use typed contracts, DTO validation, centralized errors, structured logs, reques
     - `npm test -- --runInBand`: Unit test suites passed (2/2 suites, 7/7 tests passed; exit code 0).
     - `npm run test:e2e -- --runInBand`: Application e2e tests passed (1/1 suite, 2/2 tests passed; exit code 0).
   - Commit SHA: `80814532e5893aacae73c99164566c1fe58146f2` (committed and published to `origin/main`). Status updated to `COMMITTED` (independent human verification required before `VERIFIED`).
+- **BE-01 (COMMITTED):**
+  - Validated and typed configuration (`backend/src/config/`): validated PORT (1-65535), NODE_ENV, LOG_LEVEL, and DB_PORT ranges; enforced production safeguards requiring strong, non-empty DB_PASSWORD rejecting development placeholder `postgres_dev_password`, DB_HOST, DB_NAME, and DB_USER; ensured zero secret leakage in validation errors.
+  - Implemented request correlation and structured logging (`backend/src/core/middleware/`, `backend/src/core/interceptors/`): `CorrelationMiddleware` accepts and sanitizes client-supplied `X-Correlation-Id` or generates a UUIDv4, preventing CR/LF header and log injection; returns `X-Correlation-Id` header on all responses; `LoggingInterceptor` sanitizes URLs and methods while preserving privacy (no request bodies, authorization headers, or tokens logged).
+  - Implemented structured DTO validation and centralized error handling (`backend/src/core/pipes/`, `backend/src/core/filters/`): `ValidationPipe` exception factory extracts machine-readable field paths (`parent.child`), constraint rules, and messages into `FieldError[]` without fragile regex string parsing; `HttpExceptionFilter` formats all exceptions to `ApiErrorResponse`, maps status codes to standard catalog error codes, catches unhandled exceptions safely as 500 without leaking stack traces or internal environment details, and guarantees `X-Correlation-Id` is present in both headers and payload.
+  - Implemented health, liveness, and readiness checks (`backend/src/health/`): `GET /api/v1/health` provides backwards-compatible overall status; `GET /api/v1/health/liveness` provides container process probe; `GET /api/v1/health/readiness` truthfully reports readiness state (`config: healthy`, `database: unconfigured` pending BE-02 without premature or mock database connection).
+  - Implemented OpenAPI / Swagger 3.0 specification (`backend/src/core/swagger/`): documents `/api/v1/health`, `/api/v1/health/liveness`, and `/api/v1/health/readiness` with DTO schemas and standard envelopes; served on non-colliding UI routes (`/api/docs` and `/api/v1/docs`) and JSON schema (`/api/docs-json`); automatically disabled in production (`NODE_ENV === 'production'`) unless explicitly permitted.
+  - Lifecycle reliability (`backend/src/main.ts`): graceful shutdown hooks enabled (`app.enableShutdownHooks()`), global prefix `/api/v1` applied exactly once, bootstrap exceptions caught cleanly with fatal error logger.
+  - Quality gates and test results verified:
+    - `npm run format:check`: Passed cleanly with zero style violations (exit code 0).
+    - `npm run lint`: Passed with 0 errors and 0 warnings (exit code 0).
+    - `npm run build`: NestJS TypeScript compilation succeeded (exit code 0).
+    - `npm test -- --runInBand`: 6/6 test suites passed, 43/43 unit tests passed (exit code 0).
+    - `npm run test:e2e -- --runInBand`: 1/1 test suite passed, 14/14 e2e tests passed (exit code 0).
+    - Total tests: 57 tests passing across unit and e2e suites.
+  - Commit SHA: `5006350440c69738d7059c0d80cb9f2eb7eca4ca` (committed and published to `origin/main`). Status updated to `COMMITTED` (independent human verification required before `VERIFIED`).
 
 ## 9. Definition of done for every code chunk
 
@@ -253,8 +269,8 @@ Use typed contracts, DTO validation, centralized errors, structured logs, reques
 
 ## 10. Current work / next action
 
-- **Current implementation status:** Repository audit accepted (`ACCEPTED_AUDIT_BASELINE`); Git baseline established (`COMMITTED` at `2d36ae7715caed01f241de6b1842b54c1e67b0c9`); project state ledger updated (`COMMITTED` at `1f13aea704eea4185205bd51274fd48b182bd947`); architecture deliverables published to `origin/main` (`COMMITTED` at `d282700fbc744f1fcb792815afe7462d79fb9681` / `ec25be6157ba8fe65a2e3c979675ca3177576d84`); shared API/data contracts and repository skeleton published to `origin/main` (`COMMITTED` at `dd0a89aa807c5f943b57a6482fd4cebd4ba1bd3b` / `641646906e1a465d0be634f01bfb348c7f870009`); Docker Compose baseline, quality gates, and CI workflow published to `origin/main` (`COMMITTED` at `80814532e5893aacae73c99164566c1fe58146f2`). Actual application business logic has not yet been implemented.
-- **Next eligible chunk:** `BE-01 — Backend app foundation, config, health, OpenAPI` (`PLANNED`). All dependencies (`FND-01`, `FND-02`, `FND-03`) are committed and published to `origin/main`.
-- **Next action:** Prepare and begin implementation of `BE-01` (`backend/src/core/`, bootstrap, OpenAPI/Swagger configuration).
-- **Eligibility & Gating:** `FND-03` is `COMMITTED`. `BE-01` is unblocked and set to `PLANNED`. All subsequent downstream chunks (`BE-02` through `DOCS-01`) remain strictly `BLOCKED` until their respective dependencies are satisfied and committed.
-- **Decisions Formalized in FND-01 through FND-03:** Adopted NestJS modular monolith; established `/api/v1` namespace; standardized `ApiResponse<T>` / `ApiErrorResponse` envelopes with `X-Correlation-Id`; frozen domain enums; established PostgreSQL 16 Docker Compose baseline with persistent volume; configured ESLint + Prettier quality gates; and established GitHub Actions CI pipeline.
+- **Current implementation status:** Repository audit accepted (`ACCEPTED_AUDIT_BASELINE`); Git baseline established (`COMMITTED` at `2d36ae7715caed01f241de6b1842b54c1e67b0c9`); project state ledger updated (`COMMITTED` at `1f13aea704eea4185205bd51274fd48b182bd947`); architecture deliverables published to `origin/main` (`COMMITTED` at `d282700fbc744f1fcb792815afe7462d79fb9681` / `ec25be6157ba8fe65a2e3c979675ca3177576d84`); shared API/data contracts and repository skeleton published to `origin/main` (`COMMITTED` at `dd0a89aa807c5f943b57a6482fd4cebd4ba1bd3b` / `641646906e1a465d0be634f01bfb348c7f870009`); Docker Compose baseline, quality gates, and CI workflow published to `origin/main` (`COMMITTED` at `80814532e5893aacae73c99164566c1fe58146f2`); backend application foundation, configuration validation, health checks, and OpenAPI published (`COMMITTED` at `5006350440c69738d7059c0d80cb9f2eb7eca4ca`). Actual application business logic has not yet been implemented.
+- **Current chunk:** `BE-01 — Backend app foundation, config, health, OpenAPI` (`COMMITTED`). All dependencies (`FND-01`, `FND-02`, `FND-03`) are committed and published to `origin/main`.
+- **Next eligible chunk:** `BE-02 — Database schema and migrations` (`BLOCKED` pending lead assignment/unblocking). All dependencies (`BE-01`) are committed and published to `origin/main`.
+- **Eligibility & Gating:** `BE-01` is committed and published. `BE-02` remains `BLOCKED` until assigned by the project lead. All subsequent downstream chunks (`BE-03` through `DOCS-01`) remain strictly `BLOCKED` until their respective dependencies are satisfied and committed.
+- **Decisions Formalized in FND-01 through BE-01:** Adopted NestJS modular monolith; established `/api/v1` namespace; standardized `ApiResponse<T>` / `ApiErrorResponse` envelopes with `X-Correlation-Id`; frozen domain enums; established PostgreSQL 16 Docker Compose baseline with persistent volume; configured ESLint + Prettier quality gates; established GitHub Actions CI pipeline; enforced strict configuration validation with production credential guards; implemented structured field-level DTO validation; implemented truthful liveness/readiness health probes; and established OpenAPI 3.0 documentation at `/api/docs` and `/api/docs-json`.
