@@ -16,8 +16,8 @@ export interface ApiResponse<T> {
   success: true;
   data: T;
   meta: {
-    timestamp: string;      // ISO 8601 UTC
-    correlationId: string;  // UUIDv4
+    timestamp: string; // ISO 8601 UTC
+    correlationId: string; // UUIDv4
     pagination?: PaginationMeta;
   };
 }
@@ -43,8 +43,8 @@ export interface ApiErrorResponse {
 
 export interface MockProviderMetadata {
   isMock: true;
-  provider: string;           // e.g. "SIMULATED_DIGILOCKER_SANDBOX"
-  verificationScope: string;  // e.g. "SYNTHETIC_TEST_CERTIFICATE_ONLY"
+  provider: string; // e.g. "SIMULATED_DIGILOCKER_SANDBOX"
+  verificationScope: string; // e.g. "SYNTHETIC_TEST_CERTIFICATE_ONLY"
   disclaimer: string;
 }
 

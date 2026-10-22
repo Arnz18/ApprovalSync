@@ -25,9 +25,10 @@ interface RequestWithCorrelation extends Request {
 }
 
 @Injectable()
-export class TransformInterceptor<T>
-  implements NestInterceptor<T, ApiResponse<T> | T>
-{
+export class TransformInterceptor<T> implements NestInterceptor<
+  T,
+  ApiResponse<T> | T
+> {
   intercept(
     context: ExecutionContext,
     next: CallHandler,

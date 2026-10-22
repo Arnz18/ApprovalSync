@@ -106,7 +106,7 @@ Use typed contracts, DTO validation, centralized errors, structured logs, reques
 | FND-GIT-00 | Initialize repository and establish initial baseline | M1 | FND-00 | `.git`, `.gitignore`, initial commit on main | COMMITTED |
 | FND-01 | Architecture, threat model and demo scope decision | M1 | FND-00, FND-GIT-00 | `docs/architecture/`, decisions, threat model | COMMITTED |
 | FND-02 | Shared API/data contracts and repository skeleton | M1 + M2/M3/M4 contract review | FND-01 | `docs/contracts/`, skeleton only, API conventions | COMMITTED |
-| FND-03 | Docker, env templates, lint/test/CI baseline | M1 | FND-02 | compose, Dockerfiles, CI, `.env.example` | PLANNED |
+| FND-03 | Docker, env templates, lint/test/CI baseline | M1 | FND-02 | compose, Dockerfiles, CI, `.env.example` | AWAITING_REVIEW |
 | BE-01 | Backend app foundation, config, health, OpenAPI | M2 | FND-03 | `backend/src/core/`, bootstrap | BLOCKED |
 | BE-02 | Database schema and migrations | M2 | BE-01 | core entities, JSONB, migrations, seed framework | BLOCKED |
 | BE-03 | Authentication, session/JWT and RBAC | M2 | BE-02 | `auth/`, `users/`, permissions | BLOCKED |
@@ -204,6 +204,40 @@ Use typed contracts, DTO validation, centralized errors, structured logs, reques
     - `npm test -- --runInBand`: Health controller unit tests passed (1 passed, 1 total).
     - `npm run test:e2e -- --runInBand`: Application e2e tests passed (2 passed, 2 total; verified `GET /api/v1/health` returns 200 OK with `ApiResponse` envelope, and 404 returns `ApiErrorResponse` envelope).
   - Commit SHA: `dd0a89aa807c5f943b57a6482fd4cebd4ba1bd3b` (committed and published to `origin/main`). Status updated to `COMMITTED` (independent human verification required before `VERIFIED`).
+- **FND-03 (AWAITING_REVIEW):**
+  - Authored root Docker Compose baseline (`compose.yaml`): configured official `postgres:16-alpine` service, named volume `approvalsync_postgres_data` for persistent local storage, `pg_isready` container health check, `127.0.0.1:${DB_PORT:-5432}:5432` secure local binding, and environment variable fallbacks for local development.
+  - Documented architectural decisions on conditional services:
+    - **Redis 7 Omission:** Omitted from FND-03 because BullMQ queue workers and caching are scheduled for `BE-08` and `DOC-02`. Premature addition was avoided to ensure all infrastructure is actively utilized by application code.
+    - **Backend Containerization:** Host-based NestJS development workflow was selected (`npm run start:dev`) with PostgreSQL running in Compose. The backend currently has no database driver or migration setup (scheduled for `BE-01` and `BE-02`), avoiding container hot-reload latency on Windows.
+  - Standardized environment configuration and validation:
+    - Updated `.env.example` with documented database variables (`DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`), local development fallbacks, and explicit warnings that production environments reject default demo credentials.
+    - Updated `backend/src/config/configuration.ts` with typed `DatabaseConfig` factory, ensuring production environments never fall back to `postgres_dev_password`.
+    - Updated `backend/src/config/config.validation.ts` to validate `DB_PORT` range (1–65535) and enforce that production (`NODE_ENV === 'production'`) strictly rejects default (`postgres_dev_password`) or missing passwords.
+    - Added unit test suite `backend/src/config/config.validation.spec.ts` validating port ranges, environment modes, and production credential boundary enforcement.
+  - Configured backend quality gates in `backend/`:
+    - Installed `eslint@^8.57.0`, `prettier@^3.2.5`, `@typescript-eslint/parser@^6.21.0`, `@typescript-eslint/eslint-plugin@^6.21.0`, `eslint-config-prettier@^9.1.0`, and `eslint-plugin-prettier@^5.1.3`.
+    - Created `backend/.eslintrc.js` and `backend/.prettierrc`.
+    - Added `format`, `format:check`, and `lint` scripts to `backend/package.json`. Formatted existing codebase with 0 errors.
+  - Established minimal GitHub Actions CI workflow (`.github/workflows/ci.yml`):
+    - Configured triggers on push and pull requests targeting `main`.
+    - Configured minimum permissions (`contents: read`).
+    - Upgraded actions to `@v5` (`actions/checkout@v5`, `actions/setup-node@v5`) ensuring native compatibility with the Node 24 action execution runtime (addressing GitHub's September 2026 removal of the Node 20 action runner runtime).
+    - Configured application target to active/maintenance Node.js 22 LTS with npm caching keyed to `backend/package-lock.json`.
+    - Configured reproducible workflow execution: `npm ci`, `npm run format:check`, `npm run lint`, `npm run build`, `npm test -- --runInBand`, and `npm run test:e2e -- --runInBand`.
+  - Updated developer setup guide (`docs/DEVELOPER_SETUP.md`): documented Node 22 LTS requirement, Docker Compose commands, container health inspection, persistent volume management, data deletion warning (`docker compose down -v`), quality gate execution, component status boundaries, and troubleshooting.
+  - Validation commands executed and verified:
+    - `docker compose config`: Validated compose specification (exit code 0).
+    - `docker compose up -d`: Started PostgreSQL 16 container and created persistent volume (exit code 0).
+    - `docker compose ps`: Verified `approvalsync-postgres` reached `healthy` status on `127.0.0.1:5432` (exit code 0).
+    - `docker compose exec postgres pg_isready`: Verified database accepting connections (exit code 0).
+    - `docker compose down`: Verified clean container teardown while preserving `approvalsync_postgres_data` volume (exit code 0).
+    - `npm ci`: Executed clean reproducible install in `backend/` (exit code 0; 733 packages installed).
+    - `npm run format:check`: Passed cleanly with zero style violations (exit code 0).
+    - `npm run lint`: Passed with 0 errors and 0 warnings (exit code 0).
+    - `npm run build`: TypeScript compilation succeeded (exit code 0).
+    - `npm test -- --runInBand`: Unit test suites passed (2/2 suites, 7/7 tests passed; exit code 0).
+    - `npm run test:e2e -- --runInBand`: Application e2e tests passed (1/1 suite, 2/2 tests passed; exit code 0).
+  - Uncommitted local working tree; HEAD SHA at `641646906e1a465d0be634f01bfb348c7f870009`.
 
 ## 9. Definition of done for every code chunk
 
@@ -219,8 +253,8 @@ Use typed contracts, DTO validation, centralized errors, structured logs, reques
 
 ## 10. Current work / next action
 
-- **Current implementation status:** Repository audit accepted (`ACCEPTED_AUDIT_BASELINE`); Git baseline established (`COMMITTED` at `2d36ae7715caed01f241de6b1842b54c1e67b0c9`); project state ledger updated (`COMMITTED` at `1f13aea704eea4185205bd51274fd48b182bd947`); architecture deliverables published to `origin/main` (`COMMITTED` at `d282700fbc744f1fcb792815afe7462d79fb9681` / `ec25be6157ba8fe65a2e3c979675ca3177576d84`); shared API/data contracts, repository skeleton, and test harness published to `origin/main` (`COMMITTED` at `dd0a89aa807c5f943b57a6482fd4cebd4ba1bd3b`). Actual application business logic has not yet been implemented.
-- **Next eligible chunk:** `FND-03 — Docker, env templates, lint/test/CI baseline` (M1).
-- **Next action:** Prepare and begin FND-03: author Docker Compose definitions, multi-stage backend/frontend Dockerfiles, GitHub Actions CI workflow, and environment validation.
-- **Eligibility & Gating:** FND-02 is `COMMITTED`. All prerequisites for FND-03 (FND-02 committed) are satisfied, so FND-03 is `PLANNED`. Downstream chunks (`BE-*`, `DOC-*`, `FE-*`, `INT-*`, `DEMO-*`, `DEP-*`, `DOCS-*`) remain strictly `BLOCKED` until their specific prerequisites are committed.
-- **Decisions Formalized in FND-01 & FND-02:** Adopted NestJS modular monolith; established `/api/v1` namespace; standardized `ApiResponse<T>` / `ApiErrorResponse` envelopes with `X-Correlation-Id`; frozen domain enums; documented M2/M3/M4 module boundaries; and proved runnable health check baseline.
+- **Current implementation status:** Repository audit accepted (`ACCEPTED_AUDIT_BASELINE`); Git baseline established (`COMMITTED` at `2d36ae7715caed01f241de6b1842b54c1e67b0c9`); project state ledger updated (`COMMITTED` at `1f13aea704eea4185205bd51274fd48b182bd947`); architecture deliverables published to `origin/main` (`COMMITTED` at `d282700fbc744f1fcb792815afe7462d79fb9681` / `ec25be6157ba8fe65a2e3c979675ca3177576d84`); shared API/data contracts and repository skeleton published to `origin/main` (`COMMITTED` at `dd0a89aa807c5f943b57a6482fd4cebd4ba1bd3b`); Docker Compose baseline, quality gates, and CI workflow implemented locally with tests passing (`AWAITING_REVIEW`). Actual application business logic has not yet been implemented.
+- **Next eligible chunk:** `FND-03` (Awaiting human review/acceptance). Once FND-03 is reviewed and committed, `BE-01 — Backend app foundation, config, health, OpenAPI` becomes eligible.
+- **Next action:** Independent human review of FND-03 deliverables (`compose.yaml`, `.github/workflows/ci.yml`, `backend/`, `.env.example`, `docs/DEVELOPER_SETUP.md`).
+- **Eligibility & Gating:** FND-03 is `AWAITING_REVIEW`. All downstream chunks (`BE-*`, `DOC-*`, `FE-*`, `INT-*`, `DEMO-*`, `DEP-*`, `DOCS-*`) remain strictly `BLOCKED` until FND-03 is committed to `origin/main`.
+- **Decisions Formalized in FND-01 through FND-03:** Adopted NestJS modular monolith; established `/api/v1` namespace; standardized `ApiResponse<T>` / `ApiErrorResponse` envelopes with `X-Correlation-Id`; frozen domain enums; established PostgreSQL 16 Docker Compose baseline with persistent volume; configured ESLint + Prettier quality gates; and established GitHub Actions CI pipeline.

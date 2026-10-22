@@ -12,10 +12,10 @@ export interface AuditLogEntry {
   actorRole: UserRole;
   eventType: string;
   payloadSnapshot: Record<string, unknown>;
-  previousHash: string;       // SHA-256 hex string (64 chars)
-  leafHash: string;           // SHA-256 hex of canonical payload
-  currentHash: string;        // SHA-256(previousHash + leafHash + timestamp)
-  timestamp: string;          // ISO 8601 UTC
+  previousHash: string; // SHA-256 hex string (64 chars)
+  leafHash: string; // SHA-256 hex of canonical payload
+  currentHash: string; // SHA-256(previousHash + leafHash + timestamp)
+  timestamp: string; // ISO 8601 UTC
 }
 
 export interface AuditVerificationResult {
@@ -23,7 +23,7 @@ export interface AuditVerificationResult {
   isChainValid: boolean;
   totalBlocksVerified: number;
   brokenBlockSequence?: number;
-  verifiedAt: string;         // ISO 8601 UTC
+  verifiedAt: string; // ISO 8601 UTC
   merkleRootHash?: string;
 }
 

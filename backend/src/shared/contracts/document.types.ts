@@ -14,11 +14,11 @@ export interface BoundingBox {
 }
 
 export interface DocumentExtractionFinding {
-  fieldKey: string;           // e.g. "leaseTenureYears", "landAreaAcres"
+  fieldKey: string; // e.g. "leaseTenureYears", "landAreaAcres"
   extractedValue: string | number;
-  confidenceScore: number;    // 0.0 to 1.0 (Provisional score)
+  confidenceScore: number; // 0.0 to 1.0 (Provisional score)
   evidenceLocation: BoundingBox;
-  isAdvisory: true;           // Strictly advisory finding (ADR-004)
+  isAdvisory: true; // Strictly advisory finding (ADR-004)
 }
 
 export interface DocumentMetadata {
@@ -30,13 +30,13 @@ export interface DocumentMetadata {
   fileSizeBytes: number;
   sha256Checksum: string;
   processingStatus: DocumentProcessingStatus;
-  uploadedAt: string;         // ISO 8601 UTC
+  uploadedAt: string; // ISO 8601 UTC
 }
 
 export interface DocumentAnalysisReport {
   documentId: string;
   processingStatus: DocumentProcessingStatus;
-  ocrConfidence: number;      // 0.0 to 1.0
+  ocrConfidence: number; // 0.0 to 1.0
   extractedFields: Record<string, string | number>;
   findings: DocumentExtractionFinding[];
   anomalyFlags: Array<{

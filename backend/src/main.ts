@@ -19,7 +19,9 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const port = configService.get<number>('app.port', 3000);
   const apiPrefix = configService.get<string>('app.apiPrefix', 'api/v1');
-  const corsOrigins = configService.get<string[]>('app.corsOrigins', ['http://localhost:5173']);
+  const corsOrigins = configService.get<string[]>('app.corsOrigins', [
+    'http://localhost:5173',
+  ]);
 
   // Global API Prefix: /api/v1
   app.setGlobalPrefix(apiPrefix);
@@ -66,8 +68,12 @@ async function bootstrap() {
   app.enableShutdownHooks();
 
   await app.listen(port);
-  logger.log(`ApprovalSync Backend initialized on port ${port} with prefix /${apiPrefix}`);
-  logger.log(`Health check ready at: http://localhost:${port}/${apiPrefix}/health`);
+  logger.log(
+    `ApprovalSync Backend initialized on port ${port} with prefix /${apiPrefix}`,
+  );
+  logger.log(
+    `Health check ready at: http://localhost:${port}/${apiPrefix}/health`,
+  );
 }
 
 bootstrap();
