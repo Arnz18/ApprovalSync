@@ -104,7 +104,7 @@ Use typed contracts, DTO validation, centralized errors, structured logs, reques
 |---|---|---|---|---|---|
 | FND-00 | Repository audit and project baseline | M1 | — | audit report, state, existing stack/risks | ACCEPTED_AUDIT_BASELINE |
 | FND-GIT-00 | Initialize repository and establish initial baseline | M1 | FND-00 | `.git`, `.gitignore`, initial commit on main | COMMITTED |
-| FND-01 | Architecture, threat model and demo scope decision | M1 | FND-00, FND-GIT-00 | `docs/architecture/`, decisions, threat model | PLANNED |
+| FND-01 | Architecture, threat model and demo scope decision | M1 | FND-00, FND-GIT-00 | `docs/architecture/`, decisions, threat model | AWAITING_REVIEW |
 | FND-02 | Shared API/data contracts and repository skeleton | M1 + M2/M3/M4 contract review | FND-01 | `docs/contracts/`, skeleton only, API conventions | BLOCKED |
 | FND-03 | Docker, env templates, lint/test/CI baseline | M1 | FND-02 | compose, Dockerfiles, CI, `.env.example` | BLOCKED |
 | BE-01 | Backend app foundation, config, health, OpenAPI | M2 | FND-03 | `backend/src/core/`, bootstrap | BLOCKED |
@@ -160,6 +160,19 @@ Use typed contracts, DTO validation, centralized errors, structured logs, reques
   - Reconciled PROJECT_STATE.md with the actual repository baseline and audit outcome.
   - Aligned lifecycle definitions and parallelization rules: audit-only prerequisites satisfied by `ACCEPTED_AUDIT_BASELINE`, code-producing dependencies strictly gated on `COMMITTED`.
   - Removed `AGENT_PROMPTS.md` dependencies, corrected duplicate chunk ID to `DOCS-01`, and verified clean diff.
+- **FND-01 (AWAITING_REVIEW):**
+  - Authored comprehensive architectural decision specification (`docs/architecture/architecture-decision.md`): resolved monolith vs. microservices conflict in favor of NestJS modular monolith, detailed 13 domain modules and ownership seams, and documented ADR-001 through ADR-006.
+  - Authored STRIDE-based threat model (`docs/architecture/threat-model.md`): identified 8 critical assets, 6 trust boundaries, 18 detailed threat scenarios with planned control limitations and verification tests, the 7 non-negotiable safety rules, and phased controls roadmap.
+  - Authored hackathon demonstration scope (`docs/architecture/demo-scope.md`): defined 5 personas, 7-step evaluator golden path, MoSCoW scope classification de-risked with concrete fallbacks for optional enhancements, 5 synthetic test scenarios, verified APH regulatory assumptions, observable success criteria, and timed 8-minute demo script.
+  - Completed FND-01-REVIEW-02, FND-01-REVIEW-03, & FND-01-REVIEW-04 corrections:
+    1. Traced 25-year lease covenant directly to team-authored `README.md` (Module D, lines 281-294); classified strictly as a `TEAM-DEFINED ILLUSTRATIVE DEMO POLICY` with no statutory basis in AICTE APH 2024-27.
+    2. Verified statutory APH 2024-27 norms (Clause 1.4.1 for 30-year lease for new institutions; Clause 1.4.2 remaining live lease > course duration for EoA).
+    3. Re-classified the 15-working-day scrutiny SLA from an unsupported official claim to a `PROPOSED DEMO TARGET / UNVERIFIED AS OFFICIAL STATUTORY SLA`.
+    4. Formalized the 6-point Minimum Viable Demonstration (MVD) core and established simplification strategies for the 5 additional subsystems (BullMQ dual-mode fallback, lightweight XMLDSig mock adapter, sequential SHA-256 block chaining, single-tier accelerated SLA indicator, and tabular key-value extraction display).
+    5. Replaced unqualified WORM/immutability and 'mathematical proof' claims with technically accurate tamper-evident audit logging: a sequential SHA-256 hash chain detects modifications relative to previously trusted hashes/checkpoints, cannot by itself prevent a privileged DBA from rewriting records and recomputing the chain, and requires an independent external trust anchor for DBA-level protection.
+    6. Clarified synthetic XMLDSig and mock-provider semantics (verification against local test certificate, not official CCA root trust or genuine institutional authenticity; mandatory mock response tagging).
+    7. Re-framed threat model mitigations as planned controls with explicit limitations (e.g. magic byte limits, DTO validation vs. prompt injection, provisional 0.85 OCR heuristic, full tenant scoping across all routes).
+  - Local working tree uncommitted; HEAD SHA at `1f13aea704eea4185205bd51274fd48b182bd947`.
 
 ## 9. Definition of done for every code chunk
 
@@ -175,8 +188,8 @@ Use typed contracts, DTO validation, centralized errors, structured logs, reques
 
 ## 10. Current work / next action
 
-- **Current implementation status:** Repository audit reviewed and accepted (`ACCEPTED_AUDIT_BASELINE`). Git baseline initialized and published to `main` (`COMMITTED` at `2d36ae7715caed01f241de6b1842b54c1e67b0c9`). Actual application code has not yet been implemented.
-- **Next eligible chunk:** `FND-01 — Architecture, Threat Model and Demo Scope Decision` (M1).
-- **Next action:** M1 to execute FND-01: resolve architectural style (modular monolith inside NestJS), establish threat model and data retention policies, and formalize demo scope decisions in `docs/architecture/`.
-- **Eligibility & Gating:** All prerequisites for FND-01 (FND-00 accepted, FND-GIT-00 committed) are satisfied. FND-01 is `PLANNED`. Downstream chunks (FND-02, FND-03, BE-*, DOC-*, FE-*) remain `BLOCKED`.
-- **Known blockers / open decisions for FND-01:** Finalizing modular monolith vs. microservices architecture, Node 20 LTS containerization baseline, simulated provider boundaries for DigiLocker/XMLDSig, and authoritative APH rule parameters.
+- **Current implementation status:** Repository audit accepted (`ACCEPTED_AUDIT_BASELINE`); Git baseline established (`COMMITTED` at `2d36ae7715caed01f241de6b1842b54c1e67b0c9`); project state ledger updated (`COMMITTED` at `1f13aea704eea4185205bd51274fd48b182bd947`). Architecture decision, threat model, and demo scope authored locally (`docs/architecture/`) with FND-01-REVIEW-02 corrections incorporated and submitted for review (`AWAITING_REVIEW`). Actual application code has not yet been implemented.
+- **Next eligible chunk:** `FND-01` (Awaiting human review/acceptance). Once FND-01 is reviewed and committed, `FND-02 — Shared API/data contracts and repository skeleton` becomes eligible.
+- **Next action:** Independent human review of FND-01 deliverables (`architecture-decision.md`, `threat-model.md`, `demo-scope.md`).
+- **Eligibility & Gating:** FND-01 is `AWAITING_REVIEW`. All downstream chunks (`FND-02`, `FND-03`, `BE-*`, `DOC-*`, `FE-*`) remain strictly `BLOCKED` until FND-01 is committed to `origin/main`.
+- **Decisions Formalized in FND-01:** Adopted NestJS modular monolith; synchronous REST transitions with asynchronous BullMQ OCR/SLA workers; pluggable verification adapters with explicit mock declarations; human-sovereignty advisory AI policy; tamper-evident audit logging with mutation triggers and SHA-256 Merkle proof verification; and Node 20 LTS containerization.
