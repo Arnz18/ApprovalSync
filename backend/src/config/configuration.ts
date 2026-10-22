@@ -17,6 +17,7 @@ export interface AppConfig {
   apiPrefix: string;
   corsOrigins: string[];
   logLevel: string;
+  swaggerEnabled: boolean;
 }
 
 export default (): { app: AppConfig; database: DatabaseConfig } => ({
@@ -28,6 +29,9 @@ export default (): { app: AppConfig; database: DatabaseConfig } => ({
       process.env.CORS_ORIGINS || 'http://localhost:5173,http://localhost:3000'
     ).split(','),
     logLevel: process.env.LOG_LEVEL || 'info',
+    swaggerEnabled:
+      process.env.NODE_ENV !== 'production' ||
+      process.env.ENABLE_SWAGGER === 'true',
   },
   database: {
     host: process.env.DB_HOST || '127.0.0.1',

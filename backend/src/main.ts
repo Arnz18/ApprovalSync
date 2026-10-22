@@ -1,18 +1,20 @@
 /**
  * ApprovalSync — Backend Application Entry Point
  * NestJS Modular Monolith Runtime Bootstrap
- * Milestone: FND-02
+ * Milestone: BE-01
  */
 
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe, Logger } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './core/filters/http-exception.filter';
 import { LoggingInterceptor } from './core/interceptors/logging.interceptor';
 import { TransformInterceptor } from './core/interceptors/transform.interceptor';
+import { createAppValidationPipe } from './core/pipes/validation.pipe';
+import { setupSwagger } from './core/swagger/swagger.config';
 
-async function bootstrap() {
+async function bootstrap(): Promise<void> {
   const logger = new Logger('Bootstrap');
   const app = await NestFactory.create(AppModule);
 
@@ -21,22 +23,14 @@ async function bootstrap() {
   const apiPrefix = configService.get<string>('app.apiPrefix', 'api/v1');
   const corsOrigins = configService.get<string[]>('app.corsOrigins', [
     'http://localhost:5173',
+    'http://localhost:3000',
   ]);
 
-  // Global API Prefix: /api/v1
+  // Global API Prefix: /api/v1 applied exactly once
   app.setGlobalPrefix(apiPrefix);
 
-  // Global Validation Pipe: defensive whitelisting
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
-      transform: true,
-      transformOptions: {
-        enableImplicitConversion: false,
-      },
-    }),
-  );
+  // Global Validation Pipe: defensive whitelisting with structured error factory
+  app.useGlobalPipes(createAppValidationPipe());
 
   // Global Exception Filter: standardized ApiErrorResponse envelope
   app.useGlobalFilters(new HttpExceptionFilter());
@@ -64,7 +58,10 @@ async function bootstrap() {
     exposedHeaders: ['X-Correlation-Id', 'X-ApprovalSync-Simulation'],
   });
 
-  // Graceful shutdown
+  // OpenAPI / Swagger Documentation (disabled in production)
+  setupSwagger(app, configService);
+
+  // Graceful shutdown hooks
   app.enableShutdownHooks();
 
   await app.listen(port);
@@ -76,4 +73,10 @@ async function bootstrap() {
   );
 }
 
-bootstrap();
+bootstrap().catch((err: unknown) => {
+  const logger = new Logger('Bootstrap');
+  logger.error(
+    `Fatal bootstrap failure: ${err instanceof Error ? err.message : String(err)}`,
+  );
+  process.exit(1);
+});

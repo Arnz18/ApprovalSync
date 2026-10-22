@@ -1,7 +1,7 @@
 /**
  * ApprovalSync — Centralized HTTP Exception Filter
  * Formats all exceptions to the shared ApiErrorResponse contract.
- * Milestone: FND-02
+ * Milestone: BE-01
  */
 
 import {
@@ -12,12 +12,10 @@ import {
   HttpStatus,
   Logger,
 } from '@nestjs/common';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { v4 as uuidv4 } from 'uuid';
 import { ApiErrorResponse, FieldError } from '../../shared/contracts';
-
-interface RequestWithCorrelation extends Request {
-  correlationId?: string;
-}
+import { RequestWithCorrelation } from '../middleware/correlation.middleware';
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -29,9 +27,19 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const request = ctx.getRequest<RequestWithCorrelation>();
 
     const correlationId =
-      (request.headers['x-correlation-id'] as string) ||
       request.correlationId ||
-      'unknown';
+      (response.getHeader('X-Correlation-Id') as string) ||
+      (request.headers['x-correlation-id'] as string) ||
+      uuidv4();
+
+    // Ensure correlation header is preserved in the response
+    response.setHeader('X-Correlation-Id', correlationId);
+
+    const sanitizedUrl = (request.originalUrl || request.url || '').replace(
+      /[\r\n]/g,
+      '',
+    );
+    const sanitizedMethod = (request.method || 'GET').replace(/[\r\n]/g, '');
 
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
     let code = 'ERR_INTERNAL_SERVER_ERROR';
@@ -48,8 +56,19 @@ export class HttpExceptionFilter implements ExceptionFilter {
         const errorObj = res as Record<string, unknown>;
         message = (errorObj.message as string) || message;
 
-        // Handle class-validator validation errors array
-        if (Array.isArray(errorObj.message)) {
+        // Structured code provided by exception
+        if (typeof errorObj.code === 'string') {
+          code = errorObj.code;
+        }
+
+        // Structured details array provided by validation pipe
+        if (Array.isArray(errorObj.details)) {
+          details = errorObj.details as FieldError[];
+          if (code === 'ERR_INTERNAL_SERVER_ERROR') {
+            code = 'ERR_VALIDATION_FAILED';
+          }
+        } else if (Array.isArray(errorObj.message)) {
+          // Fallback parsing for legacy or default class-validator string arrays
           code = 'ERR_VALIDATION_FAILED';
           message = 'One or more request parameters failed validation.';
           details = (errorObj.message as string[]).map((msg: string) => {
@@ -62,15 +81,15 @@ export class HttpExceptionFilter implements ExceptionFilter {
         }
       }
 
-      // Map HTTP status to standard error code if not already set
+      // Map HTTP status to standard error code if not explicitly set
       if (code === 'ERR_INTERNAL_SERVER_ERROR') {
-        code = this.mapStatusToErrorCode(status);
+        code = this.mapStatusToErrorCode(status, message);
       }
     } else {
-      // Unhandled non-HttpException error
+      // Unhandled non-HttpException error — log on server, never leak stack trace to client
       const err = exception as Error;
       this.logger.error(
-        `[${correlationId}] Unhandled exception on ${request.method} ${request.url}: ${err?.message}`,
+        `[${correlationId}] Unhandled exception on ${sanitizedMethod} ${sanitizedUrl}: ${err?.message}`,
         err?.stack,
       );
     }
@@ -82,19 +101,29 @@ export class HttpExceptionFilter implements ExceptionFilter {
         message,
         statusCode: status,
         timestamp: new Date().toISOString(),
-        path: request.url,
+        path: sanitizedUrl,
         correlationId,
-        ...(details ? { details } : {}),
+        ...(details && details.length > 0 ? { details } : {}),
       },
     };
 
     response.status(status).json(errorPayload);
   }
 
-  private mapStatusToErrorCode(status: number): string {
+  private mapStatusToErrorCode(status: number, message?: string): string {
     switch (status) {
-      case HttpStatus.BAD_REQUEST:
+      case HttpStatus.BAD_REQUEST: {
+        if (
+          message &&
+          (message.includes('JSON') ||
+            message.includes('SyntaxError') ||
+            message.includes('Unexpected token') ||
+            message.includes('malformed'))
+        ) {
+          return 'ERR_MALFORMED_REQUEST';
+        }
         return 'ERR_BAD_REQUEST';
+      }
       case HttpStatus.UNAUTHORIZED:
         return 'ERR_UNAUTHORIZED';
       case HttpStatus.FORBIDDEN:
@@ -111,6 +140,8 @@ export class HttpExceptionFilter implements ExceptionFilter {
         return 'ERR_POLICY_VIOLATION';
       case HttpStatus.TOO_MANY_REQUESTS:
         return 'ERR_RATE_LIMITED';
+      case HttpStatus.BAD_GATEWAY:
+        return 'ERR_ADAPTER_UNAVAILABLE';
       default:
         return 'ERR_INTERNAL_SERVER_ERROR';
     }
