@@ -105,7 +105,7 @@ Use typed contracts, DTO validation, centralized errors, structured logs, reques
 | FND-00 | Repository audit and project baseline | M1 | — | audit report, state, existing stack/risks | ACCEPTED_AUDIT_BASELINE |
 | FND-GIT-00 | Initialize repository and establish initial baseline | M1 | FND-00 | `.git`, `.gitignore`, initial commit on main | COMMITTED |
 | FND-01 | Architecture, threat model and demo scope decision | M1 | FND-00, FND-GIT-00 | `docs/architecture/`, decisions, threat model | COMMITTED |
-| FND-02 | Shared API/data contracts and repository skeleton | M1 + M2/M3/M4 contract review | FND-01 | `docs/contracts/`, skeleton only, API conventions | PLANNED |
+| FND-02 | Shared API/data contracts and repository skeleton | M1 + M2/M3/M4 contract review | FND-01 | `docs/contracts/`, skeleton only, API conventions | AWAITING_REVIEW |
 | FND-03 | Docker, env templates, lint/test/CI baseline | M1 | FND-02 | compose, Dockerfiles, CI, `.env.example` | BLOCKED |
 | BE-01 | Backend app foundation, config, health, OpenAPI | M2 | FND-03 | `backend/src/core/`, bootstrap | BLOCKED |
 | BE-02 | Database schema and migrations | M2 | BE-01 | core entities, JSONB, migrations, seed framework | BLOCKED |
@@ -179,6 +179,31 @@ Use typed contracts, DTO validation, centralized errors, structured logs, reques
     3. `docs/architecture/demo-scope.md`
     4. `PROJECT_STATE.md`
   - Push verified: Local `main` and remote `origin/main` match at `d282700fbc744f1fcb792815afe7462d79fb9681`. Status updated to `COMMITTED` (independent human verification required before `VERIFIED`).
+- **FND-02 (AWAITING_REVIEW):**
+  - Authored shared API conventions specification (`docs/contracts/api-conventions.md`): defined `/api/v1` namespace, standard `ApiResponse<T>` and `ApiErrorResponse` envelope structures, standard error codes catalog, defensive DTO validation defaults, ISO 8601 UTC timestamps, UUIDv4 identifiers, pagination parameters, authentication/tenant boundary headers, `X-Idempotency-Key` specification, and asynchronous BullMQ job acceptance protocol (`202 Accepted`).
+  - Authored shared data contracts and domain enums (`docs/contracts/data-contracts.md`): established initial integration enums (`ApplicationStatus`, `DocumentProcessingStatus`, `VerificationStatus`, `ComplianceSeverity`, `ReviewDisposition`, `UserRole`, `SlaTier`), statutory vs. illustrative demo policy categorization, and core TypeScript DTO interfaces.
+  - Authored inter-module boundaries specification (`docs/contracts/module-boundaries.md`): documented formal in-process DI contracts, input/output schemas, error semantics, sync vs. async boundaries, and non-responsibilities for Core, Workflow, Documents, AI, Verification, SLA, Audit, and Frontend.
+  - Established NestJS 10 + TypeScript 5.3 backend modular monolith skeleton (`backend/`):
+    - Configured application entry point (`backend/src/main.ts`) with global `/api/v1` prefix, defensive `ValidationPipe`, centralized `HttpExceptionFilter`, `LoggingInterceptor` with `X-Correlation-Id` tracking, and `TransformInterceptor`.
+    - Implemented typed configuration service and environment validator (`backend/src/config/`).
+    - Implemented global `CoreModule` (`backend/src/core/`) providing standard exception formatting and structured logging.
+    - Implemented system health check endpoint (`GET /api/v1/health`) in `HealthModule` (`backend/src/health/`).
+    - Implemented shared TypeScript contracts and enums in `backend/src/shared/contracts/`.
+    - Documented clean extension seams for M2/M3 domain modules in `backend/src/modules/README.md`.
+    - Configured unit and end-to-end testing harness (`backend/src/health/health.controller.spec.ts` and `backend/test/app.e2e-spec.ts`).
+  - Established frontend boundary specification for M4 in `frontend/README.md` (React 18 + Vite SPA; zero UI generated).
+  - Created environment template (`.env.example`) with safe, placeholder-only configuration.
+  - Authored developer setup and local execution guide (`docs/DEVELOPER_SETUP.md`).
+  - Completed FND-02-R1 independent audit and applied FND-02-R2 corrections:
+    1. Addressed DEF-01: Formally designated `POL-STAT-01`, `POL-STAT-02`, and `POL-STAT-03` as `UNVERIFIED — HUMAN REVIEW REQUIRED` in `docs/contracts/data-contracts.md` due to absence of primary Council gazette/handbook text in workspace.
+    2. Addressed DEF-02: Designated shared domain enums as `PROVISIONAL BASELINE — AWAITING M2/M3 AGREEMENT` in `docs/contracts/data-contracts.md`, establishing that M2 will validate workflow/application states and M3 will validate document-processing states.
+    3. Addressed DEF-03: Formally qualified `SlaTier.TIER_3_COUNCIL_LOCK` in both `data-contracts.md` and `backend/src/shared/contracts/enums.ts` as a team-defined prototype escalation concept rather than an asserted official AICTE statutory process.
+    4. Recorded DEF-04 deferred validation improvement: Validation errors are currently parsed from string messages in `HttpExceptionFilter`; M2 should consider implementing a structured `ValidationPipe.exceptionFactory` producing reliable field-level error mappings during `BE-01`.
+  - Validation commands executed and verified:
+    - `npm run build`: TypeScript compilation succeeded (0 errors).
+    - `npm test -- --runInBand`: Health controller unit tests passed (1 passed, 1 total).
+    - `npm run test:e2e -- --runInBand`: Application e2e tests passed (2 passed, 2 total; verified `GET /api/v1/health` returns 200 OK with `ApiResponse` envelope, and 404 returns `ApiErrorResponse` envelope).
+  - Uncommitted local working tree; HEAD SHA at `ec25be6157ba8fe65a2e3c979675ca3177576d84`.
 
 ## 9. Definition of done for every code chunk
 
@@ -194,8 +219,8 @@ Use typed contracts, DTO validation, centralized errors, structured logs, reques
 
 ## 10. Current work / next action
 
-- **Current implementation status:** Repository audit accepted (`ACCEPTED_AUDIT_BASELINE`); Git baseline established (`COMMITTED` at `2d36ae7715caed01f241de6b1842b54c1e67b0c9`); project state ledger updated (`COMMITTED` at `1f13aea704eea4185205bd51274fd48b182bd947`); architecture deliverables published to `origin/main` (`COMMITTED` at `d282700fbc744f1fcb792815afe7462d79fb9681`). Actual application code has not yet been implemented.
-- **Next eligible chunk:** `FND-02 — Shared API/data contracts and repository skeleton` (M1 + M2/M3/M4 contract review).
-- **Next action:** Prepare and begin FND-02: author shared API/data contracts in `docs/contracts/` and create repository directory skeleton in accordance with ADR-001.
-- **Eligibility & Gating:** FND-01 is `COMMITTED`. All prerequisites for FND-02 (FND-01 committed) are satisfied, so FND-02 is `PLANNED`. Downstream chunks (`FND-03`, `BE-*`, `DOC-*`, `FE-*`, `INT-*`, `DEMO-*`, `DEP-*`, `DOCS-*`) remain strictly `BLOCKED` until their specific prerequisites are committed.
-- **Decisions Formalized in FND-01:** Adopted NestJS modular monolith; synchronous REST transitions with asynchronous BullMQ OCR/SLA workers; pluggable verification adapters with explicit mock declarations; human-sovereignty advisory AI policy; tamper-evident audit logging with mutation triggers and SHA-256 Merkle proof verification; and Node 20 LTS containerization.
+- **Current implementation status:** Repository audit accepted (`ACCEPTED_AUDIT_BASELINE`); Git baseline established (`COMMITTED` at `2d36ae7715caed01f241de6b1842b54c1e67b0c9`); project state ledger updated (`COMMITTED` at `1f13aea704eea4185205bd51274fd48b182bd947`); architecture deliverables published to `origin/main` (`COMMITTED` at `d282700fbc744f1fcb792815afe7462d79fb9681` / `ec25be6157ba8fe65a2e3c979675ca3177576d84`); shared API/data contracts, repository skeleton, and test harness implemented locally with tests passing (`AWAITING_REVIEW`). Actual application business logic has not yet been implemented.
+- **Next eligible chunk:** `FND-02` (Awaiting human review/acceptance). Once FND-02 is reviewed and committed, `FND-03 — Docker, env templates, lint/test/CI baseline` becomes eligible.
+- **Next action:** Independent human review of FND-02 deliverables (`docs/contracts/`, `backend/`, `frontend/README.md`, `.env.example`, `docs/DEVELOPER_SETUP.md`).
+- **Eligibility & Gating:** FND-02 is `AWAITING_REVIEW`. All downstream chunks (`FND-03`, `BE-*`, `DOC-*`, `FE-*`, `INT-*`, `DEMO-*`, `DEP-*`, `DOCS-*`) remain strictly `BLOCKED` until FND-02 is committed to `origin/main`.
+- **Decisions Formalized in FND-01 & FND-02:** Adopted NestJS modular monolith; established `/api/v1` namespace; standardized `ApiResponse<T>` / `ApiErrorResponse` envelopes with `X-Correlation-Id`; frozen domain enums; documented M2/M3/M4 module boundaries; and proved runnable health check baseline.
