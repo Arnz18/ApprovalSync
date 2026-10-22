@@ -1,6 +1,6 @@
 # ApprovalSync — Project State & Agent Operating Contract
 
-> **Purpose:** This is the live source of truth for implementation status, ownership, dependencies, file boundaries, and the next permitted task. Every Antigravity session must read this file and `AGENT_PROMPTS.md` before touching code.
+> **Purpose:** This is the live source of truth for implementation status, ownership, dependencies, file boundaries, and the next permitted task. Every Antigravity session must read this file and the relevant task prompt supplied by the project coordinator in chat before touching code.
 >
 > **Project:** ApprovalSync — AI-Powered Application Validation, Document Authentication and Regulatory Compliance Verification for AICTE (SIH).
 > **Primary branch:** `main` (shared). **Team size:** 4.
@@ -18,7 +18,7 @@ AI-generated flags are advisory, never proof of forgery. AI must not autonomousl
 
 1. The supplied AICTE problem statement and applicable, verified AICTE Approval Process Handbook/regulations/instructions govern regulatory behavior.
 2. `AICTE Workflow Automation Prototype Plan.pdf` supplies architectural ideas: configurable application routing; finite-state workflow; PostgreSQL JSONB; tamper-evident audit/Merkle proof; durable SLA escalation; EVC scheduling/evidence; time-bound undertakings and lease validity; authorized DigiLocker/API Setu-style verification; role-based dashboards; human-in-the-loop.
-3. `ApprovalSync` implementation plan (`AGENT_PROMPTS.md` summarizes its intended modules) is a technical proposal, not legal authority. Verify all regulatory thresholds and current provider APIs before encoding them. Store policy values as versioned configuration, not hard-coded assumptions.
+3. `ApprovalSync` implementation plan (`IMPLEMENTATION_PLAN.md` and task prompts summarize its intended modules) is a technical proposal, not legal authority. Verify all regulatory thresholds and current provider APIs before encoding them. Store policy values as versioned configuration, not hard-coded assumptions.
 4. This `PROJECT_STATE.md` controls what may be implemented now and who owns files/status.
 5. Existing repository conventions take precedence where compatible; audit before scaffolding. Do not assume the repository is empty.
 
@@ -28,7 +28,7 @@ If sources conflict or a regulatory rule cannot be confirmed, create a documente
 
 | Member | Primary ownership | Exclusive top-level file/directory ownership |
 |---|---|---|
-| **M1 — Platform & Integration** | repo audit, architecture contracts, Docker/CI, security baseline, integration, deployment, docs | `.github/`, `infra/`, `deploy/`, `docs/`, root compose files, root README, `PROJECT_STATE.md`, `AGENT_PROMPTS.md`, integration/e2e tests |
+| **M1 — Platform & Integration** | repo audit, architecture contracts, Docker/CI, security baseline, integration, deployment, docs | `.github/`, `infra/`, `deploy/`, `docs/`, root compose files, root README, `PROJECT_STATE.md`, integration/e2e tests |
 | **M2 — Backend Core & Workflow** | NestJS app, auth/RBAC, applications, database, workflow FSM, rules engine, audit, SLA, undertakings | `backend/src/core/`, `backend/src/auth/`, `backend/src/users/`, `backend/src/applications/`, `backend/src/workflow/`, `backend/src/rules/`, `backend/src/audit/`, `backend/src/sla/`, `backend/src/undertakings/`, backend migrations and unit tests for these modules |
 | **M3 — Document AI & Verification** | upload/storage abstractions, OCR/extraction, classification, consistency, anomaly indicators, provider verification adapters, infrastructure evidence analysis | `backend/src/documents/`, `backend/src/verification/`, `backend/src/compliance/`, `backend/src/providers/`, `backend/src/ai/`, their module tests and isolated fixtures under `backend/test/fixtures/documents/` |
 | **M4 — Frontend & Experience** | web app, design system, role dashboards, application wizard, reviewer queues, document evidence views, EVC/committee screens, notifications and reports UI | `frontend/`, frontend tests, `docs/ui/` |
@@ -37,8 +37,8 @@ If sources conflict or a regulatory rule cannot be confirmed, create a documente
 
 ## 4. Status lifecycle
 
-- `PLANNED` — not started; prerequisites satisfied or none.
-- `BLOCKED` — one or more dependencies are not `COMMITTED`; do not start.
+- `PLANNED` — not started; eligible to begin only when all dependencies are `COMMITTED` or satisfied by an explicitly permitted audit-baseline state (`ACCEPTED_AUDIT_BASELINE`), or chunk has no dependencies.
+- `BLOCKED` — one or more dependencies are not `COMMITTED` or satisfied by an explicitly permitted audit-baseline state; do not start.
 - `IN_PROGRESS` — implementation underway by assigned owner.
 - `IMPLEMENTED` — code is written; agent has not independently verified it.
 - `AWAITING_REVIEW` — tests run and report submitted; independent review pending.
@@ -98,12 +98,13 @@ Use typed contracts, DTO validation, centralized errors, structured logs, reques
 
 ## 8. Chunk registry
 
-**Dependency rule:** only start when every dependency is `COMMITTED`. `PLANNED` means eligible only if dependencies are committed; otherwise mark `BLOCKED`. Parallel chunks are permitted only when their dependencies are committed and file ownership does not overlap. Statuses below are initial planning statuses, not implementation claims.
+**Dependency rule:** only start when every dependency is `COMMITTED` or satisfied by an explicitly permitted audit-baseline state (`ACCEPTED_AUDIT_BASELINE`). `PLANNED` means eligible only if dependencies are committed or accepted as baseline; otherwise mark `BLOCKED`. Parallel chunks are permitted only when their dependencies are committed and file ownership does not overlap. Statuses below are initial planning statuses, not implementation claims.
 
 | ID | Chunk | Owner | Dependencies | Exclusive scope / output | Initial status |
 |---|---|---|---|---|---|
-| FND-00 | Repository audit and project baseline | M1 | — | audit report, state, existing stack/risks | PLANNED |
-| FND-01 | Architecture, threat model and demo scope decision | M1 | FND-00 | `docs/architecture/`, decisions, threat model | BLOCKED |
+| FND-00 | Repository audit and project baseline | M1 | — | audit report, state, existing stack/risks | ACCEPTED_AUDIT_BASELINE |
+| FND-GIT-00 | Initialize repository and establish initial baseline | M1 | FND-00 | `.git`, `.gitignore`, initial commit on main | COMMITTED |
+| FND-01 | Architecture, threat model and demo scope decision | M1 | FND-00, FND-GIT-00 | `docs/architecture/`, decisions, threat model | PLANNED |
 | FND-02 | Shared API/data contracts and repository skeleton | M1 + M2/M3/M4 contract review | FND-01 | `docs/contracts/`, skeleton only, API conventions | BLOCKED |
 | FND-03 | Docker, env templates, lint/test/CI baseline | M1 | FND-02 | compose, Dockerfiles, CI, `.env.example` | BLOCKED |
 | BE-01 | Backend app foundation, config, health, OpenAPI | M2 | FND-03 | `backend/src/core/`, bootstrap | BLOCKED |
@@ -135,13 +136,34 @@ Use typed contracts, DTO validation, centralized errors, structured logs, reques
 | DEMO-01 | Seeded end-to-end evaluator demo and scenario scripts | M1 | INT-03 | reproducible demo data/script and evidence | BLOCKED |
 | DEP-01 | Production-style container hardening and deployment config | M1 | DEMO-01 | production compose/container/security settings | BLOCKED |
 | DEP-02 | Deploy prototype to chosen host and verify live system | M1 | DEP-01 | deployment runbook, health checks, rollback and live URL if credentials exist | BLOCKED |
-| DOC-02 | Final documentation, architecture diagrams and handoff | M1 | DEP-02 | final README, operator guide, known limitations | BLOCKED |
+| DOCS-01 | Final documentation, architecture diagrams and handoff | M1 | DEP-02 | final README, operator guide, known limitations | BLOCKED |
 
-**Parallelization:** After FND-03 is committed, BE-01 and FE-01 may proceed in parallel. DOC-01 may begin after BE-02 + BE-03 + FND-03. Backend document modules remain serial by their dependencies. UI chunks are serial within M4. Integration/deployment work remains gated. Do not parallelize edits to shared root config or shared contracts.
+**Parallelization & Gating:** Explicitly permitted `ACCEPTED_AUDIT_BASELINE` prerequisites satisfy audit-only dependencies (such as FND-00 for FND-01), while all code-producing dependencies must be `COMMITTED`. After FND-03 is committed, BE-01 and FE-01 may proceed in parallel. DOC-01 may begin after BE-02 + BE-03 + FND-03. Backend document modules remain serial by their dependencies. UI chunks are serial within M4. Integration/deployment work remains gated. Do not parallelize edits to shared root config or shared contracts.
+
+### Baseline evidence log
+
+- **FND-00 (ACCEPTED_AUDIT_BASELINE):**
+  - Thorough repository audit conducted and submitted by M1.
+  - Initial workspace state verified: 3 Markdown documents present (`README.md`, `PROJECT_STATE.md`, `IMPLEMENTATION_PLAN.md`), zero application code/scaffolding, no `.git` directory.
+  - Remote repository verified: `https://github.com/Arnz18/ApprovalSync.git` was accessible and completely empty (0 refs/commits).
+  - Identified follow-up items: architectural divergence (microservices in README vs. modular monolith in PROJECT_STATE to be resolved in FND-01), sample/mock credential strings in documentation, and Node version pinning in Docker.
+  - Verified no application code was created during audit.
+  - Reviewed and accepted by human reviewer as project audit baseline.
+- **FND-GIT-00 (COMMITTED):**
+  - Initialized Git on branch `main` with remote `origin` pointing to `https://github.com/Arnz18/ApprovalSync.git`.
+  - Created conservative root `.gitignore` (protecting `.env`, dependencies, build artifacts, OS/editor files while allowing `.env.example`).
+  - Staged and committed initial documentation baseline with message: `chore: establish ApprovalSync project baseline`.
+  - Published to `origin/main` via normal non-force push.
+  - Commit SHA: `2d36ae7715caed01f241de6b1842b54c1e67b0c9`.
+  - Verification: Local `main` SHA and remote `origin/main` SHA match exactly (`2d36ae7715caed01f241de6b1842b54c1e67b0c9`).
+- **FND-STATE-00 (COMMITTED):**
+  - Reconciled PROJECT_STATE.md with the actual repository baseline and audit outcome.
+  - Aligned lifecycle definitions and parallelization rules: audit-only prerequisites satisfied by `ACCEPTED_AUDIT_BASELINE`, code-producing dependencies strictly gated on `COMMITTED`.
+  - Removed `AGENT_PROMPTS.md` dependencies, corrected duplicate chunk ID to `DOCS-01`, and verified clean diff.
 
 ## 9. Definition of done for every code chunk
 
-- Acceptance criteria in `AGENT_PROMPTS.md` satisfied.
+- Acceptance criteria in the chunk-specific prompt satisfied.
 - Unit/integration tests added for behavior and negative cases.
 - Lint, type-check and relevant test commands pass; report exact counts and failures.
 - No secrets, real sensitive records, dead buttons, fake success states, hidden mock integrations, or unexplained AI decisions.
@@ -153,7 +175,8 @@ Use typed contracts, DTO validation, centralized errors, structured logs, reques
 
 ## 10. Current work / next action
 
-- **Current implementation status:** Not yet audited. Do not assume repository state from this planning file.
-- **Next eligible chunk:** `FND-00` only.
-- **Next action:** assign M1 to inspect the repository and reconcile this plan with existing files before any scaffolding or feature implementation.
-- **Known blockers:** actual repository contents, final stack decision, deployment target/credentials, access to official verification APIs, current authoritative APH rule values.
+- **Current implementation status:** Repository audit reviewed and accepted (`ACCEPTED_AUDIT_BASELINE`). Git baseline initialized and published to `main` (`COMMITTED` at `2d36ae7715caed01f241de6b1842b54c1e67b0c9`). Actual application code has not yet been implemented.
+- **Next eligible chunk:** `FND-01 — Architecture, Threat Model and Demo Scope Decision` (M1).
+- **Next action:** M1 to execute FND-01: resolve architectural style (modular monolith inside NestJS), establish threat model and data retention policies, and formalize demo scope decisions in `docs/architecture/`.
+- **Eligibility & Gating:** All prerequisites for FND-01 (FND-00 accepted, FND-GIT-00 committed) are satisfied. FND-01 is `PLANNED`. Downstream chunks (FND-02, FND-03, BE-*, DOC-*, FE-*) remain `BLOCKED`.
+- **Known blockers / open decisions for FND-01:** Finalizing modular monolith vs. microservices architecture, Node 20 LTS containerization baseline, simulated provider boundaries for DigiLocker/XMLDSig, and authoritative APH rule parameters.
