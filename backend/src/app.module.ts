@@ -10,6 +10,7 @@ import { ConfigModule } from '@nestjs/config';
 import configuration from './config/configuration';
 import { validateConfig } from './config/config.validation';
 import { CoreModule } from './core/core.module';
+import { DatabaseModule } from './database/database.module';
 import { HealthModule } from './health/health.module';
 
 @Module({
@@ -20,6 +21,7 @@ import { HealthModule } from './health/health.module';
       validate: validateConfig,
     }),
     CoreModule,
+    DatabaseModule,
     HealthModule,
     // Extension points for downstream modules:
     // M2: AuthModule, UsersModule, ApplicationsModule, WorkflowModule, RulesModule, AuditModule, SlaModule, UndertakingsModule

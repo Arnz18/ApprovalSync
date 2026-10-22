@@ -157,6 +157,17 @@ describe('validateConfig', () => {
       );
     });
 
+    it('should reject postgres trivial default password in production', () => {
+      expect(() =>
+        validateConfig({
+          ...validProdBase,
+          DB_PASSWORD: 'postgres',
+        }),
+      ).toThrow(
+        /Production environment cannot rely on default or empty DB_PASSWORD/,
+      );
+    });
+
     it('should reject missing DB_HOST, DB_NAME, or DB_USER in production', () => {
       expect(() =>
         validateConfig({

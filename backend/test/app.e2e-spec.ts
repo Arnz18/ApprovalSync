@@ -135,9 +135,8 @@ describe('ApprovalSync Backend Application (e2e)', () => {
         message: 'Application configuration validated',
       });
       expect(response.body.data.checks.database).toEqual({
-        status: 'unconfigured',
-        message:
-          'Database connection provider not configured (scheduled for BE-02)',
+        status: 'healthy',
+        message: 'PostgreSQL connection active',
       });
     });
   });

@@ -45,7 +45,8 @@ export function validateConfig(
       !config.DB_PASSWORD ||
       typeof config.DB_PASSWORD !== 'string' ||
       config.DB_PASSWORD.trim() === '' ||
-      config.DB_PASSWORD === 'postgres_dev_password'
+      config.DB_PASSWORD === 'postgres_dev_password' ||
+      config.DB_PASSWORD === 'postgres'
     ) {
       throw new Error(
         'Configuration error: Production environment cannot rely on default or empty DB_PASSWORD. A secure, unique DB_PASSWORD must be configured.',
