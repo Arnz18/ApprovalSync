@@ -109,12 +109,12 @@ Use typed contracts, DTO validation, centralized errors, structured logs, reques
 | FND-03 | Docker, env templates, lint/test/CI baseline | M1 | FND-02 | compose, Dockerfiles, CI, `.env.example` | COMMITTED |
 | BE-01 | Backend app foundation, config, health, OpenAPI | M2 | FND-03 | `backend/src/core/`, bootstrap | COMMITTED |
 
-| BE-02 | Database schema and migrations | M2 | BE-01 | core entities, JSONB, migrations, seed framework | VERIFIED |
-| BE-03 | Authentication, session/JWT and RBAC | M2 | BE-02 | `auth/`, `users/`, permissions | BLOCKED |
+| BE-02 | Database schema and migrations | M2 | BE-01 | core entities, JSONB, migrations, seed framework | COMMITTED |
+| BE-03 | Authentication, session/JWT and RBAC | M2 | BE-02 | `auth/`, `users/`, permissions | PLANNED |
 | BE-04 | Institution profiles and application intake | M2 | BE-03 | application CRUD, dynamic payload, attachments metadata | BLOCKED |
 | BE-05 | Versioned regulatory rules and checklists | M2 | BE-04 | `rules/`, rule admin API, rule fixtures | BLOCKED |
 | BE-06 | Workflow FSM and transition guards | M2 | BE-05 | `workflow/`, atomic transitions, timeline events | BLOCKED |
-| BE-07 | Cryptographic audit ledger and proof verification | M2 | BE-02 | `audit/`, chain/Merkle tests and tamper demo | BLOCKED |
+| BE-07 | Cryptographic audit ledger and proof verification | M2 | BE-02 | `audit/`, chain/Merkle tests and tamper demo | PLANNED |
 | BE-08 | Durable SLA timers and escalation engine | M2 | BE-06, BE-07 | `sla/`, BullMQ jobs, idempotency and notifications contract | BLOCKED |
 | BE-09 | Undertakings, lease and expiry tracker | M2 | BE-05, BE-08 | `undertakings/`, configurable date rules, deficiency output contract | BLOCKED |
 | DOC-01 | Secure document upload/storage and metadata | M3 | BE-02, BE-03, FND-03 | `documents/` upload pipeline and storage adapter | BLOCKED |
@@ -254,9 +254,9 @@ Use typed contracts, DTO validation, centralized errors, structured logs, reques
     - `npm run test:e2e -- --runInBand`: 1/1 test suite passed, 14/14 e2e tests passed (exit code 0).
     - Total tests: 57 tests passing across unit and e2e suites.
   - Commit SHA: `5006350440c69738d7059c0d80cb9f2eb7eca4ca` (committed and published to `origin/main`). Status updated to `COMMITTED` (independent human verification required before `VERIFIED`).
-- **BE-02 — Database schema and migrations:**
+- **BE-02 (COMMITTED):**
   - Owner: M2 (Backend Core & Workflow).
-  - Status: `VERIFIED` (authorized for commit and push by project lead review).
+  - Status: `COMMITTED` (reviewed and authorized by project lead; committed and published to `origin/main`).
   - Delivered:
     - Resolved database persistence stack to TypeORM (`typeorm@0.3.31`, `@nestjs/typeorm@10.0.2`, `pg@8.23.1`) matching NestJS modular monolith architecture.
     - Implemented 6 core TypeORM persistence entities under `backend/src/database/entities/`: `Institution`, `User` (`passwordHash` excluded by default with `select: false`), `Application` (with JSONB `payloadJsonb` and GIN index), `Document`, `AuditLog` (with `sequenceNumber` bigserial, actor details, payload snapshot, SHA-256 hash chain, and `onDelete: 'RESTRICT'`), and `SlaTimer`.
@@ -273,7 +273,7 @@ Use typed contracts, DTO validation, centralized errors, structured logs, reques
     - `npm test`: 6/6 test suites passed, 47/47 unit tests passed (exit code 0).
     - `npm run test:e2e`: 2/2 test suites passed, 24/24 integration and e2e tests passed (exit code 0).
     - Total tests: 71 tests passing across unit, e2e, and real database integration suites.
-  - Commit SHA: Uncommitted working tree changes awaiting independent project lead review.
+  - Commit SHA: `885519d530a4376eb8a5adf6b938ea5533a56c3d` (committed and published to `origin/main`).
 
 ## 9. Definition of done for every code chunk
 
@@ -289,13 +289,14 @@ Use typed contracts, DTO validation, centralized errors, structured logs, reques
 
 ## 10. Current work / next action
 
-- **Current implementation status:** Repository audit accepted (`ACCEPTED_AUDIT_BASELINE`); Git baseline established (`COMMITTED` at `2d36ae7715caed01f241de6b1842b54c1e67b0c9`); project state ledger updated (`COMMITTED` at `1f13aea704eea4185205bd51274fd48b182bd947`); architecture deliverables published to `origin/main` (`COMMITTED` at `d282700fbc744f1fcb792815afe7462d79fb9681` / `ec25be6157ba8fe65a2e3c979675ca3177576d84`); shared API/data contracts and repository skeleton published to `origin/main` (`COMMITTED` at `dd0a89aa807c5f943b57a6482fd4cebd4ba1bd3b` / `641646906e1a465d0be634f01bfb348c7f870009`); Docker Compose baseline, quality gates, and CI workflow published to `origin/main` (`COMMITTED` at `80814532e5893aacae73c99164566c1fe58146f2`); backend application foundation, configuration validation, health checks, and OpenAPI published (`COMMITTED` at `5006350440c69738d7059c0d80cb9f2eb7eca4ca`); database schema, migrations, seed framework, and real database readiness implemented (`AWAITING_REVIEW`). Actual application business logic has not yet been implemented.
-- **Current chunk:** `BE-02 — Database schema and migrations` (`AWAITING_REVIEW`). Review corrections implemented and quality gates passed; awaiting project lead review.
-- **Next action:** Independent project-lead review of BE-02 before authorized commit and push.
+- **Current implementation status:** Repository audit accepted (`ACCEPTED_AUDIT_BASELINE`); Git baseline established (`COMMITTED` at `2d36ae7715caed01f241de6b1842b54c1e67b0c9`); project state ledger updated (`COMMITTED` at `1f13aea704eea4185205bd51274fd48b182bd947`); architecture deliverables published to `origin/main` (`COMMITTED` at `d282700fbc744f1fcb792815afe7462d79fb9681` / `ec25be6157ba8fe65a2e3c979675ca3177576d84`); shared API/data contracts and repository skeleton published to `origin/main` (`COMMITTED` at `dd0a89aa807c5f943b57a6482fd4cebd4ba1bd3b` / `641646906e1a465d0be634f01bfb348c7f870009`); Docker Compose baseline, quality gates, and CI workflow published to `origin/main` (`COMMITTED` at `80814532e5893aacae73c99164566c1fe58146f2`); backend application foundation, configuration validation, health checks, and OpenAPI published (`COMMITTED` at `5006350440c69738d7059c0d80cb9f2eb7eca4ca`); database schema, migrations, seed framework, and real database readiness published to `origin/main` (`COMMITTED` at `885519d530a4376eb8a5adf6b938ea5533a56c3d`). Actual application business logic has not yet been implemented.
+- **Current chunk:** `BE-02 — Database schema and migrations` (`COMMITTED`).
+- **Next action:** Assignment and implementation of newly unblocked chunks: `BE-03` (Authentication, session/JWT and RBAC, M2), `BE-07` (Cryptographic audit ledger and proof verification, M2), or `FE-01` (Frontend shell, design system, routing and API client, M4).
 - **Eligibility & Gating:**
-  - `BE-02` is awaiting review.
-  - `FE-01` is `PLANNED` (all dependencies `FND-02` and `FND-03` are `COMMITTED`, ready for M4 assignment).
-  - `BE-03` and `BE-07` remain `BLOCKED` exclusively on `BE-02` review and publication.
-  - `DOC-01` remains `BLOCKED` on `BE-02` and `BE-03`.
-  - Downstream chunks (`BE-04` through `DOCS-01`) remain strictly `BLOCKED` until their respective dependencies are satisfied and committed.
+  - `BE-02` is `COMMITTED` (commit `885519d530a4376eb8a5adf6b938ea5533a56c3d`).
+  - `FE-01` is `PLANNED` (all dependencies `FND-02` and `FND-03` are `COMMITTED`; eligible for M4 assignment).
+  - `BE-03` is `PLANNED` (dependency `BE-02` is `COMMITTED`; eligible for M2 assignment).
+  - `BE-07` is `PLANNED` (dependency `BE-02` is `COMMITTED`; eligible for M2 assignment).
+  - `DOC-01` remains `BLOCKED` on `BE-03` (dependencies: `BE-02` [COMMITTED], `FND-03` [COMMITTED], `BE-03` [PLANNED]).
+  - All subsequent downstream chunks (`BE-04` through `BE-06`, `BE-08`, `BE-09`, `DOC-02` through `DOC-07`, `FE-02` through `FE-07`, `INT-01` through `DOCS-01`) remain strictly `BLOCKED` until their respective dependencies are satisfied and committed.
 - **Decisions Formalized in FND-01 through BE-02:** Adopted NestJS modular monolith; established `/api/v1` namespace; standardized `ApiResponse<T>` / `ApiErrorResponse` envelopes with `X-Correlation-Id`; frozen domain enums; established PostgreSQL 16 Docker Compose baseline with persistent volume; configured ESLint + Prettier quality gates; established GitHub Actions CI pipeline; enforced strict configuration validation with production credential guards; implemented structured field-level DTO validation; implemented truthful liveness/readiness health probes; established OpenAPI 3.0 documentation at `/api/docs` and `/api/docs-json`; adopted TypeORM with PostgreSQL 16; provisioned core relational schema with GIN index on application JSONB; enforced audit log immutability via database trigger; configured audit log foreign key with `ON DELETE RESTRICT` to protect audit history against application deletion; and established idempotent synthetic development seed framework.
