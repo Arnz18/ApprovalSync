@@ -1,0 +1,52 @@
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# Production and build outputs
+dist/
+build/
+out/
+.next/
+*.tsbuildinfo
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Coverage and testing outputs
+coverage/
+*.lcov
+.nyc_output/
+
+# Operating system files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# IDE and Editor files
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+
+# Temporary and cache directories
+.tmp/
+.temp/
+*.tmp
+*.cache
+.eslintcache
