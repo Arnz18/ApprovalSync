@@ -110,14 +110,14 @@ Use typed contracts, DTO validation, centralized errors, structured logs, reques
 | BE-01 | Backend app foundation, config, health, OpenAPI | M2 | FND-03 | `backend/src/core/`, bootstrap | COMMITTED |
 
 | BE-02 | Database schema and migrations | M2 | BE-01 | core entities, JSONB, migrations, seed framework | COMMITTED |
-| BE-03 | Authentication, session/JWT and RBAC | M2 | BE-02 | `auth/`, `users/`, permissions | PLANNED |
-| BE-04 | Institution profiles and application intake | M2 | BE-03 | application CRUD, dynamic payload, attachments metadata | BLOCKED |
+| BE-03 | Authentication, session/JWT and RBAC | M2 | BE-02 | `auth/`, `users/`, permissions | COMMITTED |
+| BE-04 | Institution profiles and application intake | M2 | BE-03 | application CRUD, dynamic payload, attachments metadata | PLANNED |
 | BE-05 | Versioned regulatory rules and checklists | M2 | BE-04 | `rules/`, rule admin API, rule fixtures | BLOCKED |
 | BE-06 | Workflow FSM and transition guards | M2 | BE-05 | `workflow/`, atomic transitions, timeline events | BLOCKED |
 | BE-07 | Cryptographic audit ledger and proof verification | M2 | BE-02 | `audit/`, chain/Merkle tests and tamper demo | PLANNED |
 | BE-08 | Durable SLA timers and escalation engine | M2 | BE-06, BE-07 | `sla/`, BullMQ jobs, idempotency and notifications contract | BLOCKED |
 | BE-09 | Undertakings, lease and expiry tracker | M2 | BE-05, BE-08 | `undertakings/`, configurable date rules, deficiency output contract | BLOCKED |
-| DOC-01 | Secure document upload/storage and metadata | M3 | BE-02, BE-03, FND-03 | `documents/` upload pipeline and storage adapter | BLOCKED |
+| DOC-01 | Secure document upload/storage and metadata | M3 | BE-02, BE-03, FND-03 | `documents/` upload pipeline and storage adapter | PLANNED |
 | DOC-02 | OCR, classification and evidence-linked extraction | M3 | DOC-01 | OCR pipeline, extracted fields, confidence and page/bounding evidence | BLOCKED |
 | DOC-03 | Completeness, expiry and cross-record consistency | M3 | DOC-02, BE-05, BE-04 | validation engine, structured findings | BLOCKED |
 | DOC-04 | Duplicate and tamper/anomaly indicators | M3 | DOC-01, DOC-02 | hash/perceptual duplicate and metadata/visual heuristic flags | BLOCKED |
@@ -274,6 +274,47 @@ Use typed contracts, DTO validation, centralized errors, structured logs, reques
     - `npm run test:e2e`: 2/2 test suites passed, 24/24 integration and e2e tests passed (exit code 0).
     - Total tests: 71 tests passing across unit, e2e, and real database integration suites.
   - Commit SHA: `885519d530a4376eb8a5adf6b938ea5533a56c3d` (committed and published to `origin/main`).
+- **BE-03 — Authentication, session/JWT and RBAC (COMMITTED):**
+  - Owner: M2 (Backend Core & Workflow).
+  - Status: `COMMITTED` (implementation accepted by project lead and published to `origin/main`).
+  - Feature Commit SHA: `7da903530a231e029be8383f344a10c70e575062`.
+  - Feature Commit Message: `feat(BE-03): implement authentication, JWT validation, users, and RBAC`.
+  - Push Verification: Pushed to `origin/main` (non-force push verified against remote tracking ref).
+  - Review & Acceptance Evidence: Implementation, security-review evidence, and acceptance gate corrections authorized by project lead for publication (without claim of independent test re-execution or live source inspection by project lead).
+  - Delivered & Hardened:
+    - Installed maintained authentication dependencies: `@nestjs/jwt@^10.2.0`, `bcrypt@^5.1.1`, and `@types/bcrypt@^5.0.2`.
+    - Extended configuration with `JwtConfig` (`secret`, `expiresIn`, `issuer`, `audience`), enforcing strict production validation: rejects missing, empty, default development placeholders, or secrets shorter than 32 characters when `NODE_ENV === 'production'`.
+    - Created typed JWT and principal interfaces under `backend/src/auth/interfaces/` (`JwtPayload`, `AuthUserPrincipal`, `AuthUserProjection`).
+    - Implemented reusable authorization decorators under `backend/src/auth/decorators/`: `@Public()` (marks public unauthenticated routes in deny-by-default environment), `@Roles(...roles)` (declares required `UserRole` metadata), and `@CurrentUser(prop?)` (param decorator extracting verified principal).
+    - Implemented deny-by-default `JwtAuthGuard`: validates Bearer tokens via `JwtService.verifyAsync` using HMAC-SHA256 with explicit algorithm ('HS256'), issuer, and audience verification; rejects expired, malformed, or tampered tokens with HTTP 401 `ERR_UNAUTHORIZED`; revalidates account state and active status against PostgreSQL via `UsersService.findById`, immediately rejecting missing or deactivated accounts (`isActive: false`) with HTTP 401 `ERR_UNAUTHORIZED`; dynamically derives current role and institutional tenant scope directly from persisted database state rather than trusting stale JWT claims; preserves backward-compatible developer identity stubs (`X-Dev-User-Id`, `X-Dev-User-Role`) strictly restricted to non-production environments; attaches verified, fresh principal to `request.user`.
+    - Implemented centralized `RolesGuard`: enforces `@Roles(...)` metadata; allows access if route is public or has no role requirements; rejects unauthenticated principals and users lacking the required role with HTTP 403 `ERR_FORBIDDEN` and message `'Access denied: insufficient permissions for this resource.'`.
+    - Registered `JwtAuthGuard` and `RolesGuard` globally via `APP_GUARD` in `AppModule`, ensuring 100% deny-by-default route security across all current and future domain modules.
+    - Implemented `UsersModule` (`UsersService`, `UsersController`):
+      - `UsersService.findByEmailForAuth`: explicitly selects hidden `passwordHash` column for authentication verification only.
+      - `UsersService.findSafeUserById`: returns safe user projection without `passwordHash`.
+      - `UsersService.createUser`: hashes password via `bcrypt.hash(password, 10)` with asynchronous salt generation.
+      - `UsersController.getUserById`: protected with `@Roles(UserRole.INSTITUTION_USER, UserRole.SCRUTINY_OFFICER, UserRole.REGIONAL_OFFICER, UserRole.BUREAU_HEAD, UserRole.SYSTEM_ADMIN)`; denies non-authorized roles (e.g. `AUDITOR`, `EVC_INSPECTOR`) with 403; enforces institutional tenant isolation (Threat Model THR-06 IDOR protection); hardened against user enumeration: `INSTITUTION_USER` querying nonexistent or external UUIDs uniformly receives HTTP 403 `ERR_FORBIDDEN`.
+    - Implemented `AuthModule` (`AuthService`, `AuthController`):
+      - `POST /api/v1/auth/login`: validates `LoginDto` (`email`, `password`); normalizes and trims email; executes constant-time password verification via synthetic `DUMMY_BCRYPT_HASH` when account is missing, inactive, or unconfigured, ensuring nonexistent/inactive accounts take an indistinguishable asynchronous bcrypt comparison time; provides uniform rejection with HTTP 401 `ERR_UNAUTHORIZED` (`'Invalid email or password.'`), completely preventing account enumeration; returns signed JWT and safe user projection without `passwordHash`.
+      - `GET /api/v1/auth/me`: protected endpoint returning authenticated user profile projection; revalidates active account state against PostgreSQL (`findSafeUserById`), rejecting deactivated users with HTTP 401 `ERR_UNAUTHORIZED`.
+    - Documented architectural boundaries & limitations:
+      - Stale authorization resolved: `JwtAuthGuard` verifies current persisted account state and derives fresh role/institution scope on every protected request, completely eliminating stale-claims vulnerability across all protected routes without requiring Redis or refresh-token infrastructure.
+      - Rate limiting boundary: No application-level throttling currently protects `POST /api/v1/auth/login`; deployment requires gateway/proxy rate limiting or future throttling chunk.
+    - Updated synthetic development seed records in `seed.data.ts` and `seed.service.ts`:
+      - Populated valid synthetic bcrypt hashes for demo password `DemoPass@123`.
+      - Added synthetic inactive account `demo.inactive@synthetic.approvalsync.local` to verify disabled account rejection.
+      - Seed remains 100% idempotent (11 skipped on re-run).
+    - Comprehensive test coverage verified:
+      - Unit tests: 83 tests passing across 11 suites (including constant-time dummy compare, RBAC guards, tenant isolation, and guard-level DB revalidation of active status and fresh role/tenant scope).
+      - E2E & DB tests: 50 tests passing across 3 suites (10 database integration, 14 app e2e, 26 auth e2e testing login, JWT verification, RBAC rejections, immediate deactivation rejection on protected routes, immediate role demotion denial, and dynamic tenant reassignment).
+  - Quality gates verified:
+    - `npm run format:check`: Passed cleanly with zero style violations (exit code 0).
+    - `npm run lint`: Passed with 0 errors and 0 warnings (exit code 0).
+    - `npm run build`: NestJS TypeScript compilation succeeded (exit code 0).
+    - `npm test -- --runInBand`: 11/11 test suites passed, 83/83 unit tests passed (exit code 0).
+    - `npm run test:e2e -- --runInBand`: 3/3 test suites passed, 50/50 integration and e2e tests passed (exit code 0).
+    - Total tests: 133 tests passing across unit, e2e, and PostgreSQL integration suites.
+  - Commit SHA: `7da903530a231e029be8383f344a10c70e575062` (committed and published to `origin/main`).
 
 ## 9. Definition of done for every code chunk
 
@@ -289,14 +330,15 @@ Use typed contracts, DTO validation, centralized errors, structured logs, reques
 
 ## 10. Current work / next action
 
-- **Current implementation status:** Repository audit accepted (`ACCEPTED_AUDIT_BASELINE`); Git baseline established (`COMMITTED` at `2d36ae7715caed01f241de6b1842b54c1e67b0c9`); project state ledger updated (`COMMITTED` at `1f13aea704eea4185205bd51274fd48b182bd947`); architecture deliverables published to `origin/main` (`COMMITTED` at `d282700fbc744f1fcb792815afe7462d79fb9681` / `ec25be6157ba8fe65a2e3c979675ca3177576d84`); shared API/data contracts and repository skeleton published to `origin/main` (`COMMITTED` at `dd0a89aa807c5f943b57a6482fd4cebd4ba1bd3b` / `641646906e1a465d0be634f01bfb348c7f870009`); Docker Compose baseline, quality gates, and CI workflow published to `origin/main` (`COMMITTED` at `80814532e5893aacae73c99164566c1fe58146f2`); backend application foundation, configuration validation, health checks, and OpenAPI published (`COMMITTED` at `5006350440c69738d7059c0d80cb9f2eb7eca4ca`); database schema, migrations, seed framework, and real database readiness published to `origin/main` (`COMMITTED` at `885519d530a4376eb8a5adf6b938ea5533a56c3d`). Actual application business logic has not yet been implemented.
-- **Current chunk:** `BE-02 — Database schema and migrations` (`COMMITTED`).
-- **Next action:** Assignment and implementation of newly unblocked chunks: `BE-03` (Authentication, session/JWT and RBAC, M2), `BE-07` (Cryptographic audit ledger and proof verification, M2), or `FE-01` (Frontend shell, design system, routing and API client, M4).
+- **Current implementation status:** Repository audit accepted (`ACCEPTED_AUDIT_BASELINE`); Git baseline established (`COMMITTED` at `2d36ae7715caed01f241de6b1842b54c1e67b0c9`); project state ledger updated (`COMMITTED` at `1f13aea704eea4185205bd51274fd48b182bd947`); architecture deliverables published to `origin/main` (`COMMITTED` at `d282700fbc744f1fcb792815afe7462d79fb9681` / `ec25be6157ba8fe65a2e3c979675ca3177576d84`); shared API/data contracts and repository skeleton published to `origin/main` (`COMMITTED` at `dd0a89aa807c5f943b57a6482fd4cebd4ba1bd3b` / `641646906e1a465d0be634f01bfb348c7f870009`); Docker Compose baseline, quality gates, and CI workflow published to `origin/main` (`COMMITTED` at `80814532e5893aacae73c99164566c1fe58146f2`); backend application foundation, configuration validation, health checks, and OpenAPI published (`COMMITTED` at `5006350440c69738d7059c0d80cb9f2eb7eca4ca`); database schema, migrations, seed framework, and real database readiness published to `origin/main` (`COMMITTED` at `885519d530a4376eb8a5adf6b938ea5533a56c3d`); authentication, JWT issuance, password hashing, RBAC guards, and user tenancy published to `origin/main` (`COMMITTED` at `7da903530a231e029be8383f344a10c70e575062`). Actual application business logic has not yet been implemented.
+- **Current chunk:** `BE-03 — Authentication, session/JWT and RBAC` (`COMMITTED`). Feature published and verified; state ledger finalized.
+- **Next action:** Assignment and implementation of newly unblocked chunks: `BE-04` (Institution profiles and application intake, M2), `BE-07` (Cryptographic audit ledger and proof verification, M2), `DOC-01` (Secure document upload/storage and metadata, M3), or `FE-01` (Frontend shell, design system, routing and API client, M4).
 - **Eligibility & Gating:**
   - `BE-02` is `COMMITTED` (commit `885519d530a4376eb8a5adf6b938ea5533a56c3d`).
-  - `FE-01` is `PLANNED` (all dependencies `FND-02` and `FND-03` are `COMMITTED`; eligible for M4 assignment).
-  - `BE-03` is `PLANNED` (dependency `BE-02` is `COMMITTED`; eligible for M2 assignment).
+  - `BE-03` is `COMMITTED` (commit `7da903530a231e029be8383f344a10c70e575062`).
+  - `BE-04` is `PLANNED` (all dependencies `BE-03` are `COMMITTED`; eligible for M2 assignment).
   - `BE-07` is `PLANNED` (dependency `BE-02` is `COMMITTED`; eligible for M2 assignment).
-  - `DOC-01` remains `BLOCKED` on `BE-03` (dependencies: `BE-02` [COMMITTED], `FND-03` [COMMITTED], `BE-03` [PLANNED]).
-  - All subsequent downstream chunks (`BE-04` through `BE-06`, `BE-08`, `BE-09`, `DOC-02` through `DOC-07`, `FE-02` through `FE-07`, `INT-01` through `DOCS-01`) remain strictly `BLOCKED` until their respective dependencies are satisfied and committed.
-- **Decisions Formalized in FND-01 through BE-02:** Adopted NestJS modular monolith; established `/api/v1` namespace; standardized `ApiResponse<T>` / `ApiErrorResponse` envelopes with `X-Correlation-Id`; frozen domain enums; established PostgreSQL 16 Docker Compose baseline with persistent volume; configured ESLint + Prettier quality gates; established GitHub Actions CI pipeline; enforced strict configuration validation with production credential guards; implemented structured field-level DTO validation; implemented truthful liveness/readiness health probes; established OpenAPI 3.0 documentation at `/api/docs` and `/api/docs-json`; adopted TypeORM with PostgreSQL 16; provisioned core relational schema with GIN index on application JSONB; enforced audit log immutability via database trigger; configured audit log foreign key with `ON DELETE RESTRICT` to protect audit history against application deletion; and established idempotent synthetic development seed framework.
+  - `DOC-01` is `PLANNED` (all dependencies `BE-02`, `BE-03`, and `FND-03` are `COMMITTED`; eligible for M3 assignment).
+  - `FE-01` is `PLANNED` (all dependencies `FND-02` and `FND-03` are `COMMITTED`; eligible for M4 assignment).
+  - All subsequent downstream chunks (`BE-05` through `BE-06`, `BE-08`, `BE-09`, `DOC-02` through `DOC-07`, `FE-02` through `FE-07`, `INT-01` through `DOCS-01`) remain strictly `BLOCKED` until their respective dependencies are satisfied and committed.
+- **Decisions Formalized in FND-01 through BE-03:** Adopted NestJS modular monolith; established `/api/v1` namespace; standardized `ApiResponse<T>` / `ApiErrorResponse` envelopes with `X-Correlation-Id`; frozen domain enums; established PostgreSQL 16 Docker Compose baseline with persistent volume; configured ESLint + Prettier quality gates; established GitHub Actions CI pipeline; enforced strict configuration validation with production credential guards; implemented structured field-level DTO validation; implemented truthful liveness/readiness health probes; established OpenAPI 3.0 documentation at `/api/docs` and `/api/docs-json`; adopted TypeORM with PostgreSQL 16; provisioned core relational schema with GIN index on application JSONB; enforced audit log immutability via database trigger; configured audit log foreign key with `ON DELETE RESTRICT` to protect audit history against application deletion; established idempotent synthetic development seed framework; adopted bcrypt password hashing with salt factor 10; implemented deny-by-default JWT authentication and RBAC guards; enforced uniform rejection on invalid/inactive login to prevent account enumeration; and enforced institutional tenant isolation preventing IDOR cross-tenant access.
