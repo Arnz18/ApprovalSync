@@ -18,8 +18,10 @@ import {
   ReadinessResponse,
 } from './health.service';
 import { HealthCheckDto, LivenessDto, ReadinessDto } from './health.dto';
+import { Public } from '../auth/decorators/public.decorator';
 
 @ApiTags('Health & System')
+@Public()
 @Controller('health')
 export class HealthController {
   constructor(private readonly healthService: HealthService) {}

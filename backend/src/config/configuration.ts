@@ -11,6 +11,13 @@ export interface DatabaseConfig {
   password?: string;
 }
 
+export interface JwtConfig {
+  secret: string;
+  expiresIn: string;
+  issuer: string;
+  audience: string;
+}
+
 export interface AppConfig {
   port: number;
   nodeEnv: string;
@@ -20,7 +27,11 @@ export interface AppConfig {
   swaggerEnabled: boolean;
 }
 
-export default (): { app: AppConfig; database: DatabaseConfig } => ({
+export default (): {
+  app: AppConfig;
+  database: DatabaseConfig;
+  jwt: JwtConfig;
+} => ({
   app: {
     port: parseInt(process.env.PORT || '3000', 10),
     nodeEnv: process.env.NODE_ENV || 'development',
@@ -42,5 +53,15 @@ export default (): { app: AppConfig; database: DatabaseConfig } => ({
       process.env.NODE_ENV === 'production'
         ? process.env.DB_PASSWORD
         : process.env.DB_PASSWORD || 'postgres_dev_password',
+  },
+  jwt: {
+    secret:
+      process.env.JWT_SECRET ||
+      (process.env.NODE_ENV === 'production'
+        ? ''
+        : 'dev_synthetic_jwt_signing_secret_min_32_characters_for_local_demo_only'),
+    expiresIn: process.env.JWT_EXPIRES_IN || '3600s',
+    issuer: process.env.JWT_ISSUER || 'approvalsync-auth',
+    audience: process.env.JWT_AUDIENCE || 'approvalsync-client',
   },
 });

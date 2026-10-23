@@ -30,6 +30,7 @@ export interface SeedUser {
   passwordHash: string;
   institutionRegistrationNumber?: string;
   regionalOffice?: string;
+  isActive?: boolean;
 }
 
 export interface SeedApplication {
@@ -99,23 +100,38 @@ export const SEED_USERS: SeedUser[] = [
     name: 'Demo Institution Representative',
     email: 'demo.institution@synthetic.approvalsync.local',
     role: UserRole.INSTITUTION_USER,
-    // Synthetic bcrypt-format hash for local mock testing only; not a real secret
-    passwordHash: '$2b$10$demoHashForTestingPurposesOnlySyntheticSeedData001',
+    // Synthetic bcrypt hash for demo password 'DemoPass@123'
+    passwordHash:
+      '$2b$10$5tdfV.pdkzzJIE9eyS58EOT/ioZcveA4AsuPQc1kZ7PwOslVXx9Oe',
     institutionRegistrationNumber: 'DEMO-INST-2026-001',
+    isActive: true,
   },
   {
     name: 'Demo Scrutiny Officer',
     email: 'demo.scrutiny@synthetic.approvalsync.local',
     role: UserRole.SCRUTINY_OFFICER,
-    passwordHash: '$2b$10$demoHashForTestingPurposesOnlySyntheticSeedData002',
+    passwordHash:
+      '$2b$10$5tdfV.pdkzzJIE9eyS58EOT/ioZcveA4AsuPQc1kZ7PwOslVXx9Oe',
     regionalOffice: 'Western Regional Office (WRO)',
+    isActive: true,
   },
   {
     name: 'Demo Regional Officer',
     email: 'demo.regional@synthetic.approvalsync.local',
     role: UserRole.REGIONAL_OFFICER,
-    passwordHash: '$2b$10$demoHashForTestingPurposesOnlySyntheticSeedData003',
+    passwordHash:
+      '$2b$10$5tdfV.pdkzzJIE9eyS58EOT/ioZcveA4AsuPQc1kZ7PwOslVXx9Oe',
     regionalOffice: 'Western Regional Office (WRO)',
+    isActive: true,
+  },
+  {
+    name: 'Demo Inactive User',
+    email: 'demo.inactive@synthetic.approvalsync.local',
+    role: UserRole.INSTITUTION_USER,
+    passwordHash:
+      '$2b$10$5tdfV.pdkzzJIE9eyS58EOT/ioZcveA4AsuPQc1kZ7PwOslVXx9Oe',
+    institutionRegistrationNumber: 'DEMO-INST-2026-001',
+    isActive: false,
   },
 ];
 

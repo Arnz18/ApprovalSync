@@ -9,9 +9,14 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import configuration from './config/configuration';
 import { validateConfig } from './config/config.validation';
+import { APP_GUARD } from '@nestjs/core';
 import { CoreModule } from './core/core.module';
 import { DatabaseModule } from './database/database.module';
 import { HealthModule } from './health/health.module';
+import { UsersModule } from './users/users.module';
+import { AuthModule } from './auth/auth.module';
+import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
+import { RolesGuard } from './auth/guards/roles.guard';
 
 @Module({
   imports: [
@@ -23,9 +28,18 @@ import { HealthModule } from './health/health.module';
     CoreModule,
     DatabaseModule,
     HealthModule,
-    // Extension points for downstream modules:
-    // M2: AuthModule, UsersModule, ApplicationsModule, WorkflowModule, RulesModule, AuditModule, SlaModule, UndertakingsModule
-    // M3: DocumentsModule, VerificationModule, ComplianceModule, AiModule
+    UsersModule,
+    AuthModule,
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
+    },
   ],
 })
 export class AppModule {}

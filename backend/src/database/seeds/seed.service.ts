@@ -84,10 +84,15 @@ export class SeedService {
             ? institutionMap.get(data.institutionRegistrationNumber)?.id
             : undefined,
           regionalOffice: data.regionalOffice,
+          isActive: data.isActive !== undefined ? data.isActive : true,
         });
         await userRepo.save(user);
         report.usersCreated++;
       } else {
+        await userRepo.update(existingUser.id, {
+          passwordHash: data.passwordHash,
+          ...(data.isActive !== undefined ? { isActive: data.isActive } : {}),
+        });
         report.skippedExisting++;
       }
     }

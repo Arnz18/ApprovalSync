@@ -9,6 +9,8 @@ describe('validateConfig', () => {
     DB_NAME: 'approvalsync_prod',
     DB_USER: 'approvalsync_app',
     DB_PASSWORD: 'super_secret_production_password_#2026',
+    JWT_SECRET:
+      'production_super_strong_jwt_signing_secret_min_32_characters_for_auth',
   };
 
   describe('development configuration', () => {
@@ -189,6 +191,36 @@ describe('validateConfig', () => {
           DB_USER: '',
         }),
       ).toThrow(/requires DB_USER to be specified/);
+    });
+
+    it('should reject missing, short, or placeholder JWT_SECRET in production', () => {
+      expect(() =>
+        validateConfig({
+          ...validProdBase,
+          JWT_SECRET: '',
+        }),
+      ).toThrow(/requires a strong, unique JWT_SECRET/);
+
+      expect(() =>
+        validateConfig({
+          ...validProdBase,
+          JWT_SECRET: 'too_short_secret',
+        }),
+      ).toThrow(/requires a strong, unique JWT_SECRET/);
+
+      expect(() =>
+        validateConfig({
+          ...validProdBase,
+          JWT_SECRET:
+            'dev_synthetic_jwt_signing_secret_min_32_characters_for_local_demo_only',
+        }),
+      ).toThrow(/requires a strong, unique JWT_SECRET/);
+
+      const withoutJwt = { ...validProdBase };
+      delete (withoutJwt as Record<string, unknown>).JWT_SECRET;
+      expect(() => validateConfig(withoutJwt)).toThrow(
+        /requires a strong, unique JWT_SECRET/,
+      );
     });
 
     it('should never leak password or sensitive values in validation errors', () => {

@@ -32,6 +32,7 @@ import { LoggingInterceptor } from '../src/core/interceptors/logging.interceptor
 import { TransformInterceptor } from '../src/core/interceptors/transform.interceptor';
 import { createAppValidationPipe } from '../src/core/pipes/validation.pipe';
 import { setupSwagger } from '../src/core/swagger/swagger.config';
+import { Public } from '../src/auth/decorators/public.decorator';
 
 jest.setTimeout(30000);
 
@@ -52,6 +53,7 @@ class TestValidationDto {
   address: TestAddressDto;
 }
 
+@Public()
 @Controller('test-harness')
 class TestHarnessController {
   @Post('validate')

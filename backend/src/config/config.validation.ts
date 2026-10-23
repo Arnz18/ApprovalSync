@@ -82,6 +82,18 @@ export function validateConfig(
         'Configuration error: Production environment requires DB_USER to be specified.',
       );
     }
+
+    if (
+      !config.JWT_SECRET ||
+      typeof config.JWT_SECRET !== 'string' ||
+      config.JWT_SECRET.trim().length < 32 ||
+      config.JWT_SECRET ===
+        'dev_synthetic_jwt_signing_secret_min_32_characters_for_local_demo_only'
+    ) {
+      throw new Error(
+        'Configuration error: Production environment requires a strong, unique JWT_SECRET of at least 32 characters.',
+      );
+    }
   }
 
   return config;
