@@ -21,6 +21,7 @@ import { RulesModule } from './rules/rules.module';
 import { WorkflowModule } from './workflow/workflow.module';
 import { DocumentsModule } from './documents/documents.module';
 import { AiModule } from './ai/ai.module';
+import { VerificationModule } from './verification/verification.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RolesGuard } from './auth/guards/roles.guard';
 
@@ -42,6 +43,7 @@ import { RolesGuard } from './auth/guards/roles.guard';
     WorkflowModule,
     DocumentsModule,
     AiModule,
+    VerificationModule,
   ],
 
   providers: [
