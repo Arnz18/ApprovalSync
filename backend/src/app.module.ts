@@ -20,6 +20,7 @@ import { ApplicationsModule } from './applications/applications.module';
 import { RulesModule } from './rules/rules.module';
 import { WorkflowModule } from './workflow/workflow.module';
 import { DocumentsModule } from './documents/documents.module';
+import { AiModule } from './ai/ai.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RolesGuard } from './auth/guards/roles.guard';
 
@@ -40,6 +41,7 @@ import { RolesGuard } from './auth/guards/roles.guard';
     RulesModule,
     WorkflowModule,
     DocumentsModule,
+    AiModule,
   ],
 
   providers: [
