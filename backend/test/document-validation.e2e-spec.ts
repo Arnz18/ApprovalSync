@@ -31,10 +31,15 @@ import {
   ValidationOutcome,
   ValidationCategory,
 } from '../src/verification/enums';
+import {
+  STORAGE_ADAPTER_TOKEN,
+  IStorageAdapter,
+} from '../src/documents/interfaces/storage-adapter.interface';
 
 describe('Document Validation Engine (e2e)', () => {
   let app: INestApplication;
   let dataSource: DataSource;
+  let storageAdapter: IStorageAdapter;
 
   let institutionA: Institution;
   let institutionB: Institution;
@@ -68,6 +73,7 @@ describe('Document Validation Engine (e2e)', () => {
     await app.init();
 
     dataSource = app.get(DataSource);
+    storageAdapter = app.get<IStorageAdapter>(STORAGE_ADAPTER_TOKEN);
     const instRepo = dataSource.getRepository(Institution);
     const userRepo = dataSource.getRepository(User);
     const applicationRepo = dataSource.getRepository(Application);
@@ -228,6 +234,37 @@ describe('Document Validation Engine (e2e)', () => {
     beforeAll(async () => {
       const docRepo = dataSource.getRepository(Document);
 
+      const validPdf = Buffer.from(
+        '%PDF-1.4\n1 0 obj\n<< /Type /Catalog >>\nendobj\ntrailer\n<< >>\n%%EOF',
+      );
+      await storageAdapter.save(
+        `documents/${appA.id}/deed.pdf`,
+        validPdf,
+        'application/pdf',
+      );
+      await storageAdapter.save(
+        `documents/${appA.id}/clu.pdf`,
+        validPdf,
+        'application/pdf',
+      );
+      await storageAdapter.save(
+        `documents/${appA.id}/plan.pdf`,
+        validPdf,
+        'application/pdf',
+      );
+      await storageAdapter.save(
+        `documents/${appA.id}/fire.pdf`,
+        validPdf,
+        'application/pdf',
+      );
+      await storageAdapter.save(
+        `documents/${appA.id}/trust.pdf`,
+        validPdf,
+        'application/pdf',
+      );
+
+      const testRunId = Date.now();
+
       // Seed comprehensive synthetic documents with DOC-02 extraction analysis reports
       const landDeed = docRepo.create({
         applicationId: appA.id,
@@ -236,7 +273,7 @@ describe('Document Validation Engine (e2e)', () => {
         mimeType: 'application/pdf',
         fileSizeBytes: 204800,
         storagePath: `documents/${appA.id}/deed.pdf`,
-        fileHashSha256: 'deed-sha256-hash-001',
+        fileHashSha256: `deed-sha256-hash-${testRunId}-001`,
         processingStatus: DocumentProcessingStatus.OCR_EXTRACTED,
         metadata: {
           ocrClassification: 'LAND_TITLE_DEED',
@@ -344,7 +381,7 @@ describe('Document Validation Engine (e2e)', () => {
         mimeType: 'application/pdf',
         fileSizeBytes: 153600,
         storagePath: `documents/${appA.id}/clu.pdf`,
-        fileHashSha256: 'clu-sha256-hash-002',
+        fileHashSha256: `clu-sha256-hash-${testRunId}-002`,
         processingStatus: DocumentProcessingStatus.OCR_EXTRACTED,
         metadata: {
           ocrClassification: 'LAND_USE_CERTIFICATE',
@@ -368,7 +405,7 @@ describe('Document Validation Engine (e2e)', () => {
         mimeType: 'application/pdf',
         fileSizeBytes: 409600,
         storagePath: `documents/${appA.id}/plan.pdf`,
-        fileHashSha256: 'plan-sha256-hash-003',
+        fileHashSha256: `plan-sha256-hash-${testRunId}-003`,
         processingStatus: DocumentProcessingStatus.OCR_EXTRACTED,
         metadata: {
           ocrClassification: 'BUILDING_PLAN_APPROVAL',
@@ -393,7 +430,7 @@ describe('Document Validation Engine (e2e)', () => {
         mimeType: 'application/pdf',
         fileSizeBytes: 180000,
         storagePath: `documents/${appA.id}/fire.pdf`,
-        fileHashSha256: 'fire-sha256-hash-004',
+        fileHashSha256: `fire-sha256-hash-${testRunId}-004`,
         processingStatus: DocumentProcessingStatus.OCR_EXTRACTED,
         metadata: {
           ocrClassification: 'FIRE_SAFETY_CERTIFICATE',
@@ -417,7 +454,7 @@ describe('Document Validation Engine (e2e)', () => {
         mimeType: 'application/pdf',
         fileSizeBytes: 220000,
         storagePath: `documents/${appA.id}/trust.pdf`,
-        fileHashSha256: 'trust-sha256-hash-005',
+        fileHashSha256: `trust-sha256-hash-${testRunId}-005`,
         processingStatus: DocumentProcessingStatus.OCR_EXTRACTED,
         metadata: {
           ocrClassification: 'SOCIETY_TRUST_REGISTRATION',

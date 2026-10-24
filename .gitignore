@@ -50,3 +50,5 @@ desktop.ini
 *.tmp
 *.cache
 .eslintcache
+storage/
+backend/storage/
