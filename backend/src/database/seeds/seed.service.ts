@@ -7,6 +7,7 @@
  */
 
 import { DataSource } from 'typeorm';
+import { ApplicationStatus, UserRole } from '../../shared/contracts';
 import {
   Institution,
   User,
@@ -19,6 +20,7 @@ import {
   RegulatoryRule,
   ChecklistTemplate,
   ChecklistItem,
+  WorkflowTimelineEvent,
 } from '../entities';
 import {
   SEED_INSTITUTIONS,
@@ -46,6 +48,7 @@ export interface SeedReport {
   regulatoryRulesCreated: number;
   checklistTemplatesCreated: number;
   checklistItemsCreated: number;
+  timelineEventsCreated: number;
   skippedExisting: number;
 }
 
@@ -63,6 +66,7 @@ export class SeedService {
       regulatoryRulesCreated: 0,
       checklistTemplatesCreated: 0,
       checklistItemsCreated: 0,
+      timelineEventsCreated: 0,
       skippedExisting: 0,
     };
 
@@ -378,6 +382,35 @@ export class SeedService {
         report.checklistItemsCreated++;
       } else {
         report.skippedExisting++;
+      }
+    }
+
+    // 8. Seed Initial Workflow Timeline Events for Submitted Applications
+    const timelineRepo = dataSource.getRepository(WorkflowTimelineEvent);
+    for (const app of applicationMap.values()) {
+      if (app.status === ApplicationStatus.SUBMITTED) {
+        const existingEvent = await timelineRepo.findOne({
+          where: {
+            applicationId: app.id,
+            eventType: 'APPLICATION_SUBMITTED',
+          },
+        });
+        if (!existingEvent) {
+          const event = timelineRepo.create({
+            applicationId: app.id,
+            fromStatus: ApplicationStatus.DRAFT,
+            toStatus: ApplicationStatus.SUBMITTED,
+            eventType: 'APPLICATION_SUBMITTED',
+            actorId: 'seed-system',
+            actorRole: UserRole.INSTITUTION_USER,
+            comment: 'Application submitted during synthetic intake seed',
+            createdAt: app.submittedAt || new Date('2026-10-15T00:00:00.000Z'),
+          });
+          await timelineRepo.save(event);
+          report.timelineEventsCreated++;
+        } else {
+          report.skippedExisting++;
+        }
       }
     }
 

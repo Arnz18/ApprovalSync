@@ -6,6 +6,7 @@
 
 import {
   Injectable,
+  Optional,
   NotFoundException,
   ForbiddenException,
   BadRequestException,
@@ -23,6 +24,7 @@ import {
   PaginationMeta,
 } from '../shared/contracts';
 import { AuthUserPrincipal } from '../auth/interfaces/auth-user.interface';
+import { WorkflowService } from '../workflow/workflow.service';
 import { CreateApplicationDto } from './dto/create-application.dto';
 import { UpdateApplicationDto } from './dto/update-application.dto';
 import { ApplicationQueryDto } from './dto/application-query.dto';
@@ -56,6 +58,8 @@ export class ApplicationsService {
     @InjectRepository(Document)
     private readonly documentRepository: Repository<Document>,
     private readonly dataSource: DataSource,
+    @Optional()
+    private readonly workflowService?: WorkflowService,
   ) {}
 
   /**
@@ -367,6 +371,18 @@ export class ApplicationsService {
       application.submittedAt = new Date();
 
       const saved = await manager.save(Application, application);
+
+      if (this.workflowService) {
+        await this.workflowService.recordTimelineEventInTransaction(manager, {
+          applicationId: saved.id,
+          fromStatus: ApplicationStatus.DRAFT,
+          toStatus: ApplicationStatus.SUBMITTED,
+          eventType: 'APPLICATION_SUBMITTED',
+          actorId: currentUser.id,
+          actorRole: currentUser.role,
+          comment: 'Application submitted for scrutiny review',
+        });
+      }
 
       // Load institution association for complete projection return
       const institution = await manager.findOne(Institution, {

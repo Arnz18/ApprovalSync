@@ -19,9 +19,11 @@ import {
   RegulatoryRule,
   ChecklistTemplate,
   ChecklistItem,
+  WorkflowTimelineEvent,
 } from './entities';
 import { InitialCoreSchema1729640000000 } from './migrations/1729640000000-InitialCoreSchema';
 import { CreateRulesAndChecklists1729720000000 } from './migrations/1729720000000-CreateRulesAndChecklists';
+import { CreateWorkflowTimelineEvents1729800000000 } from './migrations/1729800000000-CreateWorkflowTimelineEvents';
 
 export const dataSourceOptions: DataSourceOptions = {
   type: 'postgres',
@@ -46,10 +48,12 @@ export const dataSourceOptions: DataSourceOptions = {
     RegulatoryRule,
     ChecklistTemplate,
     ChecklistItem,
+    WorkflowTimelineEvent,
   ],
   migrations: [
     InitialCoreSchema1729640000000,
     CreateRulesAndChecklists1729720000000,
+    CreateWorkflowTimelineEvents1729800000000,
   ],
 
   synchronize: false,

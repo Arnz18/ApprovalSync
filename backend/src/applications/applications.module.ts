@@ -11,11 +11,13 @@ import { Document } from '../database/entities/document.entity';
 import { ApplicationsService } from './applications.service';
 import { ApplicationsController } from './applications.controller';
 import { UsersModule } from '../users/users.module';
+import { WorkflowModule } from '../workflow/workflow.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Application, Institution, Document]),
     UsersModule,
+    WorkflowModule,
   ],
   controllers: [ApplicationsController],
   providers: [ApplicationsService],

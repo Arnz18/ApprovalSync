@@ -38,6 +38,9 @@ async function runSeed(): Promise<void> {
     console.log(
       `  - Checklist items created:     ${report.checklistItemsCreated}`,
     );
+    console.log(
+      `  - Timeline events created:     ${report.timelineEventsCreated}`,
+    );
     console.log(`  - Existing skipped:            ${report.skippedExisting}`);
   } catch (error: unknown) {
     console.error('[SeedRunner] Seeding failed:', error);

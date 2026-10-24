@@ -18,6 +18,7 @@ import { AuthModule } from './auth/auth.module';
 import { InstitutionsModule } from './institutions/institutions.module';
 import { ApplicationsModule } from './applications/applications.module';
 import { RulesModule } from './rules/rules.module';
+import { WorkflowModule } from './workflow/workflow.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RolesGuard } from './auth/guards/roles.guard';
 
@@ -36,6 +37,7 @@ import { RolesGuard } from './auth/guards/roles.guard';
     InstitutionsModule,
     ApplicationsModule,
     RulesModule,
+    WorkflowModule,
   ],
 
   providers: [

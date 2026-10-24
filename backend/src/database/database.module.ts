@@ -20,6 +20,7 @@ import {
   RegulatoryRule,
   ChecklistTemplate,
   ChecklistItem,
+  WorkflowTimelineEvent,
 } from './entities';
 
 export const coreEntities = [
@@ -34,6 +35,7 @@ export const coreEntities = [
   RegulatoryRule,
   ChecklistTemplate,
   ChecklistItem,
+  WorkflowTimelineEvent,
 ];
 
 @Module({

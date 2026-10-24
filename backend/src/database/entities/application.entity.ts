@@ -78,4 +78,7 @@ export class Application {
 
   @OneToMany(() => SlaTimer, (timer) => timer.application)
   slaTimers: SlaTimer[];
+
+  @OneToMany('WorkflowTimelineEvent', (event: any) => event.application)
+  timelineEvents?: any[];
 }
