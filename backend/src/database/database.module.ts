@@ -15,6 +15,11 @@ import {
   Document,
   AuditLog,
   SlaTimer,
+  RuleSet,
+  RuleVersion,
+  RegulatoryRule,
+  ChecklistTemplate,
+  ChecklistItem,
 } from './entities';
 
 export const coreEntities = [
@@ -24,6 +29,11 @@ export const coreEntities = [
   Document,
   AuditLog,
   SlaTimer,
+  RuleSet,
+  RuleVersion,
+  RegulatoryRule,
+  ChecklistTemplate,
+  ChecklistItem,
 ];
 
 @Module({

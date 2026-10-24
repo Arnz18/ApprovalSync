@@ -17,6 +17,7 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { InstitutionsModule } from './institutions/institutions.module';
 import { ApplicationsModule } from './applications/applications.module';
+import { RulesModule } from './rules/rules.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RolesGuard } from './auth/guards/roles.guard';
 
@@ -34,7 +35,9 @@ import { RolesGuard } from './auth/guards/roles.guard';
     AuthModule,
     InstitutionsModule,
     ApplicationsModule,
+    RulesModule,
   ],
+
   providers: [
     {
       provide: APP_GUARD,

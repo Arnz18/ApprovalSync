@@ -14,8 +14,14 @@ import {
   Document,
   AuditLog,
   SlaTimer,
+  RuleSet,
+  RuleVersion,
+  RegulatoryRule,
+  ChecklistTemplate,
+  ChecklistItem,
 } from './entities';
 import { InitialCoreSchema1729640000000 } from './migrations/1729640000000-InitialCoreSchema';
+import { CreateRulesAndChecklists1729720000000 } from './migrations/1729720000000-CreateRulesAndChecklists';
 
 export const dataSourceOptions: DataSourceOptions = {
   type: 'postgres',
@@ -28,8 +34,24 @@ export const dataSourceOptions: DataSourceOptions = {
       ? undefined
       : 'postgres_dev_password'),
   database: process.env.DB_NAME || 'approvalsync',
-  entities: [Institution, User, Application, Document, AuditLog, SlaTimer],
-  migrations: [InitialCoreSchema1729640000000],
+  entities: [
+    Institution,
+    User,
+    Application,
+    Document,
+    AuditLog,
+    SlaTimer,
+    RuleSet,
+    RuleVersion,
+    RegulatoryRule,
+    ChecklistTemplate,
+    ChecklistItem,
+  ],
+  migrations: [
+    InitialCoreSchema1729640000000,
+    CreateRulesAndChecklists1729720000000,
+  ],
+
   synchronize: false,
   logging: process.env.DEBUG_LOGGING === 'true',
   extra: {

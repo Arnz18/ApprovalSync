@@ -14,6 +14,11 @@ import {
   Document,
   AuditLog,
   SlaTimer,
+  RuleSet,
+  RuleVersion,
+  RegulatoryRule,
+  ChecklistTemplate,
+  ChecklistItem,
 } from '../entities';
 import {
   SEED_INSTITUTIONS,
@@ -22,6 +27,11 @@ import {
   SEED_DOCUMENTS,
   SEED_AUDIT_LOGS,
   SEED_SLA_TIMERS,
+  SEED_RULE_SETS,
+  SEED_RULE_VERSIONS,
+  SEED_REGULATORY_RULES,
+  SEED_CHECKLIST_TEMPLATES,
+  SEED_CHECKLIST_ITEMS,
 } from './seed.data';
 
 export interface SeedReport {
@@ -31,6 +41,11 @@ export interface SeedReport {
   documentsCreated: number;
   auditLogsCreated: number;
   slaTimersCreated: number;
+  ruleSetsCreated: number;
+  ruleVersionsCreated: number;
+  regulatoryRulesCreated: number;
+  checklistTemplatesCreated: number;
+  checklistItemsCreated: number;
   skippedExisting: number;
 }
 
@@ -43,6 +58,11 @@ export class SeedService {
       documentsCreated: 0,
       auditLogsCreated: 0,
       slaTimersCreated: 0,
+      ruleSetsCreated: 0,
+      ruleVersionsCreated: 0,
+      regulatoryRulesCreated: 0,
+      checklistTemplatesCreated: 0,
+      checklistItemsCreated: 0,
       skippedExisting: 0,
     };
 
@@ -204,6 +224,158 @@ export class SeedService {
         });
         await slaTimerRepo.save(timer);
         report.slaTimersCreated++;
+      } else {
+        report.skippedExisting++;
+      }
+    }
+
+    // 7. Seed Rule Sets
+    const ruleSetRepo = dataSource.getRepository(RuleSet);
+    const ruleVersionRepo = dataSource.getRepository(RuleVersion);
+    const regulatoryRuleRepo = dataSource.getRepository(RegulatoryRule);
+    const checklistTemplateRepo = dataSource.getRepository(ChecklistTemplate);
+    const checklistItemRepo = dataSource.getRepository(ChecklistItem);
+
+    const ruleSetMap = new Map<string, RuleSet>();
+    for (const data of SEED_RULE_SETS) {
+      let rs = await ruleSetRepo.findOne({
+        where: { code: data.code },
+      });
+      if (!rs) {
+        rs = ruleSetRepo.create(data);
+        await ruleSetRepo.save(rs);
+        report.ruleSetsCreated++;
+      } else {
+        report.skippedExisting++;
+      }
+      ruleSetMap.set(data.code, rs);
+    }
+
+    // 8. Seed Rule Versions
+    const ruleVersionMap = new Map<string, RuleVersion>();
+    for (const data of SEED_RULE_VERSIONS) {
+      const ruleSet = ruleSetMap.get(data.ruleSetCode);
+      if (!ruleSet) continue;
+
+      const key = `${data.ruleSetCode}-v${data.versionNumber}`;
+      let version = await ruleVersionRepo.findOne({
+        where: {
+          ruleSetId: ruleSet.id,
+          versionNumber: data.versionNumber,
+        },
+      });
+      if (!version) {
+        version = ruleVersionRepo.create({
+          ruleSetId: ruleSet.id,
+          versionNumber: data.versionNumber,
+          status: data.status,
+          effectiveFrom: data.effectiveFrom,
+          effectiveTo: data.effectiveTo,
+          sourceTitle: data.sourceTitle,
+          sourceReference: data.sourceReference,
+          sourceClassification: data.sourceClassification,
+          changeSummary: data.changeSummary || null,
+          publishedAt: data.status === 'PUBLISHED' ? new Date() : null,
+        });
+        await ruleVersionRepo.save(version);
+        report.ruleVersionsCreated++;
+      } else {
+        report.skippedExisting++;
+      }
+      ruleVersionMap.set(key, version);
+    }
+
+    // 9. Seed Regulatory Rules
+    const regulatoryRuleMap = new Map<string, RegulatoryRule>();
+    for (const data of SEED_REGULATORY_RULES) {
+      const versionKey = `${data.ruleSetCode}-v${data.versionNumber}`;
+      const version = ruleVersionMap.get(versionKey);
+      if (!version) continue;
+
+      let rule = await regulatoryRuleRepo.findOne({
+        where: {
+          ruleVersionId: version.id,
+          ruleCode: data.ruleCode,
+        },
+      });
+      if (!rule) {
+        rule = regulatoryRuleRepo.create({
+          ruleVersionId: version.id,
+          ruleCode: data.ruleCode,
+          title: data.title,
+          description: data.description,
+          ruleType: data.ruleType,
+          severity: data.severity,
+          parametersJsonb: data.parametersJsonb,
+          sourceClause: data.sourceClause || null,
+          sourceClassification: data.sourceClassification || null,
+        });
+        await regulatoryRuleRepo.save(rule);
+        report.regulatoryRulesCreated++;
+      } else {
+        report.skippedExisting++;
+      }
+      regulatoryRuleMap.set(data.ruleCode, rule);
+    }
+
+    // 10. Seed Checklist Templates
+    const checklistTemplateMap = new Map<string, ChecklistTemplate>();
+    for (const data of SEED_CHECKLIST_TEMPLATES) {
+      const versionKey = `${data.ruleSetCode}-v${data.versionNumber}`;
+      const version = ruleVersionMap.get(versionKey);
+      if (!version) continue;
+
+      let template = await checklistTemplateRepo.findOne({
+        where: {
+          ruleVersionId: version.id,
+          code: data.code,
+        },
+      });
+      if (!template) {
+        template = checklistTemplateRepo.create({
+          ruleVersionId: version.id,
+          code: data.code,
+          name: data.name,
+          description: data.description || null,
+          applicationCategory: data.applicationCategory,
+        });
+        await checklistTemplateRepo.save(template);
+        report.checklistTemplatesCreated++;
+      } else {
+        report.skippedExisting++;
+      }
+      checklistTemplateMap.set(data.code, template);
+    }
+
+    // 11. Seed Checklist Items
+    for (const data of SEED_CHECKLIST_ITEMS) {
+      const template = checklistTemplateMap.get(data.templateCode);
+      if (!template) continue;
+
+      const existingItem = await checklistItemRepo.findOne({
+        where: {
+          checklistTemplateId: template.id,
+          itemCode: data.itemCode,
+        },
+      });
+      if (!existingItem) {
+        const linkedRule = data.ruleCode
+          ? regulatoryRuleMap.get(data.ruleCode)
+          : undefined;
+
+        const item = checklistItemRepo.create({
+          checklistTemplateId: template.id,
+          itemCode: data.itemCode,
+          description: data.description,
+          itemType: data.itemType,
+          required: data.required,
+          evidenceDocumentType: data.evidenceDocumentType || null,
+          displayOrder: data.displayOrder,
+          ruleId: linkedRule ? linkedRule.id : null,
+          guidanceNotes: data.guidanceNotes || null,
+        });
+        await checklistItemRepo.save(item);
+        report.checklistItemsCreated++;
       } else {
         report.skippedExisting++;
       }
