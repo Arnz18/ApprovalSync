@@ -28,7 +28,12 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { AuthUserPrincipal } from '../auth/interfaces/auth-user.interface';
 import { UserRole } from '../shared/contracts';
 import { ValidationOrchestratorService } from './services/validation-orchestrator.service';
-import { ApplicationValidationResultDto, ValidationQueryDto } from './dto';
+import {
+  ApplicationValidationResultDto,
+  ValidationQueryDto,
+  DuplicateDetectionResultDto,
+  DocumentIntegrityResultDto,
+} from './dto';
 
 @ApiTags('Document Verification')
 @ApiBearerAuth('jwt')
@@ -127,5 +132,129 @@ export class VerificationController {
     @Query() query?: ValidationQueryDto,
   ): Promise<ApplicationValidationResultDto> {
     return this.orchestratorService.getValidationReport(id, user, query);
+  }
+
+  @Post('applications/:id/check-duplicates')
+  @HttpCode(HttpStatus.OK)
+  @Roles(
+    UserRole.INSTITUTION_USER,
+    UserRole.SCRUTINY_OFFICER,
+    UserRole.REGIONAL_OFFICER,
+    UserRole.SYSTEM_ADMIN,
+    UserRole.AUDITOR,
+  )
+  @ApiOperation({
+    summary: 'Evaluate exact and near-duplicates for application attachments',
+    description:
+      'Performs SHA-256 cryptographic duplicate detection (intra-application, inter-application, and cross-institution) and OCR layout/template near-duplicate similarity checks with tenant isolation.',
+  })
+  @ApiParam({
+    name: 'id',
+    type: 'string',
+    format: 'uuid',
+    description: 'Application UUID to check for duplicates',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Duplicate evaluation completed with findings',
+    type: DuplicateDetectionResultDto,
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Access denied: tenancy mismatch',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Application not found',
+  })
+  async checkDuplicates(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: AuthUserPrincipal,
+  ): Promise<DuplicateDetectionResultDto> {
+    return this.orchestratorService.checkApplicationDuplicates(id, user);
+  }
+
+  @Post('documents/:id/check-integrity')
+  @HttpCode(HttpStatus.OK)
+  @Roles(
+    UserRole.INSTITUTION_USER,
+    UserRole.SCRUTINY_OFFICER,
+    UserRole.REGIONAL_OFFICER,
+    UserRole.SYSTEM_ADMIN,
+    UserRole.AUDITOR,
+  )
+  @ApiOperation({
+    summary:
+      'Evaluate document structural integrity, active content, and metadata',
+    description:
+      'Inspects PDF structure (%PDF- header, %%EOF trailer), active content (/JS, /Launch), metadata timeline inversion, image editing tool artifacts (Photoshop, GIMP), and digital signature status.',
+  })
+  @ApiParam({
+    name: 'id',
+    type: 'string',
+    format: 'uuid',
+    description: 'Document UUID to inspect',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Document integrity evaluated with findings',
+    type: DocumentIntegrityResultDto,
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Access denied: tenancy mismatch',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Document not found',
+  })
+  async checkDocumentIntegrity(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: AuthUserPrincipal,
+  ): Promise<DocumentIntegrityResultDto> {
+    return this.orchestratorService.checkDocumentIntegrity(id, user);
+  }
+
+  @Get('documents/:id/integrity')
+  @HttpCode(HttpStatus.OK)
+  @Roles(
+    UserRole.INSTITUTION_USER,
+    UserRole.SCRUTINY_OFFICER,
+    UserRole.REGIONAL_OFFICER,
+    UserRole.EVC_INSPECTOR,
+    UserRole.SHC_SAC_MEMBER,
+    UserRole.BUREAU_HEAD,
+    UserRole.SYSTEM_ADMIN,
+    UserRole.AUDITOR,
+  )
+  @ApiOperation({
+    summary: 'Retrieve document integrity and anomaly inspection results',
+    description:
+      'Retrieves structural integrity, active content, and tamper indicator findings for a specific document attachment.',
+  })
+  @ApiParam({
+    name: 'id',
+    type: 'string',
+    format: 'uuid',
+    description: 'Document UUID',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Document integrity report retrieved',
+    type: DocumentIntegrityResultDto,
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Access denied: tenancy mismatch',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Document not found',
+  })
+  async getDocumentIntegrity(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: AuthUserPrincipal,
+  ): Promise<DocumentIntegrityResultDto> {
+    return this.orchestratorService.checkDocumentIntegrity(id, user);
   }
 }

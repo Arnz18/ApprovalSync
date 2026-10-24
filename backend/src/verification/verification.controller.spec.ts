@@ -16,6 +16,8 @@ describe('VerificationController', () => {
   let orchestratorService: {
     validateApplicationDocuments: jest.Mock;
     getValidationReport: jest.Mock;
+    checkApplicationDuplicates: jest.Mock;
+    checkDocumentIntegrity: jest.Mock;
   };
 
   const mockUser: AuthUserPrincipal = {
@@ -48,6 +50,8 @@ describe('VerificationController', () => {
     orchestratorService = {
       validateApplicationDocuments: jest.fn().mockResolvedValue(mockResult),
       getValidationReport: jest.fn().mockResolvedValue(mockResult),
+      checkApplicationDuplicates: jest.fn(),
+      checkDocumentIntegrity: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -92,6 +96,61 @@ describe('VerificationController', () => {
         { recalculate: false },
       );
       expect(result).toEqual(mockResult);
+    });
+  });
+
+  describe('checkDuplicates', () => {
+    it('should invoke checkApplicationDuplicates with id and user', async () => {
+      const mockDupResult = {
+        applicationId: 'app-uuid-1',
+        totalDocumentsEvaluated: 2,
+        exactDuplicatesCount: 0,
+        nearDuplicatesCount: 0,
+        findings: [],
+        evaluatedAt: '2026-10-24T00:00:00.000Z',
+      };
+      orchestratorService.checkApplicationDuplicates = jest
+        .fn()
+        .mockResolvedValue(mockDupResult);
+
+      const result = await controller.checkDuplicates('app-uuid-1', mockUser);
+
+      expect(
+        orchestratorService.checkApplicationDuplicates,
+      ).toHaveBeenCalledWith('app-uuid-1', mockUser);
+      expect(result).toEqual(mockDupResult);
+    });
+  });
+
+  describe('checkDocumentIntegrity and getDocumentIntegrity', () => {
+    it('should invoke checkDocumentIntegrity with docId and user', async () => {
+      const mockIntegrityResult = {
+        documentId: 'doc-uuid-1',
+        fileName: 'test.pdf',
+        mimeType: 'application/pdf',
+        overallStatus: 'PASS',
+        findings: [],
+        evaluatedAt: '2026-10-24T00:00:00.000Z',
+      };
+      orchestratorService.checkDocumentIntegrity = jest
+        .fn()
+        .mockResolvedValue(mockIntegrityResult);
+
+      const postResult = await controller.checkDocumentIntegrity(
+        'doc-uuid-1',
+        mockUser,
+      );
+      expect(orchestratorService.checkDocumentIntegrity).toHaveBeenCalledWith(
+        'doc-uuid-1',
+        mockUser,
+      );
+      expect(postResult).toEqual(mockIntegrityResult);
+
+      const getResult = await controller.getDocumentIntegrity(
+        'doc-uuid-1',
+        mockUser,
+      );
+      expect(getResult).toEqual(mockIntegrityResult);
     });
   });
 });

@@ -26,6 +26,8 @@ import {
   ValidationFinding,
   ValidationSummary,
   ApplicationValidationResult,
+  DuplicateDetectionResult,
+  DocumentIntegrityResult,
   IDateProvider,
   DATE_PROVIDER_TOKEN,
 } from '../interfaces';
@@ -34,6 +36,8 @@ import { DocumentCompletenessService } from './document-completeness.service';
 import { FieldCompletenessService } from './field-completeness.service';
 import { DocumentExpiryService } from './document-expiry.service';
 import { CrossRecordConsistencyService } from './cross-record-consistency.service';
+import { DocumentDuplicateDetectionService } from './document-duplicate-detection.service';
+import { DocumentIntegrityService } from './document-integrity.service';
 
 const VALIDATION_RULE_CATALOG_VERSION = '1.0.0';
 
@@ -52,6 +56,8 @@ export class ValidationOrchestratorService {
     private readonly fieldService: FieldCompletenessService,
     private readonly expiryService: DocumentExpiryService,
     private readonly consistencyService: CrossRecordConsistencyService,
+    private readonly duplicateService: DocumentDuplicateDetectionService,
+    private readonly integrityService: DocumentIntegrityService,
     @Inject(DATE_PROVIDER_TOKEN)
     private readonly dateProvider: IDateProvider,
   ) {}
@@ -161,12 +167,25 @@ export class ValidationOrchestratorService {
       documents,
     );
 
+    // 5. Evaluate Exact and Near-Duplicate Detection
+    const duplicateResult = await this.duplicateService.evaluateDuplicates(
+      application,
+      documents,
+      currentUser,
+    );
+
+    // 6. Evaluate Document Structural Integrity and Anomaly Indicators
+    const integrityFindings =
+      await this.integrityService.evaluateApplicationIntegrity(documents);
+
     // Combine all findings
     const allFindings: ValidationFinding[] = [
       ...completenessFindings,
       ...fieldFindings,
       ...expiryFindings,
       ...consistencyFindings,
+      ...duplicateResult.findings,
+      ...integrityFindings,
     ];
 
     // Compute metrics
@@ -250,6 +269,65 @@ export class ValidationOrchestratorService {
       currentUser,
       options,
     );
+  }
+
+  /**
+   * Evaluates exact and near-duplicates specifically for an application dossier.
+   */
+  async checkApplicationDuplicates(
+    applicationId: string,
+    currentUser: AuthUserPrincipal,
+    verifyStorage: boolean = false,
+  ): Promise<DuplicateDetectionResult> {
+    const { application, documents } = await this.findAndAuthorizeApplication(
+      applicationId,
+      currentUser,
+    );
+
+    return this.duplicateService.evaluateDuplicates(
+      application,
+      documents,
+      currentUser,
+      verifyStorage,
+    );
+  }
+
+  /**
+   * Evaluates document integrity, structure, active content, and metadata for a single attachment.
+   */
+  async checkDocumentIntegrity(
+    documentId: string,
+    currentUser: AuthUserPrincipal,
+  ): Promise<DocumentIntegrityResult> {
+    const document = await this.documentRepository.findOne({
+      where: { id: documentId },
+      relations: ['application'],
+    });
+
+    if (!document) {
+      throw new NotFoundException({
+        code: 'ERR_RESOURCE_NOT_FOUND',
+        message: `Document with ID '${documentId}' was not found.`,
+      });
+    }
+
+    // Tenancy enforcement
+    if (currentUser.role === UserRole.INSTITUTION_USER) {
+      const app = document.application;
+      if (
+        !currentUser.institutionId ||
+        !app ||
+        app.institutionId !== currentUser.institutionId
+      ) {
+        throw new ForbiddenException({
+          code: 'ERR_FORBIDDEN',
+          message:
+            'Access denied: tenancy mismatch. You cannot inspect documents from another institution.',
+        });
+      }
+    }
+
+    return this.integrityService.evaluateDocumentIntegrity(document);
   }
 
   /**

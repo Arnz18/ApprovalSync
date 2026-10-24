@@ -11,6 +11,8 @@ import { DocumentCompletenessService } from './document-completeness.service';
 import { FieldCompletenessService } from './field-completeness.service';
 import { DocumentExpiryService } from './document-expiry.service';
 import { CrossRecordConsistencyService } from './cross-record-consistency.service';
+import { DocumentDuplicateDetectionService } from './document-duplicate-detection.service';
+import { DocumentIntegrityService } from './document-integrity.service';
 import { DateProviderService } from './date-provider.service';
 import { DATE_PROVIDER_TOKEN } from '../interfaces/date-provider.interface';
 import { Application } from '../../database/entities/application.entity';
@@ -97,6 +99,27 @@ describe('ValidationOrchestratorService', () => {
     mockConsistencyService = {
       evaluateConsistency: jest.fn().mockReturnValue([]),
     };
+    const mockDuplicateService = {
+      evaluateDuplicates: jest.fn().mockResolvedValue({
+        applicationId: 'app-uuid-1',
+        totalDocumentsEvaluated: 0,
+        exactDuplicatesCount: 0,
+        nearDuplicatesCount: 0,
+        findings: [],
+        evaluatedAt: new Date().toISOString(),
+      }),
+    };
+    const mockIntegrityService = {
+      evaluateApplicationIntegrity: jest.fn().mockResolvedValue([]),
+      evaluateDocumentIntegrity: jest.fn().mockResolvedValue({
+        documentId: 'doc-uuid-1',
+        fileName: 'test.pdf',
+        mimeType: 'application/pdf',
+        overallStatus: 'PASS',
+        findings: [],
+        evaluatedAt: new Date().toISOString(),
+      }),
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -128,6 +151,14 @@ describe('ValidationOrchestratorService', () => {
         {
           provide: CrossRecordConsistencyService,
           useValue: mockConsistencyService,
+        },
+        {
+          provide: DocumentDuplicateDetectionService,
+          useValue: mockDuplicateService,
+        },
+        {
+          provide: DocumentIntegrityService,
+          useValue: mockIntegrityService,
         },
         {
           provide: DATE_PROVIDER_TOKEN,
