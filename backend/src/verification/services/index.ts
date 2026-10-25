@@ -7,3 +7,4 @@ export * from './near-duplicate-detection.service';
 export * from './document-duplicate-detection.service';
 export * from './document-integrity.service';
 export * from './validation-orchestrator.service';
+export * from './dossier-orchestrator.service';
