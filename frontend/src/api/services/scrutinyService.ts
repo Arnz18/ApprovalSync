@@ -10,7 +10,7 @@ import { workflowService } from './workflowService';
 import { documentsService } from './documentsService';
 import { PaginationQueryParams } from '../types';
 import { ApplicationProjection, ApplicationListResponse } from '../../applications/types';
-import { ScrutinyQueueItem, DossierSummary } from '../../scrutiny/types';
+import { DossierSummary } from '../../scrutiny/types';
 
 export const scrutinyService = {
   /**

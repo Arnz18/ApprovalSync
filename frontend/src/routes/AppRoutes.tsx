@@ -4,6 +4,7 @@ import { AppLayout } from '../components/layout/AppLayout';
 import { HomePage } from '../pages/HomePage';
 import { LoginPage } from '../pages/LoginPage';
 import { ApplicationWizardPage } from '../pages/ApplicationWizardPage';
+import { ScrutinyQueuePage } from '../pages/ScrutinyQueuePage';
 import { FeaturePlaceholderPage } from '../pages/FeaturePlaceholderPage';
 import { NotFoundPage } from '../pages/NotFoundPage';
 import { ProtectedRoute } from './ProtectedRoute';
@@ -51,20 +52,7 @@ export function AppRoutes(): React.ReactElement {
           path="scrutiny"
           element={
             <ProtectedRoute allowedRoles={ROUTE_PERMISSIONS['/scrutiny'].allowedRoles}>
-              <FeaturePlaceholderPage
-                moduleCode="SCRUTINY"
-                title="Scrutiny Officer Review Queue"
-                description="Documentary scrutiny, AI anomaly review, human officer disposition, and deficiency workflow."
-                assignedChunk="FE-04"
-                dependencies={['FE-02', 'BE-06', 'DOC-07']}
-                dependencyStatus="BLOCKED"
-                expectedFeatures={[
-                  'Scrutiny queue with status and ageing indicators',
-                  'Document dossier side-by-side view with extracted OCR evidence and bounding boxes',
-                  'Officer disposition controls: Approve, Flag Deficiency, or Override AI finding with justification',
-                  'Atomic workflow state transitions triggering chronological audit timeline events',
-                ]}
-              />
+              <ScrutinyQueuePage />
             </ProtectedRoute>
           }
         />

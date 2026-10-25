@@ -736,3 +736,198 @@
     display: none;
   }
 }
+
+/* ==========================================================================
+   Data Table & Scrutiny Queue Styles (FE-04)
+   ========================================================================== */
+.data-table-container {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  margin-top: var(--space-4);
+}
+
+.data-table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-family-body);
+  font-size: var(--font-size-sm);
+  text-align: left;
+}
+
+.data-table th {
+  background-color: var(--color-muted);
+  color: var(--color-foreground);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+
+.data-table td {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-border-subtle);
+  color: var(--color-foreground);
+  vertical-align: middle;
+}
+
+.data-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.data-table tbody tr:hover td {
+  background-color: var(--color-background);
+}
+
+.data-table-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--color-border-subtle);
+  background-color: var(--color-surface);
+  font-size: var(--font-size-sm);
+  color: var(--color-muted-foreground);
+}
+
+.scrutiny-filter-bar {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.scrutiny-filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.scrutiny-filter-label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-muted-foreground);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.scrutiny-filter-input,
+.scrutiny-filter-select {
+  height: 2.25rem;
+  padding: 0 var(--space-3);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-family-body);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+  color: var(--color-foreground);
+}
+
+.scrutiny-filter-input:focus,
+.scrutiny-filter-select:focus {
+  outline: 2px solid var(--color-ring);
+  outline-offset: 1px;
+}
+
+/* Dossier Findings & Cards */
+.finding-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-left-width: 4px;
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  margin-bottom: var(--space-3);
+  transition: box-shadow var(--transition-fast);
+}
+
+.finding-card:hover {
+  box-shadow: var(--shadow-sm);
+}
+
+.finding-card-critical {
+  border-left-color: var(--color-error);
+}
+
+.finding-card-advisory {
+  border-left-color: var(--color-warning);
+}
+
+.finding-card-compliant {
+  border-left-color: var(--color-success);
+}
+
+/* Case Timeline List */
+.case-timeline {
+  position: relative;
+  padding-left: var(--space-6);
+}
+
+.case-timeline::before {
+  content: '';
+  position: absolute;
+  left: 9px;
+  top: 8px;
+  bottom: 8px;
+  width: 2px;
+  background-color: var(--color-border);
+}
+
+.case-timeline-item {
+  position: relative;
+  margin-bottom: var(--space-4);
+}
+
+.case-timeline-item:last-child {
+  margin-bottom: 0;
+}
+
+.case-timeline-node {
+  position: absolute;
+  left: calc(-1 * var(--space-6) + 3px);
+  top: 4px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background-color: var(--color-primary);
+  border: 2px solid var(--color-surface);
+  box-shadow: 0 0 0 2px var(--color-primary);
+}
+
+.case-timeline-node.is-deficiency {
+  background-color: var(--color-warning);
+  box-shadow: 0 0 0 2px var(--color-warning);
+}
+
+.case-timeline-node.is-approved {
+  background-color: var(--color-success);
+  box-shadow: 0 0 0 2px var(--color-success);
+}
+
+.case-timeline-node.is-rejected {
+  background-color: var(--color-error);
+  box-shadow: 0 0 0 2px var(--color-error);
+}
+
+.case-timeline-content {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+}
