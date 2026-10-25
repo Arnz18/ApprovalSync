@@ -4,9 +4,10 @@
 > - **FE-01** — Frontend shell, design system, routing and API client (`COMMITTED`)
 > - **FE-02** — Login, role-aware navigation and session handling (`COMMITTED`)
 > - **FE-03** — Institution application wizard and document upload (`COMMITTED`)
+> - **FE-04** — Scrutiny queue, case detail and evidence review (`COMMITTED`)
 > **Lead Owner:** M4 — Frontend & Experience
 > **Framework:** React 18 + TypeScript 5 + Vite 5 Single-Page Application (SPA)
-> **Status:** FE-01, FE-02 & FE-03 IMPLEMENTED & HARDENED (11 test suites, 73 automated tests passing)
+> **Status:** FE-01, FE-02, FE-03 & FE-04 IMPLEMENTED & HARDENED (14 test suites, 97 automated tests passing)
 
 ---
 
@@ -231,22 +232,38 @@ To safely add or modify a step in the wizard:
 
 ---
 
-## 6. Local Development & Quality Gates
+## 6. Scrutiny Review & Evidence Review Workspace (FE-04)
 
-### 6.1 Installation
+The Scrutiny Review Workspace (`src/scrutiny/`, `src/components/scrutiny/`, `src/pages/ScrutinyQueuePage.tsx`, `src/pages/CaseDetailPage.tsx`) provides an authorized, high-density regulatory console for AICTE evaluators.
+
+### 6.1 Architecture & Endpoints
+- **Queue Route (`/scrutiny`):** Integrates with `GET /api/v1/applications` with query filters (`status`, `search`, `sortBy`, `sortOrder`, `page`, `limit`).
+- **Summary Enrichment Worker:** Visible page applications are asynchronously enriched with lightweight dossier summaries (`GET /api/v1/applications/:id/dossier-report/summary`) using bounded concurrency workers (default 3 concurrent requests). Partial summary failures do not crash the queue.
+- **Case Detail Route (`/scrutiny/:applicationId`):** Loads authoritative case file via `GET /api/v1/applications/:id`, cached dossier report via `GET /api/v1/applications/:id/dossier-report`, allowed FSM transitions via `GET /api/v1/applications/:id/allowed-transitions`, and audit timeline via `GET /api/v1/applications/:id/timeline`.
+- **Dossier Recalculation:** Reviewers can trigger full re-evaluation via `POST /api/v1/applications/:id/dossier-report` or `?recalculate=true`.
+- **Workflow State Transitions:** State transitions are executed via `POST /api/v1/applications/:id/transitions`. Allowed transitions are dynamically discovered from the server. If `requiresComment: true` (e.g. `DEFICIENCY_ISSUED` or `REJECTED`), a mandatory justification comment is strictly validated prior to submission.
+- **Document Matrix & Binary Streaming:** Document attachments are inspected in `DocumentInspectModal` showing SHA-256 checksums, duplicate status (DOC-04), tamper status (DOC-04), issuer verification status (DOC-05), and extracted OCR fields. Secure binary file downloads stream via `GET /api/v1/documents/:id/download` with automatic object URL cleanup.
+- **Human Sovereignty Boundary (ADR-004):** Automated findings, OCR confidences, and anomaly scores are strictly advisory decision support under the AICTE Approval Process Handbook. Automated tools never approve or reject applications autonomously.
+- **Current Backend Contract Limitation:** The `ReviewDisposition` enum exists in backend contracts, but there is no dedicated database entity or endpoint for persisting individual finding-level dispositions. Case-level actions are executed through the BE-06 workflow FSM. A contract proposal has been prepared for M1/M2.
+
+---
+
+## 7. Local Development & Quality Gates
+
+### 7.1 Installation
 ```bash
 cd frontend
 npm install
 ```
 
-### 6.2 Running the Development Server
+### 7.2 Running the Development Server
 ```bash
 npm run dev
 ```
 The application will be served at `http://localhost:5173`.
 By default, requests to `/api` are automatically proxied to the NestJS backend at `http://localhost:3000`.
 
-### 6.3 Quality Gates & Validation Commands
+### 7.3 Quality Gates & Validation Commands
 All commands run from `frontend/`:
 
 | Check | Command | Purpose |
@@ -255,12 +272,12 @@ All commands run from `frontend/`:
 | **Linting** | `npm run lint` | Runs ESLint across all `.ts` and `.tsx` source files (`--max-warnings=0`) |
 | **Formatting** | `npm run format:check` | Checks code formatting against Prettier rules |
 | **Auto-Format** | `npm run format` | Auto-formats code with Prettier |
-| **Unit Tests** | `npm test` | Runs the Vitest test runner across all 11 test suites (73 tests) |
+| **Unit Tests** | `npm test` | Runs Vitest across all 14 test suites (97 tests passing) |
 | **Production Build** | `npm run build` | Compiles TypeScript and produces optimized production bundle in `dist/` |
 
 ---
 
-## 7. Environment Configuration
+## 8. Environment Configuration
 
 Copy `.env.example` to `.env.local` to override local environment variables:
 ```bash
@@ -280,9 +297,9 @@ VITE_APP_ENV=development
 
 ---
 
-## 8. Downstream Extension Guide
+## 9. Downstream Extension Guide
 
-When implementing downstream chunks (`FE-04` through `FE-07`):
+When implementing downstream chunks (`FE-05` through `FE-07`):
 1. **Reuse Components:** Utilize components from `@/components/ui` (`Button`, `Card`, `Badge`, `FormField`, `Alert`, `Modal`, `EmptyState`, `PageHeader`).
 2. **Access Current User:** Use `const { user, logout } = useAuth()` to access safe profile projection and role.
 3. **Protect New Routes:** Wrap routes in `<ProtectedRoute allowedRoles={[...]}>`.
