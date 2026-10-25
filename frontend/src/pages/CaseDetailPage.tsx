@@ -18,6 +18,7 @@ import { ApplicationDataTab } from '../components/scrutiny/ApplicationDataTab';
 import { CaseTimelineView } from '../components/scrutiny/CaseTimelineView';
 import { DossierFindingsView } from '../components/scrutiny/DossierFindingsView';
 import { DocumentVerificationMatrixView } from '../components/scrutiny/DocumentVerificationMatrixView';
+import { ReviewActionModal } from '../components/scrutiny/ReviewActionModal';
 import { scrutinyService } from '../api/services/scrutinyService';
 import { workflowService } from '../api/services/workflowService';
 import { dossierService } from '../api/services/dossierService';
@@ -26,6 +27,7 @@ import {
   WorkflowTimelineEvent,
   DossierReport,
   AllowedTransition,
+  ApplicationStatus,
 } from '../scrutiny/types';
 import { ApiClientError } from '../api/client';
 
@@ -42,6 +44,11 @@ export const CaseDetailPage: React.FC = () => {
   const [timelineEvents, setTimelineEvents] = useState<WorkflowTimelineEvent[]>([]);
   const [dossierReport, setDossierReport] = useState<DossierReport | null>(null);
   const [allowedTransitions, setAllowedTransitions] = useState<AllowedTransition[]>([]);
+
+  // Review action state
+  const [selectedTransition, setSelectedTransition] = useState<AllowedTransition | null>(null);
+  const [isTransitioning, setIsTransitioning] = useState<boolean>(false);
+  const [transitionSuccessMessage, setTransitionSuccessMessage] = useState<string | null>(null);
 
   // Loading & error states
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -202,6 +209,38 @@ export const CaseDetailPage: React.FC = () => {
     setActiveTab('matrix');
   };
 
+  const handleExecuteTransition = async (targetStatus: ApplicationStatus, comment?: string) => {
+    if (!applicationId) return;
+    setIsTransitioning(true);
+    setError(null);
+    setTransitionSuccessMessage(null);
+
+    try {
+      const res = await workflowService.executeTransition(applicationId, {
+        targetStatus,
+        comment,
+      });
+
+      setSelectedTransition(null);
+      setTransitionSuccessMessage(
+        `Application status successfully transitioned to ${res.currentStatus}. Recorded in authoritative audit timeline.`,
+      );
+
+      // Re-fetch authoritative case data, timeline, and transitions
+      await fetchCaseData();
+    } catch (err: unknown) {
+      if (err instanceof ApiClientError) {
+        setError(err.message || 'Transition rejected by workflow engine.');
+      } else if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Failed to execute workflow transition.');
+      }
+    } finally {
+      setIsTransitioning(false);
+    }
+  };
+
   if (!application) return null;
 
   return (
@@ -226,40 +265,82 @@ export const CaseDetailPage: React.FC = () => {
         </Alert>
       </div>
 
-      {/* Workflow Transition Availability Badge Strip */}
+      {/* Transition Success Banner */}
+      {transitionSuccessMessage && (
+        <div style={{ marginBottom: 'var(--space-4)' }}>
+          <Alert
+            variant="success"
+            title="Workflow State Transition Recorded"
+            onClose={() => setTransitionSuccessMessage(null)}
+          >
+            {transitionSuccessMessage}
+          </Alert>
+        </div>
+      )}
+
+      {/* Workflow Permitted Review Actions Bar */}
       {allowedTransitions.length > 0 && (
         <div
+          className="scrutiny-action-bar"
           style={{
             display: 'flex',
             alignItems: 'center',
+            justifyContent: 'space-between',
             flexWrap: 'wrap',
-            gap: 'var(--space-2)',
-            padding: 'var(--space-2) var(--space-3)',
+            gap: 'var(--space-3)',
+            padding: 'var(--space-3) var(--space-4)',
             backgroundColor: 'var(--color-surface)',
-            border: '1px solid var(--color-border-subtle)',
+            border: '1px solid var(--color-border)',
             borderRadius: 'var(--radius-md)',
             marginBottom: 'var(--space-4)',
-            fontSize: 'var(--font-size-xs)',
-            color: 'var(--color-muted-foreground)',
           }}
         >
-          <span style={{ fontWeight: 600, color: 'var(--color-foreground)' }}>
-            Permitted Review Transitions ({allowedTransitions.length}):
-          </span>
-          {allowedTransitions.map((t) => (
-            <span
-              key={t.toStatus}
-              style={{
-                padding: '2px 8px',
-                backgroundColor: 'var(--color-muted)',
-                borderRadius: 'var(--radius-sm)',
-                fontWeight: 500,
-                color: 'var(--color-foreground)',
-              }}
-            >
-              {t.toStatus}
-            </span>
-          ))}
+          <div>
+            <div style={{ fontSize: 'var(--font-size-xs)', fontWeight: 600, color: 'var(--color-foreground)' }}>
+              Permitted Review Actions ({allowedTransitions.length})
+            </div>
+            <div style={{ fontSize: '11px', color: 'var(--color-muted-foreground)' }}>
+              Server-authorized state transitions for your role under current FSM state.
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', flexWrap: 'wrap' }}>
+            {allowedTransitions.map((t) => {
+              const isDeficiency = t.toStatus === ApplicationStatus.DEFICIENCY_ISSUED;
+              const isRejection = t.toStatus === ApplicationStatus.REJECTED;
+              const label =
+                t.toStatus === ApplicationStatus.UNDER_SCRUTINY
+                  ? 'Commence Scrutiny'
+                  : t.toStatus === ApplicationStatus.DEFICIENCY_ISSUED
+                    ? 'Issue Deficiency Notice'
+                    : t.toStatus === ApplicationStatus.RECOMMENDED_FOR_EVC
+                      ? 'Recommend for EVC'
+                      : t.toStatus === ApplicationStatus.RECOMMENDED_FOR_SHC
+                        ? 'Recommend for SHC'
+                        : t.toStatus === ApplicationStatus.REJECTED
+                          ? 'Reject Application'
+                          : `Move to ${String(t.toStatus).replace(/_/g, ' ')}`;
+
+              return (
+                <Button
+                  key={t.toStatus}
+                  type="button"
+                  variant={isRejection ? 'outline' : isDeficiency ? 'outline' : 'primary'}
+                  size="sm"
+                  onClick={() => setSelectedTransition(t)}
+                  style={
+                    isRejection
+                      ? { color: 'var(--color-error)', borderColor: 'var(--color-error)' }
+                      : isDeficiency
+                        ? { color: '#B45309', borderColor: '#F59E0B' }
+                        : undefined
+                  }
+                >
+                  {label}
+                </Button>
+              );
+            })}
+          </div>
         </div>
       )}
 
@@ -411,6 +492,16 @@ export const CaseDetailPage: React.FC = () => {
           />
         )}
       </div>
+
+      {/* Review Action Dialog */}
+      <ReviewActionModal
+        isOpen={!!selectedTransition}
+        onClose={() => setSelectedTransition(null)}
+        transition={selectedTransition}
+        applicationNumber={application.applicationNumber}
+        onSubmit={handleExecuteTransition}
+        isSubmitting={isTransitioning}
+      />
     </div>
   );
 };
