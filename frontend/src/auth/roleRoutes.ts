@@ -74,6 +74,7 @@ export const ROUTE_PERMISSIONS: Record<string, RoutePermissionConfig> = {
       UserRole.REGIONAL_OFFICER,
       UserRole.BUREAU_HEAD,
       UserRole.SYSTEM_ADMIN,
+      UserRole.SHC_SAC_MEMBER,
     ],
     description: 'On-site committee inspection scheduling, photo proof, and findings.',
   },

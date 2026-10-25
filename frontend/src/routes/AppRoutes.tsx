@@ -6,6 +6,7 @@ import { LoginPage } from '../pages/LoginPage';
 import { ApplicationWizardPage } from '../pages/ApplicationWizardPage';
 import { ScrutinyQueuePage } from '../pages/ScrutinyQueuePage';
 import { CaseDetailPage } from '../pages/CaseDetailPage';
+import { EvcQueuePage } from '../pages/EvcQueuePage';
 import { FeaturePlaceholderPage } from '../pages/FeaturePlaceholderPage';
 import { NotFoundPage } from '../pages/NotFoundPage';
 import { ProtectedRoute } from './ProtectedRoute';
@@ -93,19 +94,7 @@ export function AppRoutes(): React.ReactElement {
           path="evc"
           element={
             <ProtectedRoute allowedRoles={ROUTE_PERMISSIONS['/evc'].allowedRoles}>
-              <FeaturePlaceholderPage
-                moduleCode="EVC"
-                title="EVC Scheduling & Ground Inspection"
-                description="Expert roster availability, conflict declarations, ground photo verification, and committee reports."
-                assignedChunk="FE-06"
-                dependencies={['BE-06', 'DOC-06']}
-                dependencyStatus="BLOCKED"
-                expectedFeatures={[
-                  'Randomized expert roster assignment with conflict-of-interest checks',
-                  'On-site photo and video evidence verification with geo-tagging and timestamps',
-                  'EVC inspection report authoring and Standing Hearing Committee (SHC) escalation',
-                ]}
-              />
+              <EvcQueuePage />
             </ProtectedRoute>
           }
         />

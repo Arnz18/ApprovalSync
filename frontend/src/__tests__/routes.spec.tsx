@@ -107,6 +107,21 @@ describe('Routing & Navigation (FE-01 & FE-02)', () => {
     });
   });
 
+  it('renders EvcQueuePage for "/evc" (FE-06)', async () => {
+    render(
+      <MemoryRouter initialEntries={['/evc']}>
+        <AppRoutes />
+      </MemoryRouter>,
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole('heading', { name: /EVC Inspection & Committee Queue/i }),
+      ).toBeInTheDocument();
+      expect(screen.getByText('API Online')).toBeInTheDocument();
+    });
+  });
+
   it('renders FeaturePlaceholderPage for "/verification" explaining DOC-04', async () => {
     render(
       <MemoryRouter initialEntries={['/verification']}>
