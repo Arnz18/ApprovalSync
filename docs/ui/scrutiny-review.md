@@ -1,10 +1,10 @@
 # ApprovalSync — Scrutiny Review, Evidence Inspection & Clarification Workflow
 
-> **Milestone:** FE-04 — Scrutiny Queue, Case Detail and Evidence Review  
-> **Lead Role:** M4 — Frontend & Experience  
-> **Collaborating Roles:** M2 — Backend & Integration, M3 — Document Intelligence, M1 — Contracts & Data  
-> **Status:** IMPLEMENTED & VERIFIED  
-> **Backend Integration:** BE-06 (Workflow Engine & State Transitions), DOC-07 (Dossier Verification Report & Summary Synthesis), BE-04 (Applications API), DOC-01 (Document Attachments)  
+> **Milestone:** FE-04 — Scrutiny Queue, Case Detail and Evidence Review<br>
+> **Lead Role:** M4 — Frontend & Experience<br>
+> **Collaborating Roles:** M2 — Backend & Integration, M3 — Document Intelligence, M1 — Contracts & Data<br>
+> **Status:** IMPLEMENTED & COMMITTED<br>
+> **Backend Integration:** BE-06 (Workflow Engine & State Transitions), DOC-07 (Dossier Verification Report & Summary Synthesis), BE-04 (Applications API), DOC-01 (Document Attachments)
 
 ---
 
