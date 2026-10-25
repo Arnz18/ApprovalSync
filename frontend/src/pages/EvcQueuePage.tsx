@@ -118,11 +118,11 @@ export const EvcQueuePage: React.FC = () => {
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--space-2)' }}>
             <Shield size={18} aria-hidden="true" style={{ flexShrink: 0, marginTop: '2px' }} />
             <span>
-              Automated physical inspection triggers and infrastructure review heuristics are advisory
-              decision-support signals only. In accordance with AICTE regulatory governance, automated
-              findings do not constitute statutory approval, endorsement, or rejection. Final on-site
-              determinations rest exclusively with authorized Expert Visit Committee Members and
-              Council Officers.
+              Automated physical inspection triggers and infrastructure review heuristics are
+              advisory decision-support signals only. In accordance with AICTE regulatory
+              governance, automated findings do not constitute statutory approval, endorsement, or
+              rejection. Final on-site determinations rest exclusively with authorized Expert Visit
+              Committee Members and Council Officers.
             </span>
           </div>
         </Alert>

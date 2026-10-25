@@ -7,6 +7,7 @@ import { ApplicationWizardPage } from '../pages/ApplicationWizardPage';
 import { ScrutinyQueuePage } from '../pages/ScrutinyQueuePage';
 import { CaseDetailPage } from '../pages/CaseDetailPage';
 import { EvcQueuePage } from '../pages/EvcQueuePage';
+import { EvcCaseDetailPage } from '../pages/EvcCaseDetailPage';
 import { FeaturePlaceholderPage } from '../pages/FeaturePlaceholderPage';
 import { NotFoundPage } from '../pages/NotFoundPage';
 import { ProtectedRoute } from './ProtectedRoute';
@@ -95,6 +96,15 @@ export function AppRoutes(): React.ReactElement {
           element={
             <ProtectedRoute allowedRoles={ROUTE_PERMISSIONS['/evc'].allowedRoles}>
               <EvcQueuePage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="evc/:applicationId"
+          element={
+            <ProtectedRoute allowedRoles={ROUTE_PERMISSIONS['/evc'].allowedRoles}>
+              <EvcCaseDetailPage />
             </ProtectedRoute>
           }
         />
