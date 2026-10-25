@@ -537,6 +537,7 @@ Use typed contracts, DTO validation, centralized errors, structured logs, reques
     - `06afa06`: `feat(FE-02): implement role-aware navigation and logout`
     - `0559f9a`: `test(FE-02): cover session lifecycle and route authorization`
     - `1300d44`: `docs(FE-02): document authentication and access model`
+    - `74940b3`: `style(FE-02): apply prettier code style across auth modules and tests`
   - Delivered:
     - Centralized authentication architecture (`frontend/src/auth/`): `AuthProvider`, `AuthContext`, `useAuth`, `sessionStorage`, `roleRoutes`. Modeled discrete session states (`INITIALIZING`, `UNAUTHENTICATED`, `AUTHENTICATING`, `AUTHENTICATED`, `ERROR`).
     - Real BE-03 API client integration (`frontend/src/api/services/authService.ts`): endpoints `POST /api/v1/auth/login` and `GET /api/v1/auth/me`. Integrated dynamic Bearer token injection into `ApiClient` with explicit suppression on public requests (`authToken: null`).
