@@ -5,6 +5,7 @@ import { HomePage } from '../pages/HomePage';
 import { LoginPage } from '../pages/LoginPage';
 import { ApplicationWizardPage } from '../pages/ApplicationWizardPage';
 import { ScrutinyQueuePage } from '../pages/ScrutinyQueuePage';
+import { CaseDetailPage } from '../pages/CaseDetailPage';
 import { FeaturePlaceholderPage } from '../pages/FeaturePlaceholderPage';
 import { NotFoundPage } from '../pages/NotFoundPage';
 import { ProtectedRoute } from './ProtectedRoute';
@@ -53,6 +54,15 @@ export function AppRoutes(): React.ReactElement {
           element={
             <ProtectedRoute allowedRoles={ROUTE_PERMISSIONS['/scrutiny'].allowedRoles}>
               <ScrutinyQueuePage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="scrutiny/:applicationId"
+          element={
+            <ProtectedRoute allowedRoles={ROUTE_PERMISSIONS['/scrutiny'].allowedRoles}>
+              <CaseDetailPage />
             </ProtectedRoute>
           }
         />
