@@ -10,7 +10,7 @@
  * Conforms to ADR-004 Human Sovereignty: all outputs are strictly advisory decision support.
  */
 
-import { BoundingBox, ComplianceSeverity } from '../../shared/contracts';
+import { BoundingBox } from '../../shared/contracts';
 import { OverallValidationStatus } from '../enums';
 import {
   InfrastructureReviewSummaryDto,
@@ -28,13 +28,15 @@ export type DossierFindingCategory =
   | 'REGULATORY_COMPLIANCE'
   | 'INFRASTRUCTURE_REVIEW';
 
+export type DossierFindingSeverity =
+  'CRITICAL_DEFICIENCY' | 'ADVISORY_FLAG' | 'COMPLIANT';
+
 export interface DossierReportFinding {
   id: string;
   category: DossierFindingCategory;
   ruleCode: string;
   ruleDescription: string;
-  severity:
-    ComplianceSeverity | 'CRITICAL_DEFICIENCY' | 'ADVISORY_FLAG' | 'COMPLIANT';
+  severity: DossierFindingSeverity;
   outcome: string;
   documentId?: string;
   documentType?: string;

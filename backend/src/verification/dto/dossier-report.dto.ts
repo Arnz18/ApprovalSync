@@ -8,6 +8,10 @@
 
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { BoundingBox } from '../../shared/contracts';
+import {
+  EvidenceReferenceDto,
+  InfrastructureReviewSummaryDto,
+} from '../../compliance/dto';
 import { OverallValidationStatus } from '../enums';
 import {
   DossierFindingCategory,
@@ -131,7 +135,7 @@ export class DossierReportFindingDto implements DossierReportFinding {
     description:
       'Additional evidence details or metadata supporting this finding',
   })
-  evidence?: Record<string, unknown>;
+  evidence?: Record<string, unknown> | EvidenceReferenceDto[];
 }
 
 export class DocumentVerificationMatrixItemDto implements DocumentVerificationMatrixItem {
@@ -529,7 +533,8 @@ export class DossierReportDto implements DossierVerificationResult {
   @ApiPropertyOptional({
     description: 'Detailed infrastructure review metrics and calculations',
   })
-  infrastructureReview?: Record<string, unknown>;
+  infrastructureReview?:
+    InfrastructureReviewSummaryDto | Record<string, unknown>;
 
   @ApiProperty({
     description: 'Authoritative ADR-004 Human Sovereignty legal disclaimer',

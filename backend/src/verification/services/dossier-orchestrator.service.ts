@@ -285,7 +285,12 @@ export class DossierOrchestratorService {
         category: isInfra ? 'INFRASTRUCTURE_REVIEW' : 'REGULATORY_COMPLIANCE',
         ruleCode: ruleCodeStr,
         ruleDescription: cf.title || cf.description || ruleCodeStr,
-        severity: cf.severity,
+        severity:
+          cf.severity === 'CRITICAL_DEFICIENCY'
+            ? 'CRITICAL_DEFICIENCY'
+            : cf.severity === 'COMPLIANT'
+              ? 'COMPLIANT'
+              : 'ADVISORY_FLAG',
         outcome: cf.severity === 'COMPLIANT' ? 'COMPLIANT' : 'DEFICIENT',
         documentId: firstEvidence?.documentId,
         documentType: firstEvidence?.documentType,
