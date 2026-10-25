@@ -40,9 +40,7 @@ export function LoginPage(): React.ReactElement {
 
   // Determine return target from router location state
   const rawFrom = (location.state as { from?: { pathname?: string } | string } | null)?.from;
-  const returnPath = getSafeReturnUrl(
-    typeof rawFrom === 'string' ? rawFrom : rawFrom?.pathname,
-  );
+  const returnPath = getSafeReturnUrl(typeof rawFrom === 'string' ? rawFrom : rawFrom?.pathname);
 
   // If already authenticated and not initializing, redirect to return path or default landing
   if (isAuthenticated && status === 'AUTHENTICATED') {
@@ -265,12 +263,7 @@ export function LoginPage(): React.ReactElement {
 
               {/* Password */}
               <div style={{ position: 'relative' }}>
-                <FormField
-                  label="Password"
-                  id="login-password"
-                  error={errors.password}
-                  required
-                >
+                <FormField label="Password" id="login-password" error={errors.password} required>
                   <input
                     id="login-password"
                     type={showPassword ? 'text' : 'password'}
@@ -437,8 +430,8 @@ export function LoginPage(): React.ReactElement {
                   lineHeight: 1.4,
                 }}
               >
-                Authorized personnel only. Access events are logged to the immutable SHA-256
-                audit ledger. Approval authority remains sovereign with designated officers.
+                Authorized personnel only. Access events are logged to the immutable SHA-256 audit
+                ledger. Approval authority remains sovereign with designated officers.
               </p>
             </div>
           </CardContent>

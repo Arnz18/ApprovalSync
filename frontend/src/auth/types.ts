@@ -40,11 +40,7 @@ export interface LoginResponseData {
  * Authentication Status Finite State Machine
  */
 export type AuthStatus =
-  | 'INITIALIZING'
-  | 'UNAUTHENTICATED'
-  | 'AUTHENTICATING'
-  | 'AUTHENTICATED'
-  | 'ERROR';
+  'INITIALIZING' | 'UNAUTHENTICATED' | 'AUTHENTICATING' | 'AUTHENTICATED' | 'ERROR';
 
 /**
  * Structured session initialization or network error

@@ -55,14 +55,10 @@ describe('LoginPage Component (FE-02)', () => {
   it('renders institutional login branding, fields, and accessible labels', () => {
     renderLoginPage();
 
-    expect(
-      screen.getByRole('heading', { name: /Institutional Sign In/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /Institutional Sign In/i })).toBeInTheDocument();
     expect(screen.getByLabelText(/Official Email Address/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/^Password/i)).toBeInTheDocument();
-    expect(
-      screen.getByRole('button', { name: /Sign In to Workspace/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Sign In to Workspace/i })).toBeInTheDocument();
     expect(screen.getByText(/Prototype/i)).toBeInTheDocument();
   });
 
@@ -72,9 +68,7 @@ describe('LoginPage Component (FE-02)', () => {
     const submitBtn = screen.getByRole('button', { name: /Sign In to Workspace/i });
     fireEvent.click(submitBtn);
 
-    expect(
-      await screen.findByText(/Official email address is required/i),
-    ).toBeInTheDocument();
+    expect(await screen.findByText(/Official email address is required/i)).toBeInTheDocument();
     expect(screen.getByText(/Password is required/i)).toBeInTheDocument();
   });
 
@@ -89,9 +83,7 @@ describe('LoginPage Component (FE-02)', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /Sign In to Workspace/i }));
 
-    expect(
-      await screen.findByText(/Please enter a valid email address/i),
-    ).toBeInTheDocument();
+    expect(await screen.findByText(/Please enter a valid email address/i)).toBeInTheDocument();
   });
 
   it('toggles password visibility between text and password types', () => {

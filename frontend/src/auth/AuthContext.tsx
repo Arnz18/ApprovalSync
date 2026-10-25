@@ -7,13 +7,7 @@
  */
 
 import React, { createContext, useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  AuthContextValue,
-  AuthInitError,
-  AuthStatus,
-  AuthUser,
-  LoginCredentials,
-} from './types';
+import { AuthContextValue, AuthInitError, AuthStatus, AuthUser, LoginCredentials } from './types';
 import { authService } from '../api/services/authService';
 import { ApiClientError } from '../api/client';
 import { clearStoredToken, getStoredToken, setStoredToken } from './sessionStorage';

@@ -195,10 +195,7 @@ describe('Header User Identity & Logout Action (FE-02)', () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByRole('link', { name: /Sign In/i })).toHaveAttribute(
-      'href',
-      '/login',
-    );
+    expect(screen.getByRole('link', { name: /Sign In/i })).toHaveAttribute('href', '/login');
 
     await waitFor(() => {
       expect(screen.getByText('API Online')).toBeInTheDocument();

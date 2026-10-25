@@ -117,7 +117,9 @@ describe('Routing & Navigation (FE-01 & FE-02)', () => {
       expect(
         screen.getByRole('heading', { name: /404 — Regulatory Route Not Found/i }),
       ).toBeInTheDocument();
-      expect(screen.getByRole('link', { name: /Return to Workspace Overview/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole('link', { name: /Return to Workspace Overview/i }),
+      ).toBeInTheDocument();
       expect(screen.getByText('API Online')).toBeInTheDocument();
     });
   });
@@ -134,9 +136,7 @@ describe('Routing & Navigation (FE-01 & FE-02)', () => {
 
     // Should redirect to LoginPage
     await waitFor(() => {
-      expect(
-        screen.getByRole('heading', { name: /Institutional Sign In/i }),
-      ).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: /Institutional Sign In/i })).toBeInTheDocument();
       expect(screen.getByLabelText(/Official Email Address/i)).toBeInTheDocument();
     });
   });
@@ -176,9 +176,7 @@ describe('Routing & Navigation (FE-01 & FE-02)', () => {
     );
 
     await waitFor(() => {
-      expect(
-        screen.getByRole('heading', { name: /Access Restricted/i }),
-      ).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: /Access Restricted/i })).toBeInTheDocument();
       expect(screen.getByText(/HTTP 403 Forbidden/i)).toBeInTheDocument();
       expect(screen.getByText(/Return to Designated Workspace/i)).toBeInTheDocument();
     });

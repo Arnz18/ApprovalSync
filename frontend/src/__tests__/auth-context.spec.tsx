@@ -9,17 +9,21 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import { AuthProvider } from '../auth/AuthContext';
 import { useAuth } from '../auth/useAuth';
-import {
-  setStoredToken,
-  getStoredToken,
-  clearStoredToken,
-} from '../auth/sessionStorage';
+import { setStoredToken, getStoredToken, clearStoredToken } from '../auth/sessionStorage';
 import { UserRole } from '../api/types';
 
 // Consumer component to test context hook
 function TestAuthConsumer() {
-  const { user, status, isAuthenticated, isInitializing, initError, login, logout, retryInitialization } =
-    useAuth();
+  const {
+    user,
+    status,
+    isAuthenticated,
+    isInitializing,
+    initError,
+    login,
+    logout,
+    retryInitialization,
+  } = useAuth();
 
   return (
     <div>
