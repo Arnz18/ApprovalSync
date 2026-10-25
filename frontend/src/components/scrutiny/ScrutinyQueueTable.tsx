@@ -79,7 +79,14 @@ export const ScrutinyQueueTable: React.FC<ScrutinyQueueTableProps> = ({
       );
     }
 
-    const { overallStatus, summary } = item.dossierSummary;
+    const overallStatus = item.dossierSummary.overallStatus;
+    const summary =
+      item.dossierSummary.summary ||
+      (item.dossierSummary as unknown as typeof item.dossierSummary.summary);
+
+    const hasCritical = (summary?.criticalDeficienciesCount ?? 0) > 0;
+    const advisoryCount = summary?.advisoryFlagsCount ?? 0;
+    const requiresInspection = !!summary?.requiresPhysicalInspection;
 
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-start' }}>
@@ -103,7 +110,7 @@ export const ScrutinyQueueTable: React.FC<ScrutinyQueueTableProps> = ({
             </Badge>
           )}
 
-          {summary.requiresPhysicalInspection && (
+          {requiresInspection && (
             <span
               title="Automated heuristics recommend on-site EVC inspection"
               style={{
@@ -122,7 +129,7 @@ export const ScrutinyQueueTable: React.FC<ScrutinyQueueTableProps> = ({
         </div>
 
         <div style={{ fontSize: '11px', color: 'var(--color-muted-foreground)' }}>
-          {summary.criticalDeficienciesCount > 0 ? (
+          {hasCritical ? (
             <span style={{ color: 'var(--color-error)', fontWeight: 600 }}>
               {summary.criticalDeficienciesCount} Critical Deficiency
               {summary.criticalDeficienciesCount > 1 ? 'ies' : ''}
@@ -131,7 +138,7 @@ export const ScrutinyQueueTable: React.FC<ScrutinyQueueTableProps> = ({
             <span>0 Deficiencies</span>
           )}
           {' • '}
-          <span>{summary.advisoryFlagsCount} Advisory</span>
+          <span>{advisoryCount} Advisory</span>
         </div>
       </div>
     );
