@@ -137,6 +137,7 @@ describe('Issuer Verification Adapters & Source Status (e2e)', () => {
         applicationNumber: `APP-E2E-DOC05-A-${Date.now()}`,
         status: ApplicationStatus.DRAFT,
         academicYear: '2026-2027',
+        programType: 'ENGINEERING_TECHNOLOGY',
         payloadJsonb: {
           institutionName: institutionA.name,
           state: institutionA.state,
@@ -151,6 +152,7 @@ describe('Issuer Verification Adapters & Source Status (e2e)', () => {
         applicationNumber: `APP-E2E-DOC05-B-${Date.now()}`,
         status: ApplicationStatus.DRAFT,
         academicYear: '2026-2027',
+        programType: 'ENGINEERING_TECHNOLOGY',
         payloadJsonb: {
           institutionName: institutionB.name,
           state: institutionB.state,
