@@ -30,13 +30,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref,
   ) => {
-    const classes = [
-      'btn',
-      `btn-${variant}`,
-      `btn-${size}`,
-      fullWidth ? 'btn-full' : '',
-      className,
-    ]
+    const classes = ['btn', `btn-${variant}`, `btn-${size}`, fullWidth ? 'btn-full' : '', className]
       .filter(Boolean)
       .join(' ');
 
@@ -50,7 +44,11 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       >
         {isLoading ? (
           <>
-            <Loader2 className="spinner" size={size === 'sm' ? 14 : size === 'lg' ? 20 : 16} aria-hidden="true" />
+            <Loader2
+              className="spinner"
+              size={size === 'sm' ? 14 : size === 'lg' ? 20 : 16}
+              aria-hidden="true"
+            />
             <span>{children}</span>
           </>
         ) : (

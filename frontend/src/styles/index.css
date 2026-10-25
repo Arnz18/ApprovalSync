@@ -6,7 +6,9 @@
 @import './components.css';
 @import './layout.css';
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -36,19 +38,36 @@ body {
 }
 
 /* Typography styles */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-family-heading);
   color: var(--color-foreground);
   font-weight: var(--font-weight-semibold);
   line-height: var(--line-height-tight);
 }
 
-h1 { font-size: var(--font-size-3xl); }
-h2 { font-size: var(--font-size-2xl); }
-h3 { font-size: var(--font-size-xl); }
-h4 { font-size: var(--font-size-lg); }
-h5 { font-size: var(--font-size-base); }
-h6 { font-size: var(--font-size-sm); }
+h1 {
+  font-size: var(--font-size-3xl);
+}
+h2 {
+  font-size: var(--font-size-2xl);
+}
+h3 {
+  font-size: var(--font-size-xl);
+}
+h4 {
+  font-size: var(--font-size-lg);
+}
+h5 {
+  font-size: var(--font-size-base);
+}
+h6 {
+  font-size: var(--font-size-sm);
+}
 
 p {
   line-height: var(--line-height-relaxed);
@@ -78,7 +97,10 @@ input:focus:not(:focus-visible) {
   outline: none;
 }
 
-button, input, select, textarea {
+button,
+input,
+select,
+textarea {
   font: inherit;
   color: inherit;
 }
@@ -93,7 +115,8 @@ button:disabled {
   cursor: not-allowed;
 }
 
-code, pre {
+code,
+pre {
   font-family: var(--font-family-mono);
   font-size: var(--font-size-sm);
 }

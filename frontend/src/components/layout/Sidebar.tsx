@@ -101,9 +101,7 @@ export function Sidebar({ onNavClick }: SidebarProps): React.ReactElement {
                 to={item.path}
                 end={item.path === '/'}
                 onClick={onNavClick}
-                className={({ isActive }) =>
-                  `nav-item ${isActive ? 'active' : ''}`.trim()
-                }
+                className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`.trim()}
               >
                 {item.icon}
                 <span>{item.label}</span>
@@ -127,7 +125,8 @@ export function Sidebar({ onNavClick }: SidebarProps): React.ReactElement {
           <span>Institutional Sandbox</span>
         </div>
         <p style={{ fontSize: '0.6875rem', margin: 0, lineHeight: 1.3 }}>
-          Operating in demonstration mode. Human review disposition is strictly enforced for all regulatory workflows.
+          Operating in demonstration mode. Human review disposition is strictly enforced for all
+          regulatory workflows.
         </p>
       </div>
     </aside>

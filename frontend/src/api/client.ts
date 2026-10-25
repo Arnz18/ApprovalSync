@@ -270,7 +270,8 @@ export class ApiClient {
         // Generic HTTP error without standard ApiErrorResponse envelope
         throw new ApiClientError({
           message:
-            responseText || `Request failed with HTTP status ${response.status} (${response.statusText})`,
+            responseText ||
+            `Request failed with HTTP status ${response.status} (${response.statusText})`,
           code: `HTTP_${response.status}`,
           statusCode: response.status,
           correlationId,
@@ -376,10 +377,7 @@ export class ApiClient {
   /**
    * HTTP DELETE
    */
-  public async delete<T>(
-    path: string,
-    options: Omit<RequestOptions, 'method'> = {},
-  ): Promise<T> {
+  public async delete<T>(path: string, options: Omit<RequestOptions, 'method'> = {}): Promise<T> {
     return this.request<T>(path, { ...options, method: 'DELETE' });
   }
 

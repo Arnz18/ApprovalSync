@@ -76,12 +76,7 @@ export function Modal({
               </p>
             )}
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close dialog"
-            className="modal-close"
-          >
+          <button type="button" onClick={onClose} aria-label="Close dialog" className="modal-close">
             <X size={20} aria-hidden="true" />
           </button>
         </div>

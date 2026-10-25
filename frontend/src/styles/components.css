@@ -15,7 +15,11 @@
   font-weight: var(--font-weight-medium);
   border-radius: var(--radius-md);
   border: 1px solid transparent;
-  transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), box-shadow var(--transition-fast);
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast),
+    box-shadow var(--transition-fast);
   white-space: nowrap;
   user-select: none;
   text-decoration: none;
@@ -183,7 +187,9 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  transition: box-shadow var(--transition-fast), border-color var(--transition-fast);
+  transition:
+    box-shadow var(--transition-fast),
+    border-color var(--transition-fast);
 }
 
 .card:hover {
@@ -249,7 +255,9 @@
   color: var(--color-error);
 }
 
-.form-input, .form-select, .form-textarea {
+.form-input,
+.form-select,
+.form-textarea {
   width: 100%;
   padding: var(--space-2) var(--space-3);
   font-family: var(--font-family-body);
@@ -259,16 +267,22 @@
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
 }
 
-.form-input:focus, .form-select:focus, .form-textarea:focus {
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
   border-color: var(--color-secondary);
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
   outline: none;
 }
 
-.form-input:disabled, .form-select:disabled, .form-textarea:disabled {
+.form-input:disabled,
+.form-select:disabled,
+.form-textarea:disabled {
   background-color: var(--color-muted);
   color: var(--color-muted-foreground);
   cursor: not-allowed;
@@ -451,8 +465,12 @@
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .skeleton {
@@ -463,9 +481,12 @@
 }
 
 .skeleton::after {
-  content: "";
+  content: '';
   position: absolute;
-  top: 0; right: 0; bottom: 0; left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   transform: translateX(-100%);
   background-image: linear-gradient(
     90deg,
@@ -477,7 +498,9 @@
 }
 
 @keyframes shimmer {
-  100% { transform: translateX(100%); }
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 /* ==========================================================================
@@ -485,7 +508,10 @@
    ========================================================================== */
 .modal-backdrop {
   position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background-color: rgba(15, 23, 42, 0.5);
   backdrop-filter: blur(2px);
   display: flex;
@@ -510,8 +536,14 @@
 }
 
 @keyframes modal-enter {
-  from { opacity: 0; transform: scale(0.96); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .modal-header {

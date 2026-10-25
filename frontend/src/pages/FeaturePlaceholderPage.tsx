@@ -1,7 +1,16 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Clock, Layers, ShieldCheck, GitCommit } from 'lucide-react';
-import { PageHeader, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Badge } from '../components/ui';
+import {
+  PageHeader,
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+  Badge,
+} from '../components/ui';
 
 export interface FeaturePlaceholderProps {
   moduleCode: string;
@@ -27,10 +36,7 @@ export function FeaturePlaceholderPage({
       <PageHeader
         title={title}
         description={description}
-        breadcrumbs={[
-          { label: 'Home', href: '/' },
-          { label: moduleCode },
-        ]}
+        breadcrumbs={[{ label: 'Home', href: '/' }, { label: moduleCode }]}
         actions={
           <div style={{ display: 'flex', gap: 'var(--space-2)', alignItems: 'center' }}>
             <Badge
@@ -38,8 +44,8 @@ export function FeaturePlaceholderPage({
                 dependencyStatus === 'COMMITTED'
                   ? 'success'
                   : dependencyStatus === 'PLANNED'
-                  ? 'primary'
-                  : 'warning'
+                    ? 'primary'
+                    : 'warning'
               }
             >
               Chunk {assignedChunk} — {dependencyStatus}
@@ -51,18 +57,35 @@ export function FeaturePlaceholderPage({
       <div style={{ maxWidth: '48rem' }}>
         <Card>
           <CardHeader>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: 'var(--space-1)' }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                marginBottom: 'var(--space-1)',
+              }}
+            >
               <Clock size={18} style={{ color: 'var(--color-secondary)' }} aria-hidden="true" />
               <CardTitle>Feature Availability &amp; Milestone Scope</CardTitle>
             </div>
             <CardDescription>
-              This workspace route is registered in the shell navigation. Implementation of operational workflow logic is scheduled under chunk <strong>{assignedChunk}</strong>.
+              This workspace route is registered in the shell navigation. Implementation of
+              operational workflow logic is scheduled under chunk <strong>{assignedChunk}</strong>.
             </CardDescription>
           </CardHeader>
 
           <CardContent style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
             <div>
-              <h4 style={{ fontSize: 'var(--font-size-sm)', fontWeight: 600, marginBottom: 'var(--space-2)', display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+              <h4
+                style={{
+                  fontSize: 'var(--font-size-sm)',
+                  fontWeight: 600,
+                  marginBottom: 'var(--space-2)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 'var(--space-2)',
+                }}
+              >
                 <Layers size={14} aria-hidden="true" />
                 Prerequisite Dependency Gates:
               </h4>
@@ -90,11 +113,27 @@ export function FeaturePlaceholderPage({
             </div>
 
             <div>
-              <h4 style={{ fontSize: 'var(--font-size-sm)', fontWeight: 600, marginBottom: 'var(--space-2)', display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+              <h4
+                style={{
+                  fontSize: 'var(--font-size-sm)',
+                  fontWeight: 600,
+                  marginBottom: 'var(--space-2)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 'var(--space-2)',
+                }}
+              >
                 <ShieldCheck size={14} aria-hidden="true" />
                 Planned Capabilities in {assignedChunk}:
               </h4>
-              <ul style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-muted-foreground)', paddingLeft: '1.25rem', lineHeight: 1.6 }}>
+              <ul
+                style={{
+                  fontSize: 'var(--font-size-sm)',
+                  color: 'var(--color-muted-foreground)',
+                  paddingLeft: '1.25rem',
+                  lineHeight: 1.6,
+                }}
+              >
                 {expectedFeatures.map((feat) => (
                   <li key={feat}>{feat}</li>
                 ))}
@@ -112,7 +151,10 @@ export function FeaturePlaceholderPage({
                 lineHeight: 1.5,
               }}
             >
-              <strong>Clean Interface Boundary:</strong> ApprovalSync does not fabricate submission decisions, pretend external authority verification, or introduce dead controls. When {assignedChunk} is implemented, this route will host the fully validated workflow views.
+              <strong>Clean Interface Boundary:</strong> ApprovalSync does not fabricate submission
+              decisions, pretend external authority verification, or introduce dead controls. When{' '}
+              {assignedChunk} is implemented, this route will host the fully validated workflow
+              views.
             </div>
           </CardContent>
 

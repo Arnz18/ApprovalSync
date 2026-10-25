@@ -9,10 +9,7 @@ export interface HeaderProps {
   isMobileNavOpen: boolean;
 }
 
-export function Header({
-  onToggleMobileNav,
-  isMobileNavOpen,
-}: HeaderProps): React.ReactElement {
+export function Header({ onToggleMobileNav, isMobileNavOpen }: HeaderProps): React.ReactElement {
   const [apiStatus, setApiStatus] = useState<'checking' | 'online' | 'standby'>('checking');
 
   useEffect(() => {
@@ -72,9 +69,7 @@ export function Header({
                 Prototype
               </span>
             </div>
-            <span className="header-subtitle">
-              AICTE Regulatory Compliance &amp; Verification
-            </span>
+            <span className="header-subtitle">AICTE Regulatory Compliance &amp; Verification</span>
           </div>
         </Link>
       </div>
@@ -111,7 +106,9 @@ export function Header({
           <User size={14} aria-hidden="true" style={{ color: 'var(--color-primary)' }} />
           <span>Demo Institution</span>
           <span style={{ color: 'var(--color-border)' }}>|</span>
-          <span style={{ fontWeight: 600, color: 'var(--color-primary)' }}>Applicant / Reviewer</span>
+          <span style={{ fontWeight: 600, color: 'var(--color-primary)' }}>
+            Applicant / Reviewer
+          </span>
         </div>
 
         <div

@@ -37,7 +37,11 @@ export function FormField({
     <div className={`form-field ${className}`.trim()}>
       <label htmlFor={id} className="form-label">
         <span>{label}</span>
-        {required && <span className="form-label-required" aria-hidden="true">*</span>}
+        {required && (
+          <span className="form-label-required" aria-hidden="true">
+            *
+          </span>
+        )}
       </label>
       {inputElement}
       {error && (

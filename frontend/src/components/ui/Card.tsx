@@ -12,11 +12,7 @@ export function Card({ className = '', children, ...props }: CardProps): React.R
   );
 }
 
-export function CardHeader({
-  className = '',
-  children,
-  ...props
-}: CardProps): React.ReactElement {
+export function CardHeader({ className = '', children, ...props }: CardProps): React.ReactElement {
   return (
     <div className={`card-header ${className}`.trim()} {...props}>
       {children}
@@ -48,11 +44,7 @@ export function CardDescription({
   );
 }
 
-export function CardContent({
-  className = '',
-  children,
-  ...props
-}: CardProps): React.ReactElement {
+export function CardContent({ className = '', children, ...props }: CardProps): React.ReactElement {
   return (
     <div className={`card-content ${className}`.trim()} {...props}>
       {children}
@@ -60,11 +52,7 @@ export function CardContent({
   );
 }
 
-export function CardFooter({
-  className = '',
-  children,
-  ...props
-}: CardProps): React.ReactElement {
+export function CardFooter({ className = '', children, ...props }: CardProps): React.ReactElement {
   return (
     <div className={`card-footer ${className}`.trim()} {...props}>
       {children}

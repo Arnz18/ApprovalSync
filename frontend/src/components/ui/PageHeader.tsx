@@ -31,7 +31,9 @@ export function PageHeader({
               const isLast = idx === breadcrumbs.length - 1;
               return (
                 <React.Fragment key={crumb.label}>
-                  {idx > 0 && <ChevronRight size={12} className="breadcrumbs-separator" aria-hidden="true" />}
+                  {idx > 0 && (
+                    <ChevronRight size={12} className="breadcrumbs-separator" aria-hidden="true" />
+                  )}
                   {crumb.href && !isLast ? (
                     <Link to={crumb.href}>{crumb.label}</Link>
                   ) : (

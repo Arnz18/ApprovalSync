@@ -17,10 +17,7 @@ export function AppLayout(): React.ReactElement {
 
       <div className="app-body">
         <Sidebar />
-        <MobileNav
-          isOpen={isMobileNavOpen}
-          onClose={() => setIsMobileNavOpen(false)}
-        />
+        <MobileNav isOpen={isMobileNavOpen} onClose={() => setIsMobileNavOpen(false)} />
 
         <main className="app-main">
           <div className="app-content">

@@ -21,14 +21,7 @@ import {
 } from 'lucide-react';
 
 export type BadgeVariant =
-  | 'default'
-  | 'primary'
-  | 'secondary'
-  | 'success'
-  | 'warning'
-  | 'error'
-  | 'info'
-  | 'mock';
+  'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'info' | 'mock';
 
 export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
   variant?: BadgeVariant;
@@ -94,11 +87,23 @@ const STATUS_CONFIG: Record<
   DRAFT: { label: 'Draft', variant: 'default', icon: <FileEdit size={12} /> },
   SUBMITTED: { label: 'Submitted', variant: 'info', icon: <Send size={12} /> },
   UNDER_SCRUTINY: { label: 'Under Scrutiny', variant: 'primary', icon: <Eye size={12} /> },
-  DEFICIENCY_ISSUED: { label: 'Deficiency Issued', variant: 'warning', icon: <AlertTriangle size={12} /> },
+  DEFICIENCY_ISSUED: {
+    label: 'Deficiency Issued',
+    variant: 'warning',
+    icon: <AlertTriangle size={12} />,
+  },
   RESUBMITTED: { label: 'Resubmitted', variant: 'info', icon: <RefreshCw size={12} /> },
-  RECOMMENDED_FOR_EVC: { label: 'Recommended for EVC', variant: 'primary', icon: <UserCheck size={12} /> },
+  RECOMMENDED_FOR_EVC: {
+    label: 'Recommended for EVC',
+    variant: 'primary',
+    icon: <UserCheck size={12} />,
+  },
   EVC_IN_PROGRESS: { label: 'EVC In Progress', variant: 'info', icon: <MapPin size={12} /> },
-  RECOMMENDED_FOR_SHC: { label: 'Recommended for SHC', variant: 'warning', icon: <Scale size={12} /> },
+  RECOMMENDED_FOR_SHC: {
+    label: 'Recommended for SHC',
+    variant: 'warning',
+    icon: <Scale size={12} />,
+  },
   APPROVED: { label: 'Approved', variant: 'success', icon: <CheckCircle2 size={12} /> },
   REJECTED: { label: 'Rejected', variant: 'error', icon: <XCircle size={12} /> },
   WITHDRAWN: { label: 'Withdrawn', variant: 'default', icon: <Ban size={12} /> },
@@ -135,11 +140,27 @@ const VERIFICATION_CONFIG: Record<
   VerificationStatusType,
   { label: string; variant: BadgeVariant; icon: React.ReactNode }
 > = {
-  VERIFIED_MOCK: { label: 'Verified (Mock Adapter)', variant: 'success', icon: <ShieldCheck size={12} /> },
-  INVALID_SIGNATURE: { label: 'Invalid Signature', variant: 'error', icon: <ShieldAlert size={12} /> },
+  VERIFIED_MOCK: {
+    label: 'Verified (Mock Adapter)',
+    variant: 'success',
+    icon: <ShieldCheck size={12} />,
+  },
+  INVALID_SIGNATURE: {
+    label: 'Invalid Signature',
+    variant: 'error',
+    icon: <ShieldAlert size={12} />,
+  },
   UNTRUSTED_ISSUER: { label: 'Untrusted Issuer', variant: 'warning', icon: <ShieldX size={12} /> },
-  SOURCE_UNAVAILABLE: { label: 'Source Unavailable', variant: 'warning', icon: <HelpCircle size={12} /> },
-  MANUAL_REVIEW_REQUIRED: { label: 'Manual Review Required', variant: 'warning', icon: <Eye size={12} /> },
+  SOURCE_UNAVAILABLE: {
+    label: 'Source Unavailable',
+    variant: 'warning',
+    icon: <HelpCircle size={12} />,
+  },
+  MANUAL_REVIEW_REQUIRED: {
+    label: 'Manual Review Required',
+    variant: 'warning',
+    icon: <Eye size={12} />,
+  },
 };
 
 export function VerificationStatusBadge({
@@ -163,17 +184,22 @@ export function VerificationStatusBadge({
 }
 
 export type ComplianceSeverityType =
-  | 'CRITICAL_DEFICIENCY'
-  | 'ADVISORY_FLAG'
-  | 'COMPLIANT'
-  | 'UNVERIFIED_POLICY';
+  'CRITICAL_DEFICIENCY' | 'ADVISORY_FLAG' | 'COMPLIANT' | 'UNVERIFIED_POLICY';
 
 const SEVERITY_CONFIG: Record<
   ComplianceSeverityType,
   { label: string; variant: BadgeVariant; icon: React.ReactNode }
 > = {
-  CRITICAL_DEFICIENCY: { label: 'Critical Deficiency', variant: 'error', icon: <AlertOctagon size={12} /> },
-  ADVISORY_FLAG: { label: 'Advisory Flag (AI)', variant: 'warning', icon: <AlertTriangle size={12} /> },
+  CRITICAL_DEFICIENCY: {
+    label: 'Critical Deficiency',
+    variant: 'error',
+    icon: <AlertOctagon size={12} />,
+  },
+  ADVISORY_FLAG: {
+    label: 'Advisory Flag (AI)',
+    variant: 'warning',
+    icon: <AlertTriangle size={12} />,
+  },
   COMPLIANT: { label: 'Compliant', variant: 'success', icon: <Check size={12} /> },
   UNVERIFIED_POLICY: { label: 'Demo Policy', variant: 'info', icon: <Info size={12} /> },
 };
