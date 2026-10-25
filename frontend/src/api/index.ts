@@ -4,3 +4,6 @@ export * from './services/healthService';
 export * from './services/authService';
 export * from './services/applicationsService';
 export * from './services/documentsService';
+export * from './services/dossierService';
+export * from './services/workflowService';
+export * from './services/scrutinyService';

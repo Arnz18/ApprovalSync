@@ -54,4 +54,14 @@ export const documentsService = {
       `/documents/${encodeURIComponent(id)}`,
     );
   },
+
+  /**
+   * Download or stream binary document file with anti-sniff headers.
+   * Path: GET /api/v1/documents/:id/download
+   */
+  async downloadDocument(
+    id: string,
+  ): Promise<{ blob: Blob; fileName: string; mimeType: string }> {
+    return apiClient.downloadBlob(`/documents/${encodeURIComponent(id)}/download`);
+  },
 };

@@ -405,6 +405,98 @@ export class ApiClient {
   ): Promise<T> {
     return this.request<T>(path, { ...options, body: formData, method: 'POST' });
   }
+
+  /**
+   * HTTP GET for binary blobs (safe document streaming/downloading)
+   */
+  public async downloadBlob(
+    path: string,
+    options: Omit<RequestOptions, 'body' | 'method'> = {},
+  ): Promise<{ blob: Blob; fileName: string; mimeType: string }> {
+    const {
+      params,
+      headers: customHeaders = {},
+      timeoutMs: customTimeoutMs,
+      authToken: customAuthToken,
+    } = options;
+    const url = this.buildUrl(path, params);
+    const correlationId = options.correlationId || generateUUID();
+    const timeout = customTimeoutMs ?? this.timeoutMs;
+
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeout);
+
+    const token =
+      customAuthToken !== undefined
+        ? customAuthToken
+        : this.getAuthToken
+          ? this.getAuthToken()
+          : null;
+
+    const headers: Record<string, string> = {
+      'X-Correlation-Id': correlationId,
+      ...(customHeaders as Record<string, string>),
+    };
+
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        headers,
+        signal: controller.signal,
+      });
+
+      clearTimeout(timer);
+
+      if (!response.ok) {
+        const text = await response.text();
+        let apiErrorMsg = text;
+        let code = `HTTP_${response.status}`;
+        try {
+          const json = JSON.parse(text);
+          if (json?.error?.message) {
+            apiErrorMsg = json.error.message;
+            code = json.error.code || code;
+          }
+        } catch {
+          // fallback to text
+        }
+        throw new ApiClientError({
+          message: apiErrorMsg || `Download failed with HTTP ${response.status}`,
+          code,
+          statusCode: response.status,
+          correlationId,
+        });
+      }
+
+      const mimeType = response.headers.get('content-type') || 'application/octet-stream';
+      const disposition = response.headers.get('content-disposition') || '';
+      let fileName = 'document';
+      const match = disposition.match(/filename="?([^"]+)"?/i);
+      if (match && match[1]) {
+        fileName = match[1];
+      }
+
+      const blob = await response.blob();
+      return { blob, fileName, mimeType };
+    } catch (err: unknown) {
+      clearTimeout(timer);
+      if (err instanceof ApiClientError) throw err;
+      const isTimeout = err instanceof Error && err.name === 'AbortError';
+      throw new ApiClientError({
+        message: isTimeout
+          ? `Document download request timed out after ${timeout}ms`
+          : `Download network failure: unable to reach API.`,
+        code: isTimeout ? 'ERR_TIMEOUT' : 'ERR_NETWORK',
+        statusCode: isTimeout ? 408 : 0,
+        correlationId,
+        isNetworkError: true,
+      });
+    }
+  }
 }
 
 // Export singleton client instance with default environment config
