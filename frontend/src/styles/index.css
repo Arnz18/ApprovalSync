@@ -4,6 +4,7 @@
  */
 
 @import './components.css';
+@import './layout.css';
 
 *, *::before, *::after {
   box-sizing: border-box;
