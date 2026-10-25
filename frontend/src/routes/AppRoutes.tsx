@@ -3,6 +3,7 @@ import { Routes, Route } from 'react-router-dom';
 import { AppLayout } from '../components/layout/AppLayout';
 import { HomePage } from '../pages/HomePage';
 import { LoginPage } from '../pages/LoginPage';
+import { ApplicationWizardPage } from '../pages/ApplicationWizardPage';
 import { FeaturePlaceholderPage } from '../pages/FeaturePlaceholderPage';
 import { NotFoundPage } from '../pages/NotFoundPage';
 import { ProtectedRoute } from './ProtectedRoute';
@@ -36,25 +37,12 @@ export function AppRoutes(): React.ReactElement {
           }
         />
 
-        {/* Downstream Chunk Routes */}
+        {/* Real Application Intake Wizard (FE-03) */}
         <Route
           path="applications"
           element={
             <ProtectedRoute allowedRoles={ROUTE_PERMISSIONS['/applications'].allowedRoles}>
-              <FeaturePlaceholderPage
-                moduleCode="APPLICATIONS"
-                title="Application Intake & Wizard"
-                description="Drafting, dynamic category checklists, document attachments, and atomic submission."
-                assignedChunk="FE-03"
-                dependencies={['FE-02', 'BE-04', 'DOC-01']}
-                dependencyStatus="BLOCKED"
-                expectedFeatures={[
-                  'Multi-step category application intake wizard (Engineering, Pharmacy, Architecture, etc.)',
-                  'Streaming file upload with MIME & magic byte validation (%PDF-, PNG, JPEG)',
-                  'Tenant-scoped draft persistence with auto-save',
-                  'Atomic submission with pessimistic row-locking preventing double-submissions',
-                ]}
-              />
+              <ApplicationWizardPage />
             </ProtectedRoute>
           }
         />

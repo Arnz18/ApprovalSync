@@ -56,7 +56,7 @@ describe('Routing & Navigation (FE-01 & FE-02)', () => {
     });
   });
 
-  it('renders FeaturePlaceholderPage for "/applications" explaining FE-03', async () => {
+  it('renders ApplicationWizardPage for "/applications" (FE-03)', async () => {
     render(
       <MemoryRouter initialEntries={['/applications']}>
         <AppRoutes />
@@ -65,11 +65,14 @@ describe('Routing & Navigation (FE-01 & FE-02)', () => {
 
     await waitFor(() => {
       expect(
-        screen.getByRole('heading', { name: /Application Intake & Wizard/i }),
+        screen.getByRole('heading', { name: /Institution Application Intake Wizard/i }),
       ).toBeInTheDocument();
-      expect(screen.getByText(/Chunk FE-03 — BLOCKED/i)).toBeInTheDocument();
-      expect(screen.getByText(/Prerequisite Dependency Gates:/i)).toBeInTheDocument();
-      expect(screen.getByText(/FE-02/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Statutory accreditation & regulatory approval intake workflow/i),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: /Step 1: Institution & Program/i }),
+      ).toBeInTheDocument();
       expect(screen.getByText('API Online')).toBeInTheDocument();
     });
   });
