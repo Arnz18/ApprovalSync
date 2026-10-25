@@ -315,6 +315,228 @@ describe('DossierOrchestratorService', () => {
       expect(result).toBeDefined();
       expect(result.applicationId).toBe('app-uuid-1');
     });
+
+    it('should mark REQUIRES_REVIEW and flag documentMatrix when integrity anomalies are detected', async () => {
+      validationOrchestrator.validateApplicationDocuments.mockResolvedValueOnce(
+        {
+          ...mockValidationResult,
+          findings: [
+            {
+              ruleId: 'INTEGRITY_PDF_ACTIVE_CONTENT_DETECTED',
+              category: 'DOCUMENT_INTEGRITY',
+              outcome: 'DEFICIENT',
+              severity: 'ADVISORY_FLAG',
+              message: 'Active JavaScript detected in attachment',
+              documentId: 'doc-uuid-1',
+              isAdvisory: true,
+            },
+          ],
+        },
+      );
+
+      const result = await service.evaluateDossier(
+        'app-uuid-1',
+        mockOfficerUser,
+      );
+
+      expect(result.overallStatus).toBe(
+        OverallValidationStatus.REQUIRES_REVIEW,
+      );
+      expect(result.summary.integrityAnomalyCount).toBe(1);
+      expect(result.documentMatrix[0].integrityStatus).toBe(
+        'ANOMALIES_DETECTED',
+      );
+      expect(result.documentMatrix[0].integrityAnomalyCodes).toContain(
+        'INTEGRITY_PDF_ACTIVE_CONTENT_DETECTED',
+      );
+    });
+
+    it('should mark REQUIRES_REVIEW and flag documentMatrix when duplicate matches are detected', async () => {
+      validationOrchestrator.validateApplicationDocuments.mockResolvedValueOnce(
+        {
+          ...mockValidationResult,
+          findings: [
+            {
+              ruleId: 'DUP_EXACT_SHA256_MATCH',
+              category: 'DUPLICATE_DETECTION',
+              outcome: 'DEFICIENT',
+              severity: 'ADVISORY_FLAG',
+              message: 'Exact duplicate document detected across applications',
+              documentId: 'doc-uuid-1',
+              isAdvisory: true,
+            },
+          ],
+        },
+      );
+
+      const result = await service.evaluateDossier(
+        'app-uuid-1',
+        mockOfficerUser,
+      );
+
+      expect(result.overallStatus).toBe(
+        OverallValidationStatus.REQUIRES_REVIEW,
+      );
+      expect(result.summary.duplicateMatchCount).toBe(1);
+      expect(result.documentMatrix[0].duplicateStatus).toBe('EXACT_DUPLICATE');
+    });
+
+    it('should mark DEFICIENT and set requiresPhysicalInspection when issuer verification reports mismatch', async () => {
+      const docWithMismatch: Partial<Document> = {
+        ...mockDocument,
+        metadata: {
+          ...mockDocument.metadata,
+          issuerVerification: {
+            status: 'INVALID_SIGNATURE',
+            outcome: 'DISCREPANCY',
+            sourceId: 'SIMULATED_ISSUER_ADAPTER',
+            sourceName: 'Simulated DigiLocker',
+            isSimulated: true,
+            comparisonSummary:
+              'Land area extracted (7.5) does not match registry (6.2)',
+            discrepantFields: ['landAreaAcres'],
+          },
+        },
+      };
+
+      applicationRepo.findOne.mockResolvedValueOnce({
+        ...mockApplication,
+        documents: [docWithMismatch as Document],
+      });
+
+      const result = await service.evaluateDossier(
+        'app-uuid-1',
+        mockOfficerUser,
+      );
+
+      expect(result.overallStatus).toBe(OverallValidationStatus.DEFICIENT);
+      expect(result.summary.issuerVerificationSummary.discrepancyCount).toBe(1);
+      expect(result.summary.requiresPhysicalInspection).toBe(true);
+      expect(result.documentMatrix[0].issuerStatus).toBe('DISCREPANCY');
+      expect(
+        result.findings.some(
+          (f) =>
+            f.category === 'ISSUER_VERIFICATION' &&
+            f.severity === 'CRITICAL_DEFICIENCY',
+        ),
+      ).toBe(true);
+    });
+
+    it('should handle issuer verification provider failure gracefully by falling back to SOURCE_UNAVAILABLE', async () => {
+      const docWithoutIssuer: Partial<Document> = {
+        ...mockDocument,
+        metadata: {
+          ocrConfidence: 0.9,
+          analysisReport: { extractedFields: {} },
+        },
+      };
+
+      applicationRepo.findOne.mockResolvedValueOnce({
+        ...mockApplication,
+        documents: [docWithoutIssuer as Document],
+      });
+
+      issuerVerificationService.verifyDocumentIssuer.mockRejectedValueOnce(
+        new Error('External registry timeout after 5000ms'),
+      );
+
+      const result = await service.evaluateDossier(
+        'app-uuid-1',
+        mockOfficerUser,
+      );
+
+      expect(result).toBeDefined();
+      expect(result.documentMatrix[0].issuerStatus).toBe('SOURCE_UNAVAILABLE');
+      expect(result.summary.issuerVerificationSummary.pendingCount).toBe(1);
+      expect(
+        result.findings.some(
+          (f) =>
+            f.category === 'ISSUER_VERIFICATION' &&
+            f.severity === 'ADVISORY_FLAG',
+        ),
+      ).toBe(true);
+    });
+
+    it('should trigger issuer verification on eligible documents without existing metadata', async () => {
+      const docUnverified: Partial<Document> = {
+        ...mockDocument,
+        metadata: {
+          ocrConfidence: 0.9,
+          analysisReport: { extractedFields: { deedNumber: 'D-999' } },
+        },
+      };
+
+      applicationRepo.findOne.mockResolvedValueOnce({
+        ...mockApplication,
+        documents: [docUnverified as Document],
+      });
+
+      issuerVerificationService.verifyDocumentIssuer.mockResolvedValueOnce({
+        status: 'VERIFIED',
+        outcome: 'VERIFIED',
+        isSimulated: true,
+        sourceName: 'Simulated DigiLocker',
+        matchedFields: ['deedNumber'],
+      });
+
+      const result = await service.evaluateDossier(
+        'app-uuid-1',
+        mockOfficerUser,
+      );
+
+      expect(
+        issuerVerificationService.verifyDocumentIssuer,
+      ).toHaveBeenCalledWith('doc-uuid-1', mockOfficerUser);
+      expect(result.documentMatrix[0].issuerStatus).toBe('SIMULATED');
+    });
+
+    it('should set requiresPhysicalInspection when infrastructure review recommends EVC inspection', async () => {
+      complianceService.evaluateCompliance.mockResolvedValueOnce({
+        ...mockComplianceResult,
+        infrastructureReview: {
+          ...mockComplianceResult.infrastructureReview,
+          evcInspectionRecommended: true,
+          inspectionTriggerReasons: [
+            'Carpet area to built-up area ratio is outside permissible norms',
+          ],
+        },
+      });
+
+      const result = await service.evaluateDossier(
+        'app-uuid-1',
+        mockOfficerUser,
+      );
+
+      expect(result.overallStatus).toBe(
+        OverallValidationStatus.REQUIRES_REVIEW,
+      );
+      expect(result.summary.requiresPhysicalInspection).toBe(true);
+      expect(
+        result.summary.infrastructureReviewSummary.evcInspectionRecommended,
+      ).toBe(true);
+    });
+
+    it('should accept custom asOfDate and pass it to validation pipelines', async () => {
+      const customDate = '2026-11-01T00:00:00.000Z';
+      const result = await service.evaluateDossier(
+        'app-uuid-1',
+        mockOfficerUser,
+        { asOfDate: customDate },
+      );
+
+      expect(result.evaluatedAt).toBe(customDate);
+      expect(
+        validationOrchestrator.validateApplicationDocuments,
+      ).toHaveBeenCalledWith('app-uuid-1', mockOfficerUser, {
+        asOfDate: customDate,
+        recalculate: true,
+      });
+      expect(complianceService.evaluateCompliance).toHaveBeenCalledWith(
+        'app-uuid-1',
+        mockOfficerUser,
+        { evaluationDate: '2026-11-01' },
+      );
+    });
   });
 
   describe('getDossierReport', () => {
