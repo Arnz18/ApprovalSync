@@ -49,37 +49,59 @@ export function ApplicationWizardPage(): React.ReactElement {
   const [topErrorList, setTopErrorList] = useState<Array<{ field: string; message: string }>>([]);
   const errorSummaryRef = useRef<HTMLDivElement | null>(null);
 
-  // Load existing draft if present for current institution user
+  // Load existing draft or submitted application for current institution user
   useEffect(() => {
     let isMounted = true;
 
     async function loadExistingDraft() {
       try {
         setInitialLoading(true);
-        const listRes = await applicationsService.listApplications({
+
+        // 1. First look for an existing editable draft
+        const draftRes = await applicationsService.listApplications({
           status: 'DRAFT',
           limit: 1,
         });
 
-        if (isMounted && listRes.items && listRes.items.length > 0) {
-          const draft: ApplicationProjection = listRes.items[0];
+        let targetApplication: ApplicationProjection | null = null;
+        let isSubmittedView = false;
 
-          // Fetch attached documents for this draft
+        if (draftRes.items && draftRes.items.length > 0) {
+          targetApplication = draftRes.items[0];
+        } else {
+          // 2. If no draft exists, check if there is an existing submitted application
+          const allRes = await applicationsService.listApplications({
+            limit: 1,
+            sortBy: 'createdAt',
+            sortOrder: 'DESC',
+          });
+          if (allRes.items && allRes.items.length > 0 && allRes.items[0].status !== 'DRAFT') {
+            targetApplication = allRes.items[0];
+            isSubmittedView = true;
+          }
+        }
+
+        if (isMounted && targetApplication) {
+          const app = targetApplication;
+
+          // Fetch attached documents for this application
           let docs: DocumentMetadataProjection[] = [];
           try {
-            docs = await applicationsService.getApplicationDocuments(draft.id);
+            docs = await applicationsService.getApplicationDocuments(app.id);
           } catch {
             docs = [];
           }
 
           if (isMounted) {
-            const payload = draft.payloadJsonb || {};
+            const payload = app.payloadJsonb || {};
             setState((prev) => ({
               ...prev,
-              applicationId: draft.id,
-              applicationNumber: draft.applicationNumber,
-              academicYear: draft.academicYear || prev.academicYear,
-              programType: draft.programType || prev.programType,
+              applicationId: app.id,
+              applicationNumber: app.applicationNumber,
+              status: app.status,
+              submittedAt: app.submittedAt,
+              academicYear: app.academicYear || prev.academicYear,
+              programType: app.programType || prev.programType,
               facultyCount:
                 typeof payload.facultyCount === 'number' ? payload.facultyCount : prev.facultyCount,
               landAreaAcres:
@@ -102,14 +124,18 @@ export function ApplicationWizardPage(): React.ReactElement {
                 ? (payload.coursesProposed as string[])
                 : prev.coursesProposed,
               uploadedDocuments: docs,
+              currentStep: isSubmittedView ? WizardStep.CONFIRMATION : WizardStep.INSTITUTION_INFO,
+              highestVisitedStep: isSubmittedView
+                ? WizardStep.CONFIRMATION
+                : WizardStep.INSTITUTION_INFO,
               saveStatus: 'saved',
-              lastSavedAt: draft.updatedAt,
+              lastSavedAt: app.updatedAt,
             }));
           }
         }
       } catch (err) {
         // Failing to list drafts is non-fatal: user can start a fresh draft
-        console.warn('Could not load existing drafts:', err);
+        console.warn('Could not load existing application:', err);
       } finally {
         if (isMounted) {
           setInitialLoading(false);
@@ -189,10 +215,41 @@ export function ApplicationWizardPage(): React.ReactElement {
     } catch (err: unknown) {
       let msg = 'Failed to save draft to server.';
       if (err instanceof ApiClientError) {
-        msg = err.message;
+        if (err.statusCode === 401) {
+          msg = 'Your session has expired. Please log in again to save your draft.';
+        } else {
+          msg = err.message;
+        }
       }
       setState((prev) => ({ ...prev, saveStatus: 'error', errorMessage: msg }));
       throw err;
+    }
+  };
+
+  /**
+   * Explicit manual save triggered by user clicking 'Save Draft'
+   */
+  const handleManualSaveDraft = async () => {
+    try {
+      await ensureDraftSaved();
+      setActiveErrors({});
+      setTopErrorList([]);
+    } catch (err: unknown) {
+      let message = 'Unable to save draft to server. Please check your network and retry.';
+      if (err instanceof ApiClientError) {
+        if (err.statusCode === 401) {
+          message = 'Your session has expired. Please log in again to save your draft.';
+        } else {
+          message = err.message;
+        }
+      } else if (err instanceof Error) {
+        message = err.message;
+      }
+      setActiveErrors({ server: message });
+      setTopErrorList([{ field: 'server', message }]);
+      setTimeout(() => {
+        errorSummaryRef.current?.focus();
+      }, 50);
     }
   };
 
@@ -237,8 +294,24 @@ export function ApplicationWizardPage(): React.ReactElement {
         highestVisitedStep: Math.max(prev.highestVisitedStep, nextStep) as WizardStep,
       }));
       safeScrollToTop();
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Auto-save on step advance failed:', err);
+      let message =
+        'Unable to save application draft to server. Please check your network connection and try again.';
+      if (err instanceof ApiClientError) {
+        if (err.statusCode === 401) {
+          message = 'Your session has expired. Please log in again to continue.';
+        } else {
+          message = err.message;
+        }
+      } else if (err instanceof Error) {
+        message = err.message;
+      }
+      setActiveErrors({ server: message });
+      setTopErrorList([{ field: 'server', message }]);
+      setTimeout(() => {
+        errorSummaryRef.current?.focus();
+      }, 50);
     }
   };
 
@@ -318,6 +391,13 @@ export function ApplicationWizardPage(): React.ReactElement {
     }
   };
 
+  const handleStartFreshApplication = () => {
+    setState(INITIAL_WIZARD_STATE);
+    setActiveErrors({});
+    setTopErrorList([]);
+    safeScrollToTop();
+  };
+
   if (initialLoading) {
     return (
       <div className="py-16 flex flex-col items-center justify-center gap-3">
@@ -359,7 +439,7 @@ export function ApplicationWizardPage(): React.ReactElement {
                 variant="outline"
                 size="sm"
                 leftIcon={<Save size={14} />}
-                onClick={() => ensureDraftSaved()}
+                onClick={handleManualSaveDraft}
                 disabled={state.saveStatus === 'saving' || state.isSubmitting}
               >
                 Save Draft
@@ -457,7 +537,7 @@ export function ApplicationWizardPage(): React.ReactElement {
       )}
 
       {state.currentStep === WizardStep.CONFIRMATION && (
-        <SubmissionConfirmationStep state={state} />
+        <SubmissionConfirmationStep state={state} onStartFresh={handleStartFreshApplication} />
       )}
     </div>
   );

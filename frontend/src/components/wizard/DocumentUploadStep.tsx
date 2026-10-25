@@ -98,6 +98,92 @@ export function DocumentUploadStep({
     return null;
   };
 
+  /**
+   * Preflight binary header magic-byte verification.
+   * Matches DOC-01 security constraints before transmission:
+   * - PDF: %PDF-
+   * - JPEG: \xFF\xD8\xFF
+   * - PNG: \x89PNG
+   * - Blocks disguised executables (MZ)
+   */
+  const inspectFileMagicBytes = async (file: File): Promise<string | null> => {
+    if (typeof FileReader === 'undefined' || typeof file.slice !== 'function') {
+      return null;
+    }
+
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      const slice = file.slice(0, 8);
+
+      reader.onload = () => {
+        try {
+          const buffer = new Uint8Array(reader.result as ArrayBuffer);
+          if (buffer.length < 3) {
+            resolve('File is too short or corrupted.');
+            return;
+          }
+
+          // Check for Windows executable (MZ header)
+          if (buffer[0] === 0x4d && buffer[1] === 0x5a) {
+            resolve(
+              'Security Alert: Windows executable file disguised with an allowed extension was rejected.',
+            );
+            return;
+          }
+
+          const ext = `.${file.name.split('.').pop()?.toLowerCase()}`;
+
+          if (ext === '.pdf') {
+            const isPdf =
+              buffer.length >= 5 &&
+              buffer[0] === 0x25 &&
+              buffer[1] === 0x50 &&
+              buffer[2] === 0x44 &&
+              buffer[3] === 0x46 &&
+              buffer[4] === 0x2d;
+            if (!isPdf) {
+              resolve(
+                'File header signature does not match valid PDF specification (%PDF-). File may be corrupted or disguised.',
+              );
+              return;
+            }
+          } else if (ext === '.jpg' || ext === '.jpeg') {
+            const isJpeg = buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff;
+            if (!isJpeg) {
+              resolve(
+                'File header signature does not match valid JPEG specification. File may be corrupted.',
+              );
+              return;
+            }
+          } else if (ext === '.png') {
+            const isPng =
+              buffer.length >= 4 &&
+              buffer[0] === 0x89 &&
+              buffer[1] === 0x50 &&
+              buffer[2] === 0x4e &&
+              buffer[3] === 0x47;
+            if (!isPng) {
+              resolve(
+                'File header signature does not match valid PNG specification. File may be corrupted.',
+              );
+              return;
+            }
+          }
+
+          resolve(null);
+        } catch {
+          resolve(null);
+        }
+      };
+
+      reader.onerror = () => {
+        resolve('Unable to read file headers. Please check file permissions and try again.');
+      };
+
+      reader.readAsArrayBuffer(slice);
+    });
+  };
+
   const handleFileChange = async (documentType: string, file: File | null) => {
     if (!file) return;
 
@@ -107,6 +193,15 @@ export function DocumentUploadStep({
       setSlotStates((prev) => ({
         ...prev,
         [documentType]: { file, status: 'error', errorMessage: validationError },
+      }));
+      return;
+    }
+
+    const magicByteError = await inspectFileMagicBytes(file);
+    if (magicByteError) {
+      setSlotStates((prev) => ({
+        ...prev,
+        [documentType]: { file, status: 'error', errorMessage: magicByteError },
       }));
       return;
     }
@@ -142,7 +237,11 @@ export function DocumentUploadStep({
     } catch (err: unknown) {
       let message = 'Upload failed. Please check network connection and try again.';
       if (err instanceof ApiClientError) {
-        message = err.message;
+        if (err.statusCode === 401) {
+          message = 'Your session has expired. Please log in again to continue uploading.';
+        } else {
+          message = err.message;
+        }
       } else if (err instanceof Error) {
         message = err.message;
       }

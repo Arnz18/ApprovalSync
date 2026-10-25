@@ -96,6 +96,15 @@ export function InstitutionStep({
               </span>
             </div>
           </div>
+          {!user?.institutionId && (
+            <div className="mt-3 p-2.5 rounded bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-center gap-2">
+              <Info size={14} className="text-amber-700 flex-shrink-0" />
+              <span>
+                Note: Your active profile has no bound institutional ID. Server-persisted draft
+                creation and submission require an accredited <code>INSTITUTION_USER</code> account.
+              </span>
+            </div>
+          )}
         </CardContent>
       </Card>
 

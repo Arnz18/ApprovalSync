@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle, FileCheck, Printer, Home, ShieldCheck, Eye } from 'lucide-react';
+import { CheckCircle, FileCheck, Printer, Home, ShieldCheck, Eye, PlusCircle } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Badge, ApplicationStatusBadge } from '../ui/Badge';
@@ -15,10 +15,12 @@ import { ApplicationWizardState } from '../../applications/types';
 
 export interface SubmissionConfirmationStepProps {
   state: ApplicationWizardState;
+  onStartFresh?: () => void;
 }
 
 export function SubmissionConfirmationStep({
   state,
+  onStartFresh,
 }: SubmissionConfirmationStepProps): React.ReactElement {
   const navigate = useNavigate();
 
@@ -141,15 +143,27 @@ export function SubmissionConfirmationStep({
             </ol>
           </div>
         </CardContent>
-        <CardFooter className="flex items-center justify-between pt-4 border-t border-border-subtle">
-          <Button
-            type="button"
-            variant="outline"
-            leftIcon={<Printer size={16} />}
-            onClick={() => window.print()}
-          >
-            Print Receipt
-          </Button>
+        <CardFooter className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-border-subtle">
+          <div className="flex items-center gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              leftIcon={<Printer size={16} />}
+              onClick={() => window.print()}
+            >
+              Print Receipt
+            </Button>
+            {onStartFresh && (
+              <Button
+                type="button"
+                variant="ghost"
+                leftIcon={<PlusCircle size={16} />}
+                onClick={onStartFresh}
+              >
+                Start Another Application
+              </Button>
+            )}
+          </div>
           <Button
             type="button"
             variant="primary"

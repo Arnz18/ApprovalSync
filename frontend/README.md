@@ -6,7 +6,7 @@
 > - **FE-03** — Institution application wizard and document upload (`COMMITTED`)
 > **Lead Owner:** M4 — Frontend & Experience
 > **Framework:** React 18 + TypeScript 5 + Vite 5 Single-Page Application (SPA)
-> **Status:** FE-01, FE-02 & FE-03 IMPLEMENTED & TESTED (11 test suites, 69 automated tests passing)
+> **Status:** FE-01, FE-02 & FE-03 IMPLEMENTED & HARDENED (11 test suites, 73 automated tests passing)
 
 ---
 
@@ -106,8 +106,8 @@ frontend/
     ├── routes/
     │   ├── ProtectedRoute.tsx   # Session guard, loading state, unauthenticated redirect, and 403 guard
     │   └── AppRoutes.tsx        # Centralized route mapping
-    └── __tests__/               # Frontend unit & integration test suites (11 suites, 69 tests)
-        ├── application-wizard.spec.tsx  # Wizard navigation, validation, upload & submit tests (6 tests)
+    └── __tests__/               # Frontend unit & integration test suites (11 suites, 73 tests)
+        ├── application-wizard.spec.tsx  # Wizard navigation, validation, upload, error recovery & submit tests (10 tests)
         ├── applications-service.spec.ts # Applications API service unit tests (6 tests)
         ├── documents-service.spec.ts    # Documents upload & multipart API tests (3 tests)
         ├── api-client.spec.ts   # API client request/error/timeout/upload tests (7 tests)
@@ -255,7 +255,7 @@ All commands run from `frontend/`:
 | **Linting** | `npm run lint` | Runs ESLint across all `.ts` and `.tsx` source files (`--max-warnings=0`) |
 | **Formatting** | `npm run format:check` | Checks code formatting against Prettier rules |
 | **Auto-Format** | `npm run format` | Auto-formats code with Prettier |
-| **Unit Tests** | `npm test` | Runs the Vitest test runner across all 11 test suites (69 tests) |
+| **Unit Tests** | `npm test` | Runs the Vitest test runner across all 11 test suites (73 tests) |
 | **Production Build** | `npm run build` | Compiles TypeScript and produces optimized production bundle in `dist/` |
 
 ---

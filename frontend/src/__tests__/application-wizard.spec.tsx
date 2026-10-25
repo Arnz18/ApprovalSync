@@ -12,6 +12,7 @@ import { ApplicationWizardPage } from '../pages/ApplicationWizardPage';
 import { applicationsService } from '../api/services/applicationsService';
 import { documentsService } from '../api/services/documentsService';
 import { ApplicationStatus, DocumentProcessingStatus } from '../applications/types';
+import { ApiClientError } from '../api/client';
 
 describe('Application Wizard & Intake (FE-03)', () => {
   beforeEach(() => {
@@ -320,5 +321,174 @@ describe('Application Wizard & Intake (FE-03)', () => {
     // Submit button should be disabled when missing documents or unaccepted declaration
     const submitBtn = screen.getByRole('button', { name: /Submit Application/i });
     expect(submitBtn).toBeDisabled();
+  });
+
+  it('displays top-level error summary banner when auto-save fails on step advance', async () => {
+    const user = userEvent.setup();
+
+    vi.spyOn(applicationsService, 'createDraft').mockRejectedValueOnce(
+      new ApiClientError({
+        message: 'Backend database connection timed out during draft creation.',
+        statusCode: 500,
+        code: 'ERR_DATABASE_ERROR',
+      }),
+    );
+
+    render(
+      <MemoryRouter>
+        <ApplicationWizardPage />
+      </MemoryRouter>,
+    );
+
+    await waitFor(() => screen.getByRole('button', { name: /Continue to Infrastructure/i }));
+    await user.click(screen.getByRole('button', { name: /Continue to Infrastructure/i }));
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(/Backend database connection timed out during draft creation/i),
+      ).toBeInTheDocument();
+      expect(screen.getByRole('alert')).toBeInTheDocument();
+    });
+  });
+
+  it('handles manual Save Draft failure and 401 session expiration gracefully', async () => {
+    const user = userEvent.setup();
+
+    vi.spyOn(applicationsService, 'createDraft').mockRejectedValueOnce(
+      new ApiClientError({
+        message: 'Missing or invalid authentication token',
+        statusCode: 401,
+        code: 'ERR_UNAUTHORIZED',
+      }),
+    );
+
+    render(
+      <MemoryRouter>
+        <ApplicationWizardPage />
+      </MemoryRouter>,
+    );
+
+    await waitFor(() => screen.getByRole('button', { name: /Save Draft/i }));
+    await user.click(screen.getByRole('button', { name: /Save Draft/i }));
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(/Your session has expired\. Please log in again to save your draft\./i),
+      ).toBeInTheDocument();
+    });
+  });
+
+  it('rejects file upload when binary magic bytes do not match PDF specification', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <MemoryRouter>
+        <ApplicationWizardPage />
+      </MemoryRouter>,
+    );
+
+    // Step 1 -> 2 -> 3
+    await waitFor(() => screen.getByRole('button', { name: /Continue to Infrastructure/i }));
+    await user.click(screen.getByRole('button', { name: /Continue to Infrastructure/i }));
+    await waitFor(() => screen.getByRole('button', { name: /Continue to Documents/i }));
+    await user.click(screen.getByRole('button', { name: /Continue to Documents/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText('Land Title / Ownership Deed')).toBeInTheDocument();
+    });
+
+    const fileInputs = document.querySelectorAll('input[type="file"]');
+    // Spoofed file: .pdf extension with corrupted text instead of %PDF- header
+    const spoofedPdf = new File(['CORRUPTED_NOT_A_PDF'], 'fake-deed.pdf', {
+      type: 'application/pdf',
+    });
+
+    fireEvent.change(fileInputs[0], { target: { files: [spoofedPdf] } });
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(/File header signature does not match valid PDF specification/i),
+      ).toBeInTheDocument();
+    });
+  });
+
+  it('loads existing submitted application into confirmation view and allows starting fresh', async () => {
+    const user = userEvent.setup();
+
+    // 1st call for DRAFT: returns empty
+    // 2nd call for all: returns SUBMITTED application
+    vi.spyOn(applicationsService, 'listApplications')
+      .mockResolvedValueOnce({
+        items: [],
+        pagination: {
+          page: 1,
+          limit: 1,
+          totalItems: 0,
+          totalPages: 0,
+          hasNextPage: false,
+          hasPreviousPage: false,
+        },
+      })
+      .mockResolvedValueOnce({
+        items: [
+          {
+            id: 'app-submitted-999',
+            applicationNumber: 'APP-2026-SUBMITTED999',
+            institutionId: 'inst-test-01',
+            academicYear: '2026-2027',
+            status: ApplicationStatus.SUBMITTED,
+            programType: 'Undergraduate Engineering & Technology',
+            payloadJsonb: {},
+            submittedAt: '2026-10-25T01:00:00.000Z',
+            createdAt: '2026-10-25T00:00:00.000Z',
+            updatedAt: '2026-10-25T01:00:00.000Z',
+          },
+        ],
+        pagination: {
+          page: 1,
+          limit: 1,
+          totalItems: 1,
+          totalPages: 1,
+          hasNextPage: false,
+          hasPreviousPage: false,
+        },
+      });
+
+    vi.spyOn(applicationsService, 'getApplicationDocuments').mockResolvedValueOnce([
+      {
+        id: 'doc-01',
+        applicationId: 'app-submitted-999',
+        documentType: 'LAND_TITLE_DEED',
+        fileName: 'land-deed.pdf',
+        mimeType: 'application/pdf',
+        fileSizeBytes: 204800,
+        sha256Checksum: 'abcdef1234567890',
+        processingStatus: DocumentProcessingStatus.UPLOADED,
+        uploadedAt: '2026-10-25T00:30:00.000Z',
+      },
+    ]);
+
+    render(
+      <MemoryRouter>
+        <ApplicationWizardPage />
+      </MemoryRouter>,
+    );
+
+    // Should render directly in confirmation receipt
+    await waitFor(() => {
+      expect(screen.getByText('APP-2026-SUBMITTED999')).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: /Start Another Application/i }),
+      ).toBeInTheDocument();
+    });
+
+    // Clicking "Start Another Application" should reset to Step 1
+    await user.click(screen.getByRole('button', { name: /Start Another Application/i }));
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole('button', { name: /Continue to Infrastructure/i }),
+      ).toBeInTheDocument();
+    });
   });
 });

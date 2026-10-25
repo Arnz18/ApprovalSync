@@ -170,13 +170,13 @@ The "Submit Application to AICTE" action remains strictly disabled until this ch
 
 ---
 
-## 8. Automated Test Coverage (11 Suites, 69 Tests)
+## 8. Automated Test Coverage (11 Suites, 73 Tests)
 
 FE-03 is accompanied by comprehensive automated Vitest test suites:
 
 | Test File | Category | Focus Areas | Tests |
 |---|---|---|---|
-| `application-wizard.spec.tsx` | Component / Wizard | Step navigation, Step 1 & 2 validation, course chips, Step 3 file uploads, Step 4 oath gate, submission receipt | 6 |
+| `application-wizard.spec.tsx` | Component / Wizard | Step navigation, Step 1 & 2 validation, course chips, Step 3 file uploads, Step 4 oath gate, submission receipt, auto-save error recovery, magic-byte preflight rejection, submitted application view | 10 |
 | `applications-service.spec.ts` | API Service | `createDraft`, `updateDraft`, `getApplication`, `listApplications`, `submitApplication`, `getApplicationDocuments` | 6 |
 | `documents-service.spec.ts` | API Service | Multipart FormData generation, upload response parsing, document metadata retrieval, document deletion | 3 |
 | `routes.spec.tsx` | Route Protection | `/applications` route mounts `ApplicationWizardPage`, RBAC guards, unauthenticated redirect | 7 |
@@ -187,4 +187,4 @@ FE-03 is accompanied by comprehensive automated Vitest test suites:
 | `auth-service.spec.ts` | Auth API | Login API, profile retrieval, token injection, HTTP 401/403 errors | 5 |
 | `api-client.spec.ts` | Transport Layer | Correlation IDs, timeout aborts, multipart uploads, envelope unwrapping | 7 |
 | `shell.spec.tsx` | Workspace Shell | Layout, header, sidebar, mobile navigation drawer | 3 |
-| **Total** | | **11 Suites Passing (100% Pass Rate)** | **69** |
+| **Total** | | **11 Suites Passing (100% Pass Rate)** | **73** |
