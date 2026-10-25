@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { ShieldCheck, Menu, User, Sparkles } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { ShieldCheck, Menu, User, Sparkles, LogOut, LogIn } from 'lucide-react';
 import { SimulatedDataBadge } from '../ui/Badge';
 import { healthService } from '../../api';
+import { useAuth } from '../../auth/useAuth';
+import { formatRoleName } from '../../auth/roleRoutes';
 
 export interface HeaderProps {
   onToggleMobileNav: () => void;
@@ -11,6 +13,13 @@ export interface HeaderProps {
 
 export function Header({ onToggleMobileNav, isMobileNavOpen }: HeaderProps): React.ReactElement {
   const [apiStatus, setApiStatus] = useState<'checking' | 'online' | 'standby'>('checking');
+  const { user, isAuthenticated, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login', { replace: true });
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -101,15 +110,58 @@ export function Header({ onToggleMobileNav, isMobileNavOpen }: HeaderProps): Rea
         {/* Simulated data notice badge */}
         <SimulatedDataBadge />
 
-        {/* Institution / Role pill */}
-        <div className="header-user-pill">
-          <User size={14} aria-hidden="true" style={{ color: 'var(--color-primary)' }} />
-          <span>Demo Institution</span>
-          <span style={{ color: 'var(--color-border)' }}>|</span>
-          <span style={{ fontWeight: 600, color: 'var(--color-primary)' }}>
-            Applicant / Reviewer
-          </span>
-        </div>
+        {/* Dynamic Authenticated User Info or Sign In Action */}
+        {isAuthenticated && user ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <div className="header-user-pill">
+              <User size={14} aria-hidden="true" style={{ color: 'var(--color-primary)' }} />
+              <span title={user.email}>{user.name || user.email}</span>
+              <span style={{ color: 'var(--color-border)' }}>|</span>
+              <span style={{ fontWeight: 600, color: 'var(--color-primary)' }}>
+                {formatRoleName(user.role)}
+              </span>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="btn-ghost"
+              aria-label="Sign out of ApprovalSync"
+              title="Sign out of ApprovalSync"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.25rem',
+                padding: '4px 8px',
+                fontSize: '0.75rem',
+                color: 'var(--color-text-muted)',
+                cursor: 'pointer',
+                border: 'none',
+                borderRadius: 'var(--radius-sm)',
+                background: 'transparent',
+              }}
+            >
+              <LogOut size={14} aria-hidden="true" />
+              <span>Sign Out</span>
+            </button>
+          </div>
+        ) : (
+          <Link
+            to="/login"
+            className="btn btn-outline btn-sm"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.25rem',
+              fontSize: '0.75rem',
+              padding: '3px 8px',
+              textDecoration: 'none',
+            }}
+          >
+            <LogIn size={14} aria-hidden="true" />
+            <span>Sign In</span>
+          </Link>
+        )}
 
         <div
           title="AI-Powered Decision Support active"

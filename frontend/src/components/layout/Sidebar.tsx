@@ -11,6 +11,9 @@ import {
   Settings,
   HelpCircle,
 } from 'lucide-react';
+import { useAuth } from '../../auth/useAuth';
+import { canRoleAccessRoute } from '../../auth/roleRoutes';
+import { UserRole } from '../../api/types';
 
 export interface NavItemConfig {
   path: string;
@@ -86,13 +89,25 @@ export const NAV_ITEMS: { section: string; items: NavItemConfig[] }[] = [
 
 export interface SidebarProps {
   onNavClick?: () => void;
+  role?: UserRole;
 }
 
-export function Sidebar({ onNavClick }: SidebarProps): React.ReactElement {
+export function Sidebar({ onNavClick, role: explicitRole }: SidebarProps): React.ReactElement {
+  const { user } = useAuth();
+  const effectiveRole = explicitRole ?? user?.role;
+
+  // Filter navigation items by role clearance when a role is active
+  const filteredNavGroups = NAV_ITEMS.map((group) => ({
+    ...group,
+    items: group.items.filter((item) =>
+      effectiveRole ? canRoleAccessRoute(effectiveRole, item.path) : true,
+    ),
+  })).filter((group) => group.items.length > 0);
+
   return (
     <aside className="app-sidebar" aria-label="Sidebar navigation">
       <nav className="sidebar-nav">
-        {NAV_ITEMS.map((group) => (
+        {filteredNavGroups.map((group) => (
           <div key={group.section} style={{ marginBottom: '0.5rem' }}>
             <div className="nav-section-label">{group.section}</div>
             {group.items.map((item) => (
