@@ -111,6 +111,14 @@ export class ApiClient {
     this.baseUrl = url.endsWith('/') ? url.slice(0, -1) : url;
   }
 
+  public setAuthTokenProvider(provider?: () => string | null): void {
+    this.getAuthToken = provider;
+  }
+
+  public getAuthTokenProvider(): (() => string | null) | undefined {
+    return this.getAuthToken;
+  }
+
   /**
    * Builds full URL with normalized path and query parameters
    */
@@ -167,7 +175,13 @@ export class ApiClient {
     };
 
     // Attach Bearer token if available
-    const token = customAuthToken ?? (this.getAuthToken ? this.getAuthToken() : null);
+    // Note: customAuthToken === null explicitly suppresses token injection for public requests
+    const token =
+      customAuthToken !== undefined
+        ? customAuthToken
+        : this.getAuthToken
+          ? this.getAuthToken()
+          : null;
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
     }
