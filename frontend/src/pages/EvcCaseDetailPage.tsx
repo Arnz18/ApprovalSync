@@ -1,21 +1,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import {
-  Compass,
-  ClipboardList,
-  CalendarCheck,
-  Users,
-  History,
-  Shield,
-} from 'lucide-react';
+import { Compass, ClipboardList, CalendarCheck, Users, History, Shield } from 'lucide-react';
 import { Alert } from '../components/ui/Alert';
 import { EvcCaseHeader } from '../components/evc/EvcCaseHeader';
 import { InfrastructureReviewView } from '../components/evc/InfrastructureReviewView';
+import { InspectionChecklistEvidenceView } from '../components/evc/InspectionChecklistEvidenceView';
 import { ReviewActionModal } from '../components/scrutiny/ReviewActionModal';
 import { evcService } from '../api/services/evcService';
 import { complianceService } from '../api/services/complianceService';
 import { workflowService } from '../api/services/workflowService';
-import { ApplicationProjection } from '../applications/types';
+import { applicationsService } from '../api/services/applicationsService';
+import { ApplicationProjection, DocumentMetadataProjection } from '../applications/types';
 import { AllowedTransition, WorkflowTimelineEvent, ApplicationStatus } from '../scrutiny/types';
 import { ComplianceAssessmentResult } from '../evc/types';
 import { ApiClientError } from '../api/client';
@@ -32,6 +27,8 @@ export const EvcCaseDetailPage: React.FC = () => {
   const [compliance, setCompliance] = useState<ComplianceAssessmentResult | null>(null);
   const [allowedTransitions, setAllowedTransitions] = useState<AllowedTransition[]>([]);
   const [_timelineEvents, setTimelineEvents] = useState<WorkflowTimelineEvent[]>([]);
+  const [documents, setDocuments] = useState<DocumentMetadataProjection[]>([]);
+  const [isLoadingDocuments, setIsLoadingDocuments] = useState(false);
 
   const [isLoading, setIsLoading] = useState(true);
   const [isEvaluating, setIsEvaluating] = useState(false);
@@ -56,6 +53,14 @@ export const EvcCaseDetailPage: React.FC = () => {
       setApplication(appData);
       setAllowedTransitions(allowedTrans);
       setTimelineEvents(timelineData.items || []);
+
+      // Fetch documents asynchronously
+      setIsLoadingDocuments(true);
+      applicationsService
+        .getApplicationDocuments(applicationId)
+        .then((docs) => setDocuments(docs))
+        .catch(() => setDocuments([]))
+        .finally(() => setIsLoadingDocuments(false));
 
       // Fetch compliance assessment asynchronously
       complianceService
@@ -360,6 +365,14 @@ export const EvcCaseDetailPage: React.FC = () => {
       {/* Tab Panels */}
       {activeTab === 'INFRASTRUCTURE' && (
         <InfrastructureReviewView compliance={compliance} isLoading={isEvaluating} />
+      )}
+
+      {activeTab === 'CHECKLIST_EVIDENCE' && (
+        <InspectionChecklistEvidenceView
+          applicationId={application.id}
+          documents={documents}
+          isLoadingDocuments={isLoadingDocuments}
+        />
       )}
 
       {/* Transition Execution Modal */}
