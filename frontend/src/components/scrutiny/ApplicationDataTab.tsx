@@ -32,53 +32,160 @@ export const ApplicationDataTab: React.FC<ApplicationDataTabProps> = ({ applicat
               gap: 'var(--space-4)',
             }}
           >
-            <div style={{ padding: 'var(--space-3)', backgroundColor: 'var(--color-background)', borderRadius: 'var(--radius-md)' }}>
-              <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-muted-foreground)', textTransform: 'uppercase' }}>
+            <div
+              style={{
+                padding: 'var(--space-3)',
+                backgroundColor: 'var(--color-background)',
+                borderRadius: 'var(--radius-md)',
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 'var(--font-size-xs)',
+                  color: 'var(--color-muted-foreground)',
+                  textTransform: 'uppercase',
+                }}
+              >
                 Land Area (Acres)
               </div>
-              <div style={{ fontSize: 'var(--font-size-xl)', fontWeight: 700, color: 'var(--color-foreground)', marginTop: '4px' }}>
+              <div
+                style={{
+                  fontSize: 'var(--font-size-xl)',
+                  fontWeight: 700,
+                  color: 'var(--color-foreground)',
+                  marginTop: '4px',
+                }}
+              >
                 {infra.landAreaAcres !== undefined ? String(infra.landAreaAcres) : '—'}
               </div>
             </div>
 
-            <div style={{ padding: 'var(--space-3)', backgroundColor: 'var(--color-background)', borderRadius: 'var(--radius-md)' }}>
-              <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-muted-foreground)', textTransform: 'uppercase' }}>
+            <div
+              style={{
+                padding: 'var(--space-3)',
+                backgroundColor: 'var(--color-background)',
+                borderRadius: 'var(--radius-md)',
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 'var(--font-size-xs)',
+                  color: 'var(--color-muted-foreground)',
+                  textTransform: 'uppercase',
+                }}
+              >
                 Built-Up Floor Area
               </div>
-              <div style={{ fontSize: 'var(--font-size-xl)', fontWeight: 700, color: 'var(--color-foreground)', marginTop: '4px' }}>
+              <div
+                style={{
+                  fontSize: 'var(--font-size-xl)',
+                  fontWeight: 700,
+                  color: 'var(--color-foreground)',
+                  marginTop: '4px',
+                }}
+              >
                 {infra.builtUpAreaSqM !== undefined ? `${infra.builtUpAreaSqM} sq.m` : '—'}
               </div>
             </div>
 
-            <div style={{ padding: 'var(--space-3)', backgroundColor: 'var(--color-background)', borderRadius: 'var(--radius-md)' }}>
-              <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-muted-foreground)', textTransform: 'uppercase' }}>
+            <div
+              style={{
+                padding: 'var(--space-3)',
+                backgroundColor: 'var(--color-background)',
+                borderRadius: 'var(--radius-md)',
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 'var(--font-size-xs)',
+                  color: 'var(--color-muted-foreground)',
+                  textTransform: 'uppercase',
+                }}
+              >
                 Faculty Headcount
               </div>
-              <div style={{ fontSize: 'var(--font-size-xl)', fontWeight: 700, color: 'var(--color-foreground)', marginTop: '4px' }}>
+              <div
+                style={{
+                  fontSize: 'var(--font-size-xl)',
+                  fontWeight: 700,
+                  color: 'var(--color-foreground)',
+                  marginTop: '4px',
+                }}
+              >
                 {infra.facultyCount !== undefined ? String(infra.facultyCount) : '—'}
               </div>
             </div>
 
-            <div style={{ padding: 'var(--space-3)', backgroundColor: 'var(--color-background)', borderRadius: 'var(--radius-md)' }}>
-              <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-muted-foreground)', textTransform: 'uppercase' }}>
+            <div
+              style={{
+                padding: 'var(--space-3)',
+                backgroundColor: 'var(--color-background)',
+                borderRadius: 'var(--radius-md)',
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 'var(--font-size-xs)',
+                  color: 'var(--color-muted-foreground)',
+                  textTransform: 'uppercase',
+                }}
+              >
                 Library Holdings
               </div>
-              <div style={{ fontSize: 'var(--font-size-xl)', fontWeight: 700, color: 'var(--color-foreground)', marginTop: '4px' }}>
+              <div
+                style={{
+                  fontSize: 'var(--font-size-xl)',
+                  fontWeight: 700,
+                  color: 'var(--color-foreground)',
+                  marginTop: '4px',
+                }}
+              >
                 {infra.libraryBooks !== undefined ? `${infra.libraryBooks} vols` : '—'}
               </div>
             </div>
 
-            <div style={{ padding: 'var(--space-3)', backgroundColor: 'var(--color-background)', borderRadius: 'var(--radius-md)' }}>
-              <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-muted-foreground)', textTransform: 'uppercase' }}>
+            <div
+              style={{
+                padding: 'var(--space-3)',
+                backgroundColor: 'var(--color-background)',
+                borderRadius: 'var(--radius-md)',
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 'var(--font-size-xs)',
+                  color: 'var(--color-muted-foreground)',
+                  textTransform: 'uppercase',
+                }}
+              >
                 Instructional Labs
               </div>
-              <div style={{ fontSize: 'var(--font-size-xl)', fontWeight: 700, color: 'var(--color-foreground)', marginTop: '4px' }}>
+              <div
+                style={{
+                  fontSize: 'var(--font-size-xl)',
+                  fontWeight: 700,
+                  color: 'var(--color-foreground)',
+                  marginTop: '4px',
+                }}
+              >
                 {infra.labCount !== undefined ? String(infra.labCount) : '—'}
               </div>
             </div>
 
-            <div style={{ padding: 'var(--space-3)', backgroundColor: 'var(--color-background)', borderRadius: 'var(--radius-md)' }}>
-              <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-muted-foreground)', textTransform: 'uppercase' }}>
+            <div
+              style={{
+                padding: 'var(--space-3)',
+                backgroundColor: 'var(--color-background)',
+                borderRadius: 'var(--radius-md)',
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 'var(--font-size-xs)',
+                  color: 'var(--color-muted-foreground)',
+                  textTransform: 'uppercase',
+                }}
+              >
                 Barrier-Free Access
               </div>
               <div style={{ marginTop: '6px' }}>
@@ -100,7 +207,9 @@ export const ApplicationDataTab: React.FC<ApplicationDataTabProps> = ({ applicat
         </CardHeader>
         <CardContent>
           {proposedCourses.length === 0 ? (
-            <div style={{ color: 'var(--color-muted-foreground)', fontSize: 'var(--font-size-sm)' }}>
+            <div
+              style={{ color: 'var(--color-muted-foreground)', fontSize: 'var(--font-size-sm)' }}
+            >
               No proposed courses were explicitly configured in the initial application payload.
             </div>
           ) : (
@@ -110,7 +219,9 @@ export const ApplicationDataTab: React.FC<ApplicationDataTabProps> = ({ applicat
                   <tr>
                     <th scope="col">Course / Specialization</th>
                     <th scope="col">Level</th>
-                    <th scope="col" style={{ textAlign: 'right' }}>Proposed Seat Intake</th>
+                    <th scope="col" style={{ textAlign: 'right' }}>
+                      Proposed Seat Intake
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -120,7 +231,13 @@ export const ApplicationDataTab: React.FC<ApplicationDataTabProps> = ({ applicat
                       <td>
                         <Badge variant="default">{c.level || 'Undergraduate'}</Badge>
                       </td>
-                      <td style={{ textAlign: 'right', fontWeight: 600, fontFamily: 'var(--font-family-mono, monospace)' }}>
+                      <td
+                        style={{
+                          textAlign: 'right',
+                          fontWeight: 600,
+                          fontFamily: 'var(--font-family-mono, monospace)',
+                        }}
+                      >
                         {c.intake} seats
                       </td>
                     </tr>
@@ -138,9 +255,21 @@ export const ApplicationDataTab: React.FC<ApplicationDataTabProps> = ({ applicat
           <CardTitle>Regulatory Affiliation & Tenancy Profile</CardTitle>
         </CardHeader>
         <CardContent>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 'var(--space-4)' }}>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+              gap: 'var(--space-4)',
+            }}
+          >
             <div>
-              <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-muted-foreground)', display: 'block' }}>
+              <span
+                style={{
+                  fontSize: 'var(--font-size-xs)',
+                  color: 'var(--color-muted-foreground)',
+                  display: 'block',
+                }}
+              >
                 Affiliating University / Board
               </span>
               <span style={{ fontSize: 'var(--font-size-sm)', fontWeight: 500 }}>
@@ -149,7 +278,13 @@ export const ApplicationDataTab: React.FC<ApplicationDataTabProps> = ({ applicat
             </div>
 
             <div>
-              <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-muted-foreground)', display: 'block' }}>
+              <span
+                style={{
+                  fontSize: 'var(--font-size-xs)',
+                  color: 'var(--color-muted-foreground)',
+                  display: 'block',
+                }}
+              >
                 Institution Type
               </span>
               <span style={{ fontSize: 'var(--font-size-sm)', fontWeight: 500 }}>
@@ -158,10 +293,21 @@ export const ApplicationDataTab: React.FC<ApplicationDataTabProps> = ({ applicat
             </div>
 
             <div>
-              <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-muted-foreground)', display: 'block' }}>
+              <span
+                style={{
+                  fontSize: 'var(--font-size-xs)',
+                  color: 'var(--color-muted-foreground)',
+                  display: 'block',
+                }}
+              >
                 Institutional Tenant ID
               </span>
-              <span style={{ fontSize: 'var(--font-size-xs)', fontFamily: 'var(--font-family-mono, monospace)' }}>
+              <span
+                style={{
+                  fontSize: 'var(--font-size-xs)',
+                  fontFamily: 'var(--font-family-mono, monospace)',
+                }}
+              >
                 {application.institutionId}
               </span>
             </div>

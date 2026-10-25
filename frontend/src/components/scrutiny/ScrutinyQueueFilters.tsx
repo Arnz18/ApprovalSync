@@ -67,7 +67,11 @@ export const ScrutinyQueueFilters: React.FC<ScrutinyQueueFiltersProps> = ({
             placeholder="Search by ID, year, or program..."
             value={filters.search}
             onChange={handleSearchChange}
-            style={{ paddingLeft: '2.25rem', paddingRight: filters.search ? '2.25rem' : 'var(--space-3)', width: '100%' }}
+            style={{
+              paddingLeft: '2.25rem',
+              paddingRight: filters.search ? '2.25rem' : 'var(--space-3)',
+              width: '100%',
+            }}
           />
           {filters.search && (
             <button
@@ -182,11 +186,7 @@ export const ScrutinyQueueFilters: React.FC<ScrutinyQueueFiltersProps> = ({
           disabled={isLoading}
           aria-label="Refresh scrutiny queue"
         >
-          <RefreshCw
-            size={14}
-            className={isLoading ? 'animate-spin' : ''}
-            aria-hidden="true"
-          />
+          <RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} aria-hidden="true" />
           <span>Refresh</span>
         </Button>
       </div>

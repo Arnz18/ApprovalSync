@@ -246,11 +246,7 @@ export const CaseDetailPage: React.FC = () => {
   return (
     <div className="case-detail-page" style={{ paddingBottom: 'var(--space-8)' }}>
       {/* Case Header */}
-      <CaseHeader
-        application={application}
-        onRefresh={fetchCaseData}
-        isLoading={isLoading}
-      />
+      <CaseHeader application={application} onRefresh={fetchCaseData} isLoading={isLoading} />
 
       {/* ADR-004 Human Sovereignty Legal Disclaimer */}
       <div style={{ marginBottom: 'var(--space-4)' }}>
@@ -296,7 +292,13 @@ export const CaseDetailPage: React.FC = () => {
           }}
         >
           <div>
-            <div style={{ fontSize: 'var(--font-size-xs)', fontWeight: 600, color: 'var(--color-foreground)' }}>
+            <div
+              style={{
+                fontSize: 'var(--font-size-xs)',
+                fontWeight: 600,
+                color: 'var(--color-foreground)',
+              }}
+            >
               Permitted Review Actions ({allowedTransitions.length})
             </div>
             <div style={{ fontSize: '11px', color: 'var(--color-muted-foreground)' }}>
@@ -304,7 +306,14 @@ export const CaseDetailPage: React.FC = () => {
             </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', flexWrap: 'wrap' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 'var(--space-2)',
+              flexWrap: 'wrap',
+            }}
+          >
             {allowedTransitions.map((t) => {
               const isDeficiency = t.toStatus === ApplicationStatus.DEFICIENCY_ISSUED;
               const isRejection = t.toStatus === ApplicationStatus.REJECTED;
@@ -462,9 +471,7 @@ export const CaseDetailPage: React.FC = () => {
 
       {/* Tab Panels */}
       <div>
-        {activeTab === 'application' && (
-          <ApplicationDataTab application={application} />
-        )}
+        {activeTab === 'application' && <ApplicationDataTab application={application} />}
 
         {activeTab === 'timeline' && (
           <CaseTimelineView

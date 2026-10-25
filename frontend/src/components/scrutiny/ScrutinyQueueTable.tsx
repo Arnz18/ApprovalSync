@@ -1,5 +1,13 @@
 import React from 'react';
-import { Eye, AlertTriangle, CheckCircle2, ShieldAlert, Clock, ChevronLeft, ChevronRight } from 'lucide-react';
+import {
+  Eye,
+  AlertTriangle,
+  CheckCircle2,
+  ShieldAlert,
+  Clock,
+  ChevronLeft,
+  ChevronRight,
+} from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 import { ScrutinyQueueItem } from '../../scrutiny/types';
@@ -89,22 +97,33 @@ export const ScrutinyQueueTable: React.FC<ScrutinyQueueTableProps> = ({
     const requiresInspection = !!summary?.requiresPhysicalInspection;
 
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-start' }}>
+      <div
+        style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-start' }}
+      >
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
           {overallStatus === 'COMPLIANT' && (
-            <Badge variant="success" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+            <Badge
+              variant="success"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+            >
               <CheckCircle2 size={12} aria-hidden="true" />
               <span>Compliant</span>
             </Badge>
           )}
           {overallStatus === 'REQUIRES_REVIEW' && (
-            <Badge variant="warning" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+            <Badge
+              variant="warning"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+            >
               <AlertTriangle size={12} aria-hidden="true" />
               <span>Requires Review</span>
             </Badge>
           )}
           {overallStatus === 'DEFICIENT' && (
-            <Badge variant="error" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+            <Badge
+              variant="error"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+            >
               <ShieldAlert size={12} aria-hidden="true" />
               <span>Deficient</span>
             </Badge>
@@ -158,7 +177,8 @@ export const ScrutinyQueueTable: React.FC<ScrutinyQueueTableProps> = ({
     }
   };
 
-  const startRecord = pagination.totalItems === 0 ? 0 : (pagination.page - 1) * pagination.limit + 1;
+  const startRecord =
+    pagination.totalItems === 0 ? 0 : (pagination.page - 1) * pagination.limit + 1;
   const endRecord = Math.min(pagination.page * pagination.limit, pagination.totalItems);
 
   return (
@@ -173,7 +193,9 @@ export const ScrutinyQueueTable: React.FC<ScrutinyQueueTableProps> = ({
               <th scope="col">Submitted</th>
               <th scope="col">Status</th>
               <th scope="col">Dossier AI Synthesis</th>
-              <th scope="col" style={{ textAlign: 'right' }}>Actions</th>
+              <th scope="col" style={{ textAlign: 'right' }}>
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody>

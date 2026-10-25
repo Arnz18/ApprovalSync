@@ -12,11 +12,7 @@ interface CaseHeaderProps {
   isLoading: boolean;
 }
 
-export const CaseHeader: React.FC<CaseHeaderProps> = ({
-  application,
-  onRefresh,
-  isLoading,
-}) => {
+export const CaseHeader: React.FC<CaseHeaderProps> = ({ application, onRefresh, isLoading }) => {
   const navigate = useNavigate();
 
   const getStatusBadge = (status: ApplicationStatus) => {
@@ -103,11 +99,7 @@ export const CaseHeader: React.FC<CaseHeaderProps> = ({
             disabled={isLoading}
             aria-label="Refresh case details"
           >
-            <RefreshCw
-              size={14}
-              className={isLoading ? 'animate-spin' : ''}
-              aria-hidden="true"
-            />
+            <RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} aria-hidden="true" />
             <span>Refresh Case Data</span>
           </Button>
         </div>
@@ -124,7 +116,14 @@ export const CaseHeader: React.FC<CaseHeaderProps> = ({
         }}
       >
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', flexWrap: 'wrap' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 'var(--space-3)',
+              flexWrap: 'wrap',
+            }}
+          >
             <h1
               style={{
                 fontFamily: 'var(--font-family-mono, monospace)',
@@ -175,11 +174,15 @@ export const CaseHeader: React.FC<CaseHeaderProps> = ({
             <span>{application.institution?.name || 'Affiliated Institution'}</span>
           </div>
 
-          <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-muted-foreground)', marginTop: '2px' }}>
+          <div
+            style={{
+              fontSize: 'var(--font-size-xs)',
+              color: 'var(--color-muted-foreground)',
+              marginTop: '2px',
+            }}
+          >
             <span>Reg No: {application.institution?.registrationNumber || 'AICTE-REG-001'}</span>
-            {application.institution?.state && (
-              <span> • {application.institution.state}</span>
-            )}
+            {application.institution?.state && <span> • {application.institution.state}</span>}
           </div>
         </div>
       </div>
@@ -200,17 +203,28 @@ export const CaseHeader: React.FC<CaseHeaderProps> = ({
       >
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
           <Calendar size={14} aria-hidden="true" />
-          <span>Academic Year: <strong style={{ color: 'var(--color-foreground)' }}>{application.academicYear}</strong></span>
+          <span>
+            Academic Year:{' '}
+            <strong style={{ color: 'var(--color-foreground)' }}>{application.academicYear}</strong>
+          </span>
         </span>
 
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
           <BookOpen size={14} aria-hidden="true" />
-          <span>Discipline: <strong style={{ color: 'var(--color-foreground)' }}>{application.programType}</strong></span>
+          <span>
+            Discipline:{' '}
+            <strong style={{ color: 'var(--color-foreground)' }}>{application.programType}</strong>
+          </span>
         </span>
 
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
           <Clock size={14} aria-hidden="true" />
-          <span>Submitted: <strong style={{ color: 'var(--color-foreground)' }}>{formatDate(application.submittedAt || application.createdAt)}</strong></span>
+          <span>
+            Submitted:{' '}
+            <strong style={{ color: 'var(--color-foreground)' }}>
+              {formatDate(application.submittedAt || application.createdAt)}
+            </strong>
+          </span>
         </span>
       </div>
     </div>

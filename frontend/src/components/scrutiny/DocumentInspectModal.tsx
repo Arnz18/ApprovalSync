@@ -46,11 +46,24 @@ export const DocumentInspectModal: React.FC<DocumentInspectModalProps> = ({
             border: '1px solid var(--color-border-subtle)',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 'var(--space-2)' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: 'var(--space-2)',
+            }}
+          >
             <div>
-              <div style={{ fontWeight: 600, color: 'var(--color-foreground)' }}>{document.fileName}</div>
-              <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-muted-foreground)' }}>
-                {document.mimeType} • {formatFileSize(document.fileSizeBytes)} • Status: {document.processingStatus}
+              <div style={{ fontWeight: 600, color: 'var(--color-foreground)' }}>
+                {document.fileName}
+              </div>
+              <div
+                style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-muted-foreground)' }}
+              >
+                {document.mimeType} • {formatFileSize(document.fileSizeBytes)} • Status:{' '}
+                {document.processingStatus}
               </div>
             </div>
 
@@ -67,8 +80,21 @@ export const DocumentInspectModal: React.FC<DocumentInspectModalProps> = ({
           </div>
 
           {/* Cryptographic SHA-256 Checksum */}
-          <div style={{ marginTop: 'var(--space-3)', paddingTop: 'var(--space-2)', borderTop: '1px solid var(--color-border-subtle)' }}>
-            <span style={{ fontSize: '11px', color: 'var(--color-muted-foreground)', display: 'block', textTransform: 'uppercase' }}>
+          <div
+            style={{
+              marginTop: 'var(--space-3)',
+              paddingTop: 'var(--space-2)',
+              borderTop: '1px solid var(--color-border-subtle)',
+            }}
+          >
+            <span
+              style={{
+                fontSize: '11px',
+                color: 'var(--color-muted-foreground)',
+                display: 'block',
+                textTransform: 'uppercase',
+              }}
+            >
               Cryptographic SHA-256 Checksum:
             </span>
             <code
@@ -93,8 +119,18 @@ export const DocumentInspectModal: React.FC<DocumentInspectModalProps> = ({
           }}
         >
           {/* Duplicate Check */}
-          <div style={{ padding: 'var(--space-3)', border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-md)' }}>
-            <span style={{ fontSize: '11px', color: 'var(--color-muted-foreground)', display: 'block' }}>Duplicate Status (DOC-04):</span>
+          <div
+            style={{
+              padding: 'var(--space-3)',
+              border: '1px solid var(--color-border-subtle)',
+              borderRadius: 'var(--radius-md)',
+            }}
+          >
+            <span
+              style={{ fontSize: '11px', color: 'var(--color-muted-foreground)', display: 'block' }}
+            >
+              Duplicate Status (DOC-04):
+            </span>
             <div style={{ marginTop: '4px' }}>
               {document.duplicateStatus === 'UNIQUE' ? (
                 <Badge variant="success">Unique Document</Badge>
@@ -107,8 +143,18 @@ export const DocumentInspectModal: React.FC<DocumentInspectModalProps> = ({
           </div>
 
           {/* Integrity Check */}
-          <div style={{ padding: 'var(--space-3)', border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-md)' }}>
-            <span style={{ fontSize: '11px', color: 'var(--color-muted-foreground)', display: 'block' }}>Integrity & Tamper (DOC-04):</span>
+          <div
+            style={{
+              padding: 'var(--space-3)',
+              border: '1px solid var(--color-border-subtle)',
+              borderRadius: 'var(--radius-md)',
+            }}
+          >
+            <span
+              style={{ fontSize: '11px', color: 'var(--color-muted-foreground)', display: 'block' }}
+            >
+              Integrity & Tamper (DOC-04):
+            </span>
             <div style={{ marginTop: '4px' }}>
               {document.integrityStatus === 'VALID' ? (
                 <Badge variant="success">Valid Structure</Badge>
@@ -124,8 +170,18 @@ export const DocumentInspectModal: React.FC<DocumentInspectModalProps> = ({
           </div>
 
           {/* Issuer Verification */}
-          <div style={{ padding: 'var(--space-3)', border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-md)' }}>
-            <span style={{ fontSize: '11px', color: 'var(--color-muted-foreground)', display: 'block' }}>Issuer Registry (DOC-05):</span>
+          <div
+            style={{
+              padding: 'var(--space-3)',
+              border: '1px solid var(--color-border-subtle)',
+              borderRadius: 'var(--radius-md)',
+            }}
+          >
+            <span
+              style={{ fontSize: '11px', color: 'var(--color-muted-foreground)', display: 'block' }}
+            >
+              Issuer Registry (DOC-05):
+            </span>
             <div style={{ marginTop: '4px' }}>
               {document.issuerStatus === 'VERIFIED' ? (
                 <Badge variant="success">Issuer Verified</Badge>
@@ -140,9 +196,26 @@ export const DocumentInspectModal: React.FC<DocumentInspectModalProps> = ({
           </div>
 
           {/* OCR Confidence */}
-          <div style={{ padding: 'var(--space-3)', border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-md)' }}>
-            <span style={{ fontSize: '11px', color: 'var(--color-muted-foreground)', display: 'block' }}>OCR Confidence:</span>
-            <div style={{ marginTop: '4px', fontSize: 'var(--font-size-base)', fontWeight: 700, color: 'var(--color-foreground)' }}>
+          <div
+            style={{
+              padding: 'var(--space-3)',
+              border: '1px solid var(--color-border-subtle)',
+              borderRadius: 'var(--radius-md)',
+            }}
+          >
+            <span
+              style={{ fontSize: '11px', color: 'var(--color-muted-foreground)', display: 'block' }}
+            >
+              OCR Confidence:
+            </span>
+            <div
+              style={{
+                marginTop: '4px',
+                fontSize: 'var(--font-size-base)',
+                fontWeight: 700,
+                color: 'var(--color-foreground)',
+              }}
+            >
               {Math.round(document.ocrConfidence * 100)}%
             </div>
           </div>
@@ -150,16 +223,30 @@ export const DocumentInspectModal: React.FC<DocumentInspectModalProps> = ({
 
         {/* Extracted Statutory Fields */}
         <div>
-          <h4 style={{ fontSize: 'var(--font-size-sm)', fontWeight: 600, marginBottom: 'var(--space-2)' }}>
+          <h4
+            style={{
+              fontSize: 'var(--font-size-sm)',
+              fontWeight: 600,
+              marginBottom: 'var(--space-2)',
+            }}
+          >
             Extracted Structured Fields ({extractedEntries.length})
           </h4>
 
           {extractedEntries.length === 0 ? (
-            <div style={{ color: 'var(--color-muted-foreground)', fontSize: 'var(--font-size-xs)' }}>
+            <div
+              style={{ color: 'var(--color-muted-foreground)', fontSize: 'var(--font-size-xs)' }}
+            >
               No structured statutory fields were extracted by OCR for this document.
             </div>
           ) : (
-            <div className="data-table-scroll" style={{ border: '1px solid var(--color-border-subtle)', borderRadius: 'var(--radius-md)' }}>
+            <div
+              className="data-table-scroll"
+              style={{
+                border: '1px solid var(--color-border-subtle)',
+                borderRadius: 'var(--radius-md)',
+              }}
+            >
               <table className="data-table" aria-label="Extracted statutory fields">
                 <thead>
                   <tr>
@@ -170,7 +257,13 @@ export const DocumentInspectModal: React.FC<DocumentInspectModalProps> = ({
                 <tbody>
                   {extractedEntries.map(([key, val]) => (
                     <tr key={key}>
-                      <td style={{ fontFamily: 'var(--font-family-mono, monospace)', fontWeight: 500, fontSize: '12px' }}>
+                      <td
+                        style={{
+                          fontFamily: 'var(--font-family-mono, monospace)',
+                          fontWeight: 500,
+                          fontSize: '12px',
+                        }}
+                      >
                         {key}
                       </td>
                       <td style={{ fontWeight: 600 }}>{String(val)}</td>

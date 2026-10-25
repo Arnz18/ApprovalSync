@@ -38,17 +38,17 @@ describe('Scrutiny, Dossier & Workflow API Services (FE-04)', () => {
         },
         documentMatrix: [],
         findings: [],
-        disclaimer: 'This automated dossier verification report provides advisory decision support...',
+        disclaimer:
+          'This automated dossier verification report provides advisory decision support...',
       };
 
       const getSpy = vi.spyOn(apiClient, 'get').mockResolvedValueOnce(mockReport);
 
       const result = await dossierService.getDossierReport(mockAppId, { recalculate: true });
 
-      expect(getSpy).toHaveBeenCalledWith(
-        `/applications/${mockAppId}/dossier-report`,
-        { recalculate: true },
-      );
+      expect(getSpy).toHaveBeenCalledWith(`/applications/${mockAppId}/dossier-report`, {
+        recalculate: true,
+      });
       expect(result.overallStatus).toBe('COMPLIANT');
       expect(result.isAdvisory).toBe(true);
     });
@@ -85,10 +85,7 @@ describe('Scrutiny, Dossier & Workflow API Services (FE-04)', () => {
 
       const result = await dossierService.getDossierSummary(mockAppId);
 
-      expect(getSpy).toHaveBeenCalledWith(
-        `/applications/${mockAppId}/dossier-report/summary`,
-        {},
-      );
+      expect(getSpy).toHaveBeenCalledWith(`/applications/${mockAppId}/dossier-report/summary`, {});
       expect(result.overallStatus).toBe('DEFICIENT');
     });
   });
@@ -121,13 +118,10 @@ describe('Scrutiny, Dossier & Workflow API Services (FE-04)', () => {
         comment: 'Beginning initial verification',
       });
 
-      expect(postSpy).toHaveBeenCalledWith(
-        `/applications/${mockAppId}/transitions`,
-        {
-          targetStatus: ApplicationStatus.UNDER_SCRUTINY,
-          comment: 'Beginning initial verification',
-        },
-      );
+      expect(postSpy).toHaveBeenCalledWith(`/applications/${mockAppId}/transitions`, {
+        targetStatus: ApplicationStatus.UNDER_SCRUTINY,
+        comment: 'Beginning initial verification',
+      });
       expect(result.currentStatus).toBe(ApplicationStatus.UNDER_SCRUTINY);
     });
 
@@ -155,12 +149,17 @@ describe('Scrutiny, Dossier & Workflow API Services (FE-04)', () => {
 
       const getSpy = vi.spyOn(apiClient, 'get').mockResolvedValueOnce(mockTimeline);
 
-      const result = await workflowService.getTimeline(mockAppId, { page: 1, limit: 10, sortOrder: 'ASC' });
+      const result = await workflowService.getTimeline(mockAppId, {
+        page: 1,
+        limit: 10,
+        sortOrder: 'ASC',
+      });
 
-      expect(getSpy).toHaveBeenCalledWith(
-        `/applications/${mockAppId}/timeline`,
-        { page: 1, limit: 10, sortOrder: 'ASC' },
-      );
+      expect(getSpy).toHaveBeenCalledWith(`/applications/${mockAppId}/timeline`, {
+        page: 1,
+        limit: 10,
+        sortOrder: 'ASC',
+      });
       expect(result.items).toHaveLength(1);
     });
 
@@ -186,9 +185,7 @@ describe('Scrutiny, Dossier & Workflow API Services (FE-04)', () => {
 
       const result = await workflowService.getAllowedTransitions(mockAppId);
 
-      expect(getSpy).toHaveBeenCalledWith(
-        `/applications/${mockAppId}/allowed-transitions`,
-      );
+      expect(getSpy).toHaveBeenCalledWith(`/applications/${mockAppId}/allowed-transitions`);
       expect(result).toHaveLength(2);
       expect(result[0].requiresComment).toBe(true);
     });
@@ -254,8 +251,22 @@ describe('Scrutiny, Dossier & Workflow API Services (FE-04)', () => {
             hasCriticalDeficiency: false,
             duplicateMatchCount: 0,
             integrityAnomalyCount: 0,
-            issuerVerificationSummary: { totalEligible: 1, verifiedCount: 1, discrepancyCount: 0, simulatedCount: 1, pendingCount: 0 },
-            infrastructureReviewSummary: { landCompliant: true, builtUpAreaCompliant: true, barrierFreeDeclared: true, fireSafetyValid: true, evcInspectionRecommended: false, inspectionTriggerReasons: [], heuristicLimitations: [] },
+            issuerVerificationSummary: {
+              totalEligible: 1,
+              verifiedCount: 1,
+              discrepancyCount: 0,
+              simulatedCount: 1,
+              pendingCount: 0,
+            },
+            infrastructureReviewSummary: {
+              landCompliant: true,
+              builtUpAreaCompliant: true,
+              barrierFreeDeclared: true,
+              fireSafetyValid: true,
+              evcInspectionRecommended: false,
+              inspectionTriggerReasons: [],
+              heuristicLimitations: [],
+            },
             requiresPhysicalInspection: false,
           },
         })

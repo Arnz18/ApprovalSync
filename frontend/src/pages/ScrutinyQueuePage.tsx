@@ -191,11 +191,7 @@ export const ScrutinyQueuePage: React.FC = () => {
               disabled={isLoading}
               aria-label="Refresh queue data"
             >
-              <RefreshCw
-                size={14}
-                className={isLoading ? 'animate-spin' : ''}
-                aria-hidden="true"
-              />
+              <RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} aria-hidden="true" />
               <span>Reload Queue</span>
             </Button>
           </div>
@@ -208,10 +204,10 @@ export const ScrutinyQueuePage: React.FC = () => {
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--space-2)' }}>
             <Info size={16} aria-hidden="true" style={{ flexShrink: 0, marginTop: '2px' }} />
             <span>
-              Automated dossier verification findings, OCR extractions, and anomaly flags are strictly
-              advisory decision support under AICTE Approval Process Handbook norms. Scrutiny officers
-              and regional directors must review original uploaded evidence before issuing deficiency
-              notices or transitioning application states.
+              Automated dossier verification findings, OCR extractions, and anomaly flags are
+              strictly advisory decision support under AICTE Approval Process Handbook norms.
+              Scrutiny officers and regional directors must review original uploaded evidence before
+              issuing deficiency notices or transitioning application states.
             </span>
           </div>
         </Alert>
@@ -230,7 +226,15 @@ export const ScrutinyQueuePage: React.FC = () => {
       {error && (
         <div style={{ marginTop: 'var(--space-4)' }}>
           <Alert variant="error" title="Queue Retrieval Error">
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 'var(--space-3)' }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: 'var(--space-3)',
+              }}
+            >
               <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
                 <AlertCircle size={18} aria-hidden="true" />
                 <span>{error}</span>

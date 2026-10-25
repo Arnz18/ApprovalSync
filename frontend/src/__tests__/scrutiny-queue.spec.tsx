@@ -12,7 +12,7 @@ import { ScrutinyQueuePage } from '../pages/ScrutinyQueuePage';
 import { scrutinyService } from '../api/services/scrutinyService';
 import { ApplicationStatus } from '../applications/types';
 import { ApiClientError } from '../api/client';
-import { ScrutinyQueueItem } from '../scrutiny/types';
+import { ScrutinyQueueItem, DossierSummary } from '../scrutiny/types';
 
 // Dummy component to test navigation
 const DummyCaseDetail = () => {
@@ -21,6 +21,82 @@ const DummyCaseDetail = () => {
 };
 
 describe('Scrutiny Review Queue (FE-04)', () => {
+  const mockSummary1: DossierSummary = {
+    applicationId: 'app-001',
+    applicationNumber: 'APP-2026-0001',
+    institutionId: 'inst-001',
+    programType: 'Engineering',
+    academicYear: '2026-2027',
+    overallStatus: 'REQUIRES_REVIEW',
+    evaluatedAt: '2026-10-25T10:00:00.000Z',
+    isAdvisory: true,
+    summary: {
+      totalDocuments: 3,
+      totalRulesEvaluated: 10,
+      criticalDeficienciesCount: 1,
+      advisoryFlagsCount: 2,
+      compliantCount: 7,
+      hasCriticalDeficiency: true,
+      duplicateMatchCount: 0,
+      integrityAnomalyCount: 0,
+      issuerVerificationSummary: {
+        totalEligible: 2,
+        verifiedCount: 2,
+        discrepancyCount: 0,
+        simulatedCount: 0,
+        pendingCount: 0,
+      },
+      infrastructureReviewSummary: {
+        landCompliant: true,
+        builtUpAreaCompliant: true,
+        barrierFreeDeclared: true,
+        fireSafetyValid: true,
+        evcInspectionRecommended: true,
+        inspectionTriggerReasons: ['Floor area discrepancy'],
+        heuristicLimitations: [],
+      },
+      requiresPhysicalInspection: true,
+    },
+  };
+
+  const mockSummary2: DossierSummary = {
+    applicationId: 'app-002',
+    applicationNumber: 'APP-2026-0002',
+    institutionId: 'inst-002',
+    programType: 'Management',
+    academicYear: '2026-2027',
+    overallStatus: 'COMPLIANT',
+    evaluatedAt: '2026-10-25T09:00:00.000Z',
+    isAdvisory: true,
+    summary: {
+      totalDocuments: 2,
+      totalRulesEvaluated: 8,
+      criticalDeficienciesCount: 0,
+      advisoryFlagsCount: 0,
+      compliantCount: 8,
+      hasCriticalDeficiency: false,
+      duplicateMatchCount: 0,
+      integrityAnomalyCount: 0,
+      issuerVerificationSummary: {
+        totalEligible: 1,
+        verifiedCount: 1,
+        discrepancyCount: 0,
+        simulatedCount: 0,
+        pendingCount: 0,
+      },
+      infrastructureReviewSummary: {
+        landCompliant: true,
+        builtUpAreaCompliant: true,
+        barrierFreeDeclared: true,
+        fireSafetyValid: true,
+        evcInspectionRecommended: false,
+        inspectionTriggerReasons: [],
+        heuristicLimitations: [],
+      },
+      requiresPhysicalInspection: false,
+    },
+  };
+
   const mockQueueItems: ScrutinyQueueItem[] = [
     {
       id: 'app-001',
@@ -29,6 +105,7 @@ describe('Scrutiny Review Queue (FE-04)', () => {
       academicYear: '2026-2027',
       status: ApplicationStatus.SUBMITTED,
       programType: 'Engineering',
+      payloadJsonb: {},
       institution: {
         id: 'inst-001',
         name: 'Apex Institute of Technology',
@@ -39,12 +116,7 @@ describe('Scrutiny Review Queue (FE-04)', () => {
       submittedAt: '2026-10-25T10:00:00.000Z',
       createdAt: '2026-10-25T08:00:00.000Z',
       updatedAt: '2026-10-25T10:00:00.000Z',
-      dossierSummary: {
-        overallStatus: 'REQUIRES_REVIEW',
-        criticalDeficienciesCount: 1,
-        advisoryFlagsCount: 2,
-        requiresPhysicalInspection: true,
-      },
+      dossierSummary: mockSummary1,
     },
     {
       id: 'app-002',
@@ -53,6 +125,7 @@ describe('Scrutiny Review Queue (FE-04)', () => {
       academicYear: '2026-2027',
       status: ApplicationStatus.UNDER_SCRUTINY,
       programType: 'Management',
+      payloadJsonb: {},
       institution: {
         id: 'inst-002',
         name: 'Beacon Management Academy',
@@ -63,12 +136,7 @@ describe('Scrutiny Review Queue (FE-04)', () => {
       submittedAt: '2026-10-24T12:00:00.000Z',
       createdAt: '2026-10-24T10:00:00.000Z',
       updatedAt: '2026-10-25T09:00:00.000Z',
-      dossierSummary: {
-        overallStatus: 'COMPLIANT',
-        criticalDeficienciesCount: 0,
-        advisoryFlagsCount: 0,
-        requiresPhysicalInspection: false,
-      },
+      dossierSummary: mockSummary2,
     },
   ];
 
@@ -88,18 +156,8 @@ describe('Scrutiny Review Queue (FE-04)', () => {
     });
 
     vi.spyOn(scrutinyService, 'enrichQueueSummaries').mockResolvedValue({
-      'app-001': {
-        overallStatus: 'REQUIRES_REVIEW',
-        criticalDeficienciesCount: 1,
-        advisoryFlagsCount: 2,
-        requiresPhysicalInspection: true,
-      },
-      'app-002': {
-        overallStatus: 'COMPLIANT',
-        criticalDeficienciesCount: 0,
-        advisoryFlagsCount: 0,
-        requiresPhysicalInspection: false,
-      },
+      'app-001': mockSummary1,
+      'app-002': mockSummary2,
     });
   });
 
@@ -122,12 +180,8 @@ describe('Scrutiny Review Queue (FE-04)', () => {
     renderWithRouter();
 
     await waitFor(() => {
-      expect(
-        screen.getByRole('heading', { name: /Scrutiny Review Queue/i }),
-      ).toBeInTheDocument();
-      expect(
-        screen.getByText(/ADR-004 Human Sovereignty Decision Support/i),
-      ).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: /Scrutiny Review Queue/i })).toBeInTheDocument();
+      expect(screen.getByText(/ADR-004 Human Sovereignty Decision Support/i)).toBeInTheDocument();
       expect(screen.getByText('APP-2026-0001')).toBeInTheDocument();
       expect(screen.getByText('Apex Institute of Technology')).toBeInTheDocument();
       expect(screen.getByText('APP-2026-0002')).toBeInTheDocument();

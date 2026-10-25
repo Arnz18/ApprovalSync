@@ -1,9 +1,5 @@
 import React, { useState } from 'react';
-import {
-  Download,
-  Eye,
-  FileCheck2,
-} from 'lucide-react';
+import { Download, Eye, FileCheck2 } from 'lucide-react';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
 import { Alert } from '../ui/Alert';
@@ -66,8 +62,14 @@ export const DocumentVerificationMatrixView: React.FC<DocumentVerificationMatrix
           borderRadius: 'var(--radius-lg)',
         }}
       >
-        <FileCheck2 size={40} style={{ color: 'var(--color-muted-foreground)', margin: '0 auto var(--space-2)' }} aria-hidden="true" />
-        <h3 style={{ fontSize: 'var(--font-size-base)', fontWeight: 600 }}>No Documents in Verification Matrix</h3>
+        <FileCheck2
+          size={40}
+          style={{ color: 'var(--color-muted-foreground)', margin: '0 auto var(--space-2)' }}
+          aria-hidden="true"
+        />
+        <h3 style={{ fontSize: 'var(--font-size-base)', fontWeight: 600 }}>
+          No Documents in Verification Matrix
+        </h3>
         <p style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-muted-foreground)' }}>
           No statutory document attachments have been associated with this application dossier.
         </p>
@@ -78,7 +80,11 @@ export const DocumentVerificationMatrixView: React.FC<DocumentVerificationMatrix
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
       {downloadError && (
-        <Alert variant="error" title="Document Download Failure" onClose={() => setDownloadError(null)}>
+        <Alert
+          variant="error"
+          title="Document Download Failure"
+          onClose={() => setDownloadError(null)}
+        >
           {downloadError}
         </Alert>
       )}
@@ -94,7 +100,9 @@ export const DocumentVerificationMatrixView: React.FC<DocumentVerificationMatrix
                 <th scope="col">Duplicate Check (DOC-04)</th>
                 <th scope="col">Integrity (DOC-04)</th>
                 <th scope="col">Issuer Verification (DOC-05)</th>
-                <th scope="col" style={{ textAlign: 'right' }}>Actions</th>
+                <th scope="col" style={{ textAlign: 'right' }}>
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -219,7 +227,9 @@ export const DocumentVerificationMatrixView: React.FC<DocumentVerificationMatrix
                         aria-label={`Download ${doc.fileName}`}
                       >
                         <Download size={13} aria-hidden="true" />
-                        <span>{downloadingId === doc.documentId ? 'Downloading...' : 'Download'}</span>
+                        <span>
+                          {downloadingId === doc.documentId ? 'Downloading...' : 'Download'}
+                        </span>
                       </Button>
                     </div>
                   </td>

@@ -13,10 +13,7 @@ interface CaseTimelineViewProps {
   onRefresh?: () => void;
 }
 
-export const CaseTimelineView: React.FC<CaseTimelineViewProps> = ({
-  events,
-  isLoading,
-}) => {
+export const CaseTimelineView: React.FC<CaseTimelineViewProps> = ({ events, isLoading }) => {
   if (isLoading && events.length === 0) {
     return (
       <div style={{ padding: 'var(--space-8) 0', textAlign: 'center' }}>
@@ -91,14 +88,24 @@ export const CaseTimelineView: React.FC<CaseTimelineViewProps> = ({
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
-                  <span style={{ fontWeight: 600, color: 'var(--color-foreground)', fontSize: 'var(--font-size-sm)' }}>
+                  <span
+                    style={{
+                      fontWeight: 600,
+                      color: 'var(--color-foreground)',
+                      fontSize: 'var(--font-size-sm)',
+                    }}
+                  >
                     {formatEventType(event.eventType)}
                   </span>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                     <Badge variant="default" style={{ fontSize: '11px' }}>
                       {event.fromStatus}
                     </Badge>
-                    <ArrowRight size={12} aria-hidden="true" style={{ color: 'var(--color-muted-foreground)' }} />
+                    <ArrowRight
+                      size={12}
+                      aria-hidden="true"
+                      style={{ color: 'var(--color-muted-foreground)' }}
+                    />
                     <Badge variant="primary" style={{ fontSize: '11px' }}>
                       {event.toStatus}
                     </Badge>
@@ -166,7 +173,11 @@ export const CaseTimelineView: React.FC<CaseTimelineViewProps> = ({
                   <MessageSquare
                     size={14}
                     aria-hidden="true"
-                    style={{ color: 'var(--color-muted-foreground)', flexShrink: 0, marginTop: '2px' }}
+                    style={{
+                      color: 'var(--color-muted-foreground)',
+                      flexShrink: 0,
+                      marginTop: '2px',
+                    }}
                   />
                   <div>
                     <span style={{ fontWeight: 600, display: 'block', marginBottom: '2px' }}>

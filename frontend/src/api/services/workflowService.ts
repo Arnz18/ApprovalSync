@@ -50,9 +50,7 @@ export const workflowService = {
    * Discover allowed transitions from current status for authenticated user's role.
    * Path: GET /api/v1/applications/:id/allowed-transitions
    */
-  async getAllowedTransitions(
-    applicationId: string,
-  ): Promise<AllowedTransition[]> {
+  async getAllowedTransitions(applicationId: string): Promise<AllowedTransition[]> {
     return apiClient.get<AllowedTransition[]>(
       `/applications/${encodeURIComponent(applicationId)}/allowed-transitions`,
     );

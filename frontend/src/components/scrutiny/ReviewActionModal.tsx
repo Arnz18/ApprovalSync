@@ -1,9 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  AlertTriangle,
-  ShieldAlert,
-  Send,
-} from 'lucide-react';
+import { AlertTriangle, ShieldAlert, Send } from 'lucide-react';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { Alert } from '../ui/Alert';
@@ -91,12 +87,19 @@ export const ReviewActionModal: React.FC<ReviewActionModalProps> = ({
       title={getActionTitle()}
       description={`Case Reference: ${applicationNumber}`}
     >
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+      <form
+        onSubmit={handleSubmit}
+        style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}
+      >
         {/* Transition Summary Alert */}
         {isDeficiency && (
           <Alert variant="warning" title="Issuing Deficiency Notice / Clarification Request">
             <div style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--space-2)' }}>
-              <AlertTriangle size={18} aria-hidden="true" style={{ flexShrink: 0, marginTop: '2px' }} />
+              <AlertTriangle
+                size={18}
+                aria-hidden="true"
+                style={{ flexShrink: 0, marginTop: '2px' }}
+              />
               <div>
                 This action transitions the application to <strong>DEFICIENCY_ISSUED</strong> and
                 notifies the applicant institution. The institution will be required to submit
@@ -109,10 +112,15 @@ export const ReviewActionModal: React.FC<ReviewActionModalProps> = ({
         {isRejection && (
           <Alert variant="error" title="Adverse Decision Warning">
             <div style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--space-2)' }}>
-              <ShieldAlert size={18} aria-hidden="true" style={{ flexShrink: 0, marginTop: '2px' }} />
+              <ShieldAlert
+                size={18}
+                aria-hidden="true"
+                style={{ flexShrink: 0, marginTop: '2px' }}
+              />
               <div>
-                Rejecting an application is a formal adverse regulatory outcome. Ensure all documentary
-                deficiencies have been verified against statutory norms before proceeding.
+                Rejecting an application is a formal adverse regulatory outcome. Ensure all
+                documentary deficiencies have been verified against statutory norms before
+                proceeding.
               </div>
             </div>
           </Alert>
@@ -134,7 +142,14 @@ export const ReviewActionModal: React.FC<ReviewActionModalProps> = ({
           <div style={{ color: 'var(--color-muted-foreground)' }}>
             {transition.description || `Move state to ${transition.toStatus}`}
           </div>
-          <div style={{ marginTop: '8px', display: 'flex', gap: 'var(--space-2)', alignItems: 'center' }}>
+          <div
+            style={{
+              marginTop: '8px',
+              display: 'flex',
+              gap: 'var(--space-2)',
+              alignItems: 'center',
+            }}
+          >
             <span style={{ color: 'var(--color-muted-foreground)' }}>Event Type:</span>
             <code style={{ fontFamily: 'var(--font-family-mono, monospace)', fontWeight: 600 }}>
               {transition.eventType}
@@ -156,7 +171,8 @@ export const ReviewActionModal: React.FC<ReviewActionModalProps> = ({
           >
             {requiresComment ? (
               <span>
-                Mandatory Regulatory Justification / Deficiency Specifications <span style={{ color: 'var(--color-error)' }}>*</span>
+                Mandatory Regulatory Justification / Deficiency Specifications{' '}
+                <span style={{ color: 'var(--color-error)' }}>*</span>
               </span>
             ) : (
               <span>Reviewer Observations / Discretionary Notes (Optional)</span>
@@ -181,7 +197,9 @@ export const ReviewActionModal: React.FC<ReviewActionModalProps> = ({
               width: '100%',
               padding: 'var(--space-2) var(--space-3)',
               borderRadius: 'var(--radius-md)',
-              border: validationError ? '1px solid var(--color-error)' : '1px solid var(--color-border)',
+              border: validationError
+                ? '1px solid var(--color-error)'
+                : '1px solid var(--color-border)',
               fontSize: 'var(--font-size-xs)',
               fontFamily: 'inherit',
               resize: 'vertical',
@@ -200,7 +218,10 @@ export const ReviewActionModal: React.FC<ReviewActionModalProps> = ({
           >
             <span>
               {validationError ? (
-                <span id="transition-comment-error" style={{ color: 'var(--color-error)', fontWeight: 500 }}>
+                <span
+                  id="transition-comment-error"
+                  style={{ color: 'var(--color-error)', fontWeight: 500 }}
+                >
                   {validationError}
                 </span>
               ) : (
@@ -221,12 +242,7 @@ export const ReviewActionModal: React.FC<ReviewActionModalProps> = ({
             borderTop: '1px solid var(--color-border-subtle)',
           }}
         >
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={onClose}
-            disabled={isSubmitting}
-          >
+          <Button type="button" variant="ghost" onClick={onClose} disabled={isSubmitting}>
             Cancel
           </Button>
 
@@ -236,7 +252,11 @@ export const ReviewActionModal: React.FC<ReviewActionModalProps> = ({
             disabled={isSubmitting}
             style={
               isRejection
-                ? { backgroundColor: 'var(--color-error)', borderColor: 'var(--color-error)', color: '#fff' }
+                ? {
+                    backgroundColor: 'var(--color-error)',
+                    borderColor: 'var(--color-error)',
+                    color: '#fff',
+                  }
                 : isDeficiency
                   ? { backgroundColor: '#D97706', borderColor: '#D97706', color: '#fff' }
                   : undefined

@@ -6,7 +6,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { CaseDetailPage } from '../pages/CaseDetailPage';
@@ -17,11 +17,7 @@ import { documentsService } from '../api/services/documentsService';
 import { ApplicationStatus } from '../applications/types';
 import { UserRole } from '../api/types';
 import { ApiClientError } from '../api/client';
-import {
-  DossierReport,
-  WorkflowTimelineEvent,
-  AllowedTransition,
-} from '../scrutiny/types';
+import { DossierReport, WorkflowTimelineEvent, AllowedTransition } from '../scrutiny/types';
 
 describe('Case Detail & Evidence Review (FE-04)', () => {
   const mockApplication = {
@@ -111,9 +107,7 @@ describe('Case Detail & Evidence Review (FE-04)', () => {
         barrierFreeDeclared: true,
         fireSafetyValid: true,
         evcInspectionRecommended: true,
-        inspectionTriggerReasons: [
-          'Built-up area requires physical floor verification.',
-        ],
+        inspectionTriggerReasons: ['Built-up area requires physical floor verification.'],
         heuristicLimitations: [],
       },
       requiresPhysicalInspection: true,
@@ -121,7 +115,7 @@ describe('Case Detail & Evidence Review (FE-04)', () => {
     findings: [
       {
         id: 'find-001',
-        category: 'COMPLIANCE',
+        category: 'REGULATORY_COMPLIANCE',
         ruleCode: 'BUILT_UP_AREA_MINIMUM',
         ruleDescription: 'Instructional built-up area requirement for 120 intake',
         severity: 'CRITICAL_DEFICIENCY',
@@ -140,7 +134,7 @@ describe('Case Detail & Evidence Review (FE-04)', () => {
       },
       {
         id: 'find-002',
-        category: 'DOCUMENT_EXPIRY',
+        category: 'EXPIRY_VALIDITY',
         ruleCode: 'FIRE_SAFETY_VALIDITY',
         ruleDescription: 'Fire safety certificate must be valid for at least 6 months',
         severity: 'ADVISORY_FLAG',
@@ -160,9 +154,12 @@ describe('Case Detail & Evidence Review (FE-04)', () => {
         ocrConfidence: 0.94,
         processingStatus: 'OCR_EXTRACTED',
         duplicateStatus: 'UNIQUE',
+        duplicateMatchIds: [],
         integrityStatus: 'VALID',
         integrityAnomalyCodes: [],
         issuerStatus: 'VERIFIED',
+        isSimulated: false,
+        findingsCount: 1,
         extractedFieldCount: 4,
         extractedFields: {
           surveyNumber: '42/1-B',
@@ -180,12 +177,15 @@ describe('Case Detail & Evidence Review (FE-04)', () => {
       eventType: 'COMMENCE_SCRUTINY',
       description: 'Scrutiny Officer commences documentary review.',
       requiresComment: false,
+      allowedRoles: [UserRole.SCRUTINY_OFFICER],
     },
     {
       toStatus: ApplicationStatus.DEFICIENCY_ISSUED,
       eventType: 'DEFICIENCY_NOTICE',
-      description: 'Deficiencies identified requiring institutional clarification and document resubmission.',
+      description:
+        'Deficiencies identified requiring institutional clarification and document resubmission.',
       requiresComment: true,
+      allowedRoles: [UserRole.SCRUTINY_OFFICER],
     },
   ];
 
@@ -209,14 +209,28 @@ describe('Case Detail & Evidence Review (FE-04)', () => {
     vi.spyOn(dossierService, 'evaluateDossier').mockResolvedValue(mockDossierReport);
     vi.spyOn(workflowService, 'executeTransition').mockResolvedValue({
       success: true,
+      applicationId: 'app-test-uuid-001',
+      applicationNumber: 'APP-2026-EN001',
       previousStatus: ApplicationStatus.SUBMITTED,
       currentStatus: ApplicationStatus.DEFICIENCY_ISSUED,
-      eventType: 'DEFICIENCY_NOTICE',
-      timestamp: '2026-10-25T11:00:00.000Z',
+      timelineEvent: {
+        id: 'evt-2',
+        applicationId: 'app-test-uuid-001',
+        fromStatus: ApplicationStatus.SUBMITTED,
+        toStatus: ApplicationStatus.DEFICIENCY_ISSUED,
+        eventType: 'DEFICIENCY_NOTICE',
+        actorId: 'usr-1',
+        actorRole: UserRole.SCRUTINY_OFFICER,
+        comment: 'Land title deed is expired. Please provide renewed deed.',
+        correlationId: 'corr-1',
+        metadata: {},
+        createdAt: '2026-10-25T11:00:00.000Z',
+      },
     });
     vi.spyOn(documentsService, 'downloadDocument').mockResolvedValue({
       blob: new Blob(['%PDF-1.4 mock content'], { type: 'application/pdf' }),
       fileName: 'land_title_apex.pdf',
+      mimeType: 'application/pdf',
     });
   });
 
@@ -243,7 +257,9 @@ describe('Case Detail & Evidence Review (FE-04)', () => {
       expect(screen.getByText('Apex Institute of Technology')).toBeInTheDocument();
       expect(screen.getByText(/ADR-004 Human Sovereignty Advisory Boundary/i)).toBeInTheDocument();
       expect(
-        screen.getByText(/This automated dossier verification report provides advisory decision support/i),
+        screen.getByText(
+          /This automated dossier verification report provides advisory decision support/i,
+        ),
       ).toBeInTheDocument();
     });
   });
@@ -253,9 +269,17 @@ describe('Case Detail & Evidence Review (FE-04)', () => {
 
     await waitFor(() => {
       expect(screen.getByText(/Requires Review \(Advisory Flags\)/i)).toBeInTheDocument();
-      expect(screen.getByText('Built-up area shortfall detected based on submitted architectural blueprint.')).toBeInTheDocument();
-      expect(screen.getByText('On-Site Expert Visit Committee (EVC) Inspection Recommended')).toBeInTheDocument();
-      expect(screen.getByText('Built-up area requires physical floor verification.')).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          'Built-up area shortfall detected based on submitted architectural blueprint.',
+        ),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('On-Site Expert Visit Committee (EVC) Inspection Recommended'),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('Built-up area requires physical floor verification.'),
+      ).toBeInTheDocument();
     });
   });
 
@@ -264,15 +288,21 @@ describe('Case Detail & Evidence Review (FE-04)', () => {
     renderCaseDetail();
 
     await waitFor(() => {
-      expect(screen.getByText('Instructional built-up area requirement for 120 intake')).toBeInTheDocument();
+      expect(
+        screen.getByText('Instructional built-up area requirement for 120 intake'),
+      ).toBeInTheDocument();
     });
 
     // Click Critical Filter
     const criticalBtn = screen.getByRole('button', { name: /Critical \(1\)/i });
     await user.click(criticalBtn);
 
-    expect(screen.getByText('Instructional built-up area requirement for 120 intake')).toBeInTheDocument();
-    expect(screen.queryByText('Fire safety certificate must be valid for at least 6 months')).not.toBeInTheDocument();
+    expect(
+      screen.getByText('Instructional built-up area requirement for 120 intake'),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText('Fire safety certificate must be valid for at least 6 months'),
+    ).not.toBeInTheDocument();
   });
 
   it('switches to document verification matrix tab and displays document attachments', async () => {
@@ -353,7 +383,9 @@ describe('Case Detail & Evidence Review (FE-04)', () => {
     await user.click(deficiencyBtn);
 
     await waitFor(() => {
-      expect(screen.getByText(/Issue Regulatory Deficiency Notice \(Clarification\)/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Issue Regulatory Deficiency Notice \(Clarification\)/i),
+      ).toBeInTheDocument();
       expect(
         screen.getByText(/Mandatory Regulatory Justification \/ Deficiency Specifications/i),
       ).toBeInTheDocument();
@@ -415,7 +447,9 @@ describe('Case Detail & Evidence Review (FE-04)', () => {
     await waitFor(() => {
       expect(screen.getByText(/Access Forbidden/i)).toBeInTheDocument();
       expect(
-        screen.getByText(/strictly isolated to their own institution records under multi-tenant security boundaries/i),
+        screen.getByText(
+          /strictly isolated to their own institution records under multi-tenant security boundaries/i,
+        ),
       ).toBeInTheDocument();
     });
   });

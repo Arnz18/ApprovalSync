@@ -73,12 +73,7 @@ export interface DocumentVerificationMatrixItem {
   duplicateStatus: 'UNIQUE' | 'EXACT_DUPLICATE' | 'NEAR_DUPLICATE';
   duplicateMatchIds: string[];
   issuerStatus:
-    | 'VERIFIED'
-    | 'DISCREPANCY'
-    | 'SIMULATED'
-    | 'NOT_APPLICABLE'
-    | 'PENDING'
-    | 'SOURCE_UNAVAILABLE';
+    'VERIFIED' | 'DISCREPANCY' | 'SIMULATED' | 'NOT_APPLICABLE' | 'PENDING' | 'SOURCE_UNAVAILABLE';
   issuerProviderId?: string;
   isSimulated: boolean;
   findingsCount: number;

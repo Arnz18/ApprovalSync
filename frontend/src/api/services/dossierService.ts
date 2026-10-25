@@ -5,11 +5,7 @@
  */
 
 import { apiClient } from '../client';
-import {
-  DossierReport,
-  DossierSummary,
-  DossierQueryOptions,
-} from '../../scrutiny/types';
+import { DossierReport, DossierSummary, DossierQueryOptions } from '../../scrutiny/types';
 
 export const dossierService = {
   /**

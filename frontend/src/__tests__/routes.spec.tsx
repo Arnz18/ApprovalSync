@@ -102,9 +102,7 @@ describe('Routing & Navigation (FE-01 & FE-02)', () => {
     );
 
     await waitFor(() => {
-      expect(
-        screen.getByRole('heading', { name: /Scrutiny Review Queue/i }),
-      ).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: /Scrutiny Review Queue/i })).toBeInTheDocument();
       expect(screen.getByText('API Online')).toBeInTheDocument();
     });
   });
