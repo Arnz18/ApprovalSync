@@ -383,14 +383,11 @@ describe('Compliance Evidence & Infrastructure Review Assist (e2e)', () => {
       const appRepo = dataSource.getRepository(Application);
       const savedApp = await appRepo.findOne({ where: { id: appA.id } });
 
-      expect(savedApp).toBeDefined();
-      expect(savedApp?.payloadJsonb?.complianceAssessment).toBeDefined();
-      expect(savedApp?.payloadJsonb?.complianceAssessment?.ruleSetCode).toBe(
-        'RULESET-ENGG-UG',
-      );
-      expect(
-        savedApp?.payloadJsonb?.complianceAssessment?.summary,
-      ).toBeDefined();
+      const assessmentPayload = (savedApp?.payloadJsonb as any)
+        ?.complianceAssessment;
+      expect(assessmentPayload).toBeDefined();
+      expect(assessmentPayload?.ruleSetCode).toBe('RULESET-ENGG-UG');
+      expect(assessmentPayload?.summary).toBeDefined();
     });
   });
 });
