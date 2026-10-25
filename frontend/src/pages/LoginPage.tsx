@@ -264,13 +264,13 @@ export function LoginPage(): React.ReactElement {
               </FormField>
 
               {/* Password */}
-              <FormField
-                label="Password"
-                id="login-password"
-                error={errors.password}
-                required
-              >
-                <div style={{ position: 'relative' }}>
+              <div style={{ position: 'relative' }}>
+                <FormField
+                  label="Password"
+                  id="login-password"
+                  error={errors.password}
+                  required
+                >
                   <input
                     id="login-password"
                     type={showPassword ? 'text' : 'password'}
@@ -280,8 +280,6 @@ export function LoginPage(): React.ReactElement {
                     onChange={(e) => setPassword(e.target.value)}
                     disabled={isSubmitting}
                     required
-                    aria-describedby={errors.password ? 'login-password-error' : undefined}
-                    aria-invalid={!!errors.password}
                     placeholder="Enter your password"
                     className="input-text"
                     style={{
@@ -297,33 +295,32 @@ export function LoginPage(): React.ReactElement {
                       color: 'var(--color-text-main)',
                     }}
                   />
+                </FormField>
 
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword((prev) => !prev)}
-                    aria-label={showPassword ? 'Hide password' : 'Show password'}
-                    style={{
-                      position: 'absolute',
-                      right: '0.5rem',
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      background: 'none',
-                      border: 'none',
-                      color: 'var(--color-text-muted)',
-                      cursor: 'pointer',
-                      padding: '0.25rem',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                    }}
-                  >
-                    {showPassword ? (
-                      <EyeOff size={16} aria-hidden="true" />
-                    ) : (
-                      <Eye size={16} aria-hidden="true" />
-                    )}
-                  </button>
-                </div>
-              </FormField>
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  style={{
+                    position: 'absolute',
+                    right: '0.5rem',
+                    top: '2.1rem',
+                    background: 'none',
+                    border: 'none',
+                    color: 'var(--color-text-muted)',
+                    cursor: 'pointer',
+                    padding: '0.25rem',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                  }}
+                >
+                  {showPassword ? (
+                    <EyeOff size={16} aria-hidden="true" />
+                  ) : (
+                    <Eye size={16} aria-hidden="true" />
+                  )}
+                </button>
+              </div>
 
               {/* Submit Action */}
               <div style={{ marginTop: '1.25rem' }}>
