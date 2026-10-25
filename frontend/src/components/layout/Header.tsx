@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ShieldCheck, Menu, User, Sparkles } from 'lucide-react';
 import { SimulatedDataBadge } from '../ui/Badge';
+import { healthService } from '../../api';
 
 export interface HeaderProps {
   onToggleMobileNav: () => void;
@@ -12,6 +13,30 @@ export function Header({
   onToggleMobileNav,
   isMobileNavOpen,
 }: HeaderProps): React.ReactElement {
+  const [apiStatus, setApiStatus] = useState<'checking' | 'online' | 'standby'>('checking');
+
+  useEffect(() => {
+    let isMounted = true;
+    healthService
+      .getHealth()
+      .then((res) => {
+        if (isMounted && res.data && (res.data.status === 'ok' || res.data.status === 'degraded')) {
+          setApiStatus('online');
+        } else if (isMounted) {
+          setApiStatus('standby');
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setApiStatus('standby');
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   return (
     <header className="app-header">
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
@@ -55,6 +80,29 @@ export function Header({
       </div>
 
       <div className="header-actions">
+        {/* Backend API Status Pill */}
+        <span
+          className={`badge ${apiStatus === 'online' ? 'badge-success' : 'badge-default'}`}
+          title={
+            apiStatus === 'online'
+              ? 'Backend API connected and responding normally'
+              : 'Backend API is offline or standby (run npm run start:dev in backend/)'
+          }
+          style={{ fontSize: '0.6875rem' }}
+        >
+          <span
+            style={{
+              width: 6,
+              height: 6,
+              borderRadius: '50%',
+              backgroundColor: apiStatus === 'online' ? 'var(--color-success)' : '#94a3b8',
+              display: 'inline-block',
+            }}
+            aria-hidden="true"
+          />
+          {apiStatus === 'online' ? 'API Online' : 'API Standby'}
+        </span>
+
         {/* Simulated data notice badge */}
         <SimulatedDataBadge />
 
