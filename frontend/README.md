@@ -3,9 +3,10 @@
 > **Milestones:**
 > - **FE-01** — Frontend shell, design system, routing and API client (`COMMITTED`)
 > - **FE-02** — Login, role-aware navigation and session handling (`COMMITTED`)
+> - **FE-03** — Institution application wizard and document upload (`COMMITTED`)
 > **Lead Owner:** M4 — Frontend & Experience
 > **Framework:** React 18 + TypeScript 5 + Vite 5 Single-Page Application (SPA)
-> **Status:** FE-01 & FE-02 IMPLEMENTED & TESTED (54/54 automated tests passing)
+> **Status:** FE-01, FE-02 & FE-03 IMPLEMENTED & TESTED (11 test suites, 69 automated tests passing)
 
 ---
 
@@ -20,6 +21,7 @@ ApprovalSync is an AI-powered regulatory compliance, document authentication, an
 - **Centralized Authentication & Session Model:** Implemented in `src/auth/` adhering to BE-03 contracts. Session state is modeled explicitly (`INITIALIZING`, `UNAUTHENTICATED`, `AUTHENTICATING`, `AUTHENTICATED`, `ERROR`). Session bootstrap verifies bearer tokens on application startup against `GET /api/v1/auth/me` without flashing protected content.
 - **Token Handling Strategy:** Scoped to `sessionStorage` (with in-memory fallback) to restrict token exposure to the active browser tab/session, avoiding persistent `localStorage` cross-tab XSS persistence.
 - **Role-Based Access Control (RBAC):** Strict presentation-layer mapping based on the frozen `UserRole` enum (`INSTITUTION_USER`, `SCRUTINY_OFFICER`, `REGIONAL_OFFICER`, `EVC_INSPECTOR`, `SHC_SAC_MEMBER`, `BUREAU_HEAD`, `SYSTEM_ADMIN`, `AUDITOR`). Navigation links and routes fail closed by default. The real backend remains the authoritative security boundary.
+- **Application Intake Wizard (FE-03):** 5-step institutional workflow (`src/applications/`, `src/components/wizard/`) mapping directly to `BE-04` application intake contracts and `DOC-01` secure multipart document uploads.
 - **Visual Design System:** Built following the `ui-ux-pro-max` design intelligence framework, utilizing a **Swiss Minimalism & Enterprise Gateway** visual direction with a balanced, high-trust institutional color palette, Lexend/Source Sans 3 typography, CSS custom properties, and zero raw hex values in components.
 - **Centralized Typed API Client:** Native `fetch`-based client adhering to `docs/contracts/api-conventions.md`: handles `ApiResponse<T>` and `ApiErrorResponse` envelopes, automated `X-Correlation-Id` generation, dynamic bearer token injection via `apiClient.setAuthTokenProvider(getStoredToken)`, query parameter serialization, `FormData` multipart uploads without boundary overwrites, configurable timeout aborts, and network failure resilience.
 - **Institutional Safety Boundary:** Enforces the Human Sovereignty principle (ADR-004): automated document validation, OCR extraction, and anomaly scores are prominently framed as advisory decision support. Prominent `SIMULATED / MOCK DATA` badges are rendered on synthetic records.
@@ -42,7 +44,7 @@ frontend/
     ├── App.tsx                  # Root component wrapping BrowserRouter & AuthProvider
     ├── vite-env.d.ts            # Vite client environment typing declarations
     ├── test/
-    │   └── setup.ts             # Vitest test setup (@testing-library/jest-dom)
+    │   └── setup.ts             # Vitest test setup (@testing-library/jest-dom, window.scrollTo mock)
     ├── auth/                    # FE-02 Authentication & RBAC Layer
     │   ├── types.ts             # AuthUser, LoginCredentials, AuthStatus, AuthInitError
     │   ├── sessionStorage.ts    # Scoped sessionStorage token management & memory fallback
@@ -50,9 +52,13 @@ frontend/
     │   ├── useAuth.ts           # Typed useAuth hook with safe guest fallback
     │   ├── roleRoutes.ts        # RBAC permissions matrix, role titles, and return-path sanitizer
     │   └── index.ts             # Master exports for auth layer
+    ├── applications/            # FE-03 Application Intake Domain
+    │   ├── types.ts             # Application & document DTOs, category requirements, wizard state model
+    │   ├── validation.ts        # Syntactic & business rule validators for wizard steps
+    │   └── index.ts             # Application domain exports
     ├── styles/
     │   ├── tokens.css           # Design tokens (colors, typography, spacing, radius, shadows)
-    │   ├── components.css       # Reusable component styles
+    │   ├── components.css       # Reusable component styles & wizard card layouts
     │   ├── layout.css           # Application shell, header, sidebar, mobile drawer, footer
     │   └── index.css            # Global base styles, reset, and focus rings
     ├── api/
@@ -61,6 +67,8 @@ frontend/
     │   ├── index.ts             # Public API layer exports
     │   └── services/
     │       ├── authService.ts   # BE-03 Auth API Service (/auth/login, /auth/me)
+    │       ├── applicationsService.ts # BE-04 Application Service (CRUD, drafts, submit, doc list)
+    │       ├── documentsService.ts    # DOC-01 Document Upload Service (multipart upload, get, delete)
     │       └── healthService.ts # Health check service (/health, /liveness, /readiness)
     ├── components/
     │   ├── ui/                  # Reusable design system components
@@ -74,6 +82,14 @@ frontend/
     │   │   ├── PageHeader.tsx   # Page titles, breadcrumbs, action slots
     │   │   ├── Modal.tsx        # Accessible dialog primitive with focus trap and Esc handling
     │   │   └── index.ts         # Export barrel for UI components
+    │   ├── wizard/              # FE-03 Application Intake Wizard Components
+    │   │   ├── WizardStepper.tsx       # Accessible multi-step progress stepper
+    │   │   ├── InstitutionStep.tsx     # Step 1: Affiliation, academic year, program type
+    │   │   ├── FacilitiesStep.tsx      # Step 2: Land, built-up, faculty, library, dynamic courses
+    │   │   ├── DocumentUploadStep.tsx  # Step 3: Multipart uploads, slot states, retry/delete
+    │   │   ├── ReviewSubmitStep.tsx    # Step 4: Full summary audit, oath checkbox, submit trigger
+    │   │   ├── SubmissionConfirmationStep.tsx # Step 5: Official receipt & next steps walkthrough
+    │   │   └── index.ts                # Export barrel for wizard steps
     │   └── layout/              # Application workspace shell
     │       ├── Header.tsx       # Dynamic authenticated user profile, role badge, and logout
     │       ├── Sidebar.tsx      # Role-filtered navigation with active route highlights
@@ -83,19 +99,23 @@ frontend/
     ├── pages/
     │   ├── HomePage.tsx         # Primary institutional overview and interactive design sandbox
     │   ├── LoginPage.tsx        # Institutional login page with inline validation & dev helper
+    │   ├── ApplicationWizardPage.tsx  # FE-03 Master application intake wizard page
     │   ├── AccessDeniedPage.tsx # HTTP 403 Forbidden state with return to workspace action
     │   ├── FeaturePlaceholderPage.tsx # Standardized placeholder explaining downstream chunks
     │   └── NotFoundPage.tsx     # 404 Not Found page
     ├── routes/
     │   ├── ProtectedRoute.tsx   # Session guard, loading state, unauthenticated redirect, and 403 guard
     │   └── AppRoutes.tsx        # Centralized route mapping
-    └── __tests__/               # Frontend unit & integration test suites (54 tests)
+    └── __tests__/               # Frontend unit & integration test suites (11 suites, 69 tests)
+        ├── application-wizard.spec.tsx  # Wizard navigation, validation, upload & submit tests (6 tests)
+        ├── applications-service.spec.ts # Applications API service unit tests (6 tests)
+        ├── documents-service.spec.ts    # Documents upload & multipart API tests (3 tests)
         ├── api-client.spec.ts   # API client request/error/timeout/upload tests (7 tests)
         ├── auth-service.spec.ts # Auth service, token injection, and 401/403 tests (5 tests)
         ├── auth-context.spec.tsx# AuthContext session bootstrap, storage, and logout tests (6 tests)
         ├── login-page.spec.tsx  # LoginPage validation, credentials, and errors tests (8 tests)
         ├── role-nav.spec.tsx    # Role matrix, safe return URL, and nav filtering tests (7 tests)
-        ├── routes.spec.tsx      # Routing, placeholder, protected redirect, and 403 tests (7 tests)
+        ├── routes.spec.tsx      # Routing, wizard mounting, protected redirect, and 403 tests (7 tests)
         ├── components.spec.tsx  # UI components behavior & accessibility tests (11 tests)
         └── shell.spec.tsx       # Shell layout and navigation tests (3 tests)
 ```
@@ -147,34 +167,86 @@ All route permissions are defined centrally in `src/auth/roleRoutes.ts` against 
 | `/audit` | Cryptographic Audit Ledger | `AUDITOR`, `BUREAU_HEAD`, `SYSTEM_ADMIN` | `AUDITOR` |
 | `/settings` | Platform Settings & Health | All authenticated roles | — |
 
-### Access Denied (HTTP 403 Forbidden)
-When an authenticated user attempts to access a protected route outside their role clearance:
-- The `<AccessDeniedPage>` is rendered.
-- Displays the user's current identity and role alongside required role clearance.
-- Preserves the authenticated session without forcing a logout.
-- Provides a safe button to return to their designated workspace (`getDefaultRouteForRole(user.role)`).
+---
 
-### Open-Redirect Prevention
-Post-login redirections are sanitized through `getSafeReturnUrl()`. Destination paths are accepted only if they are safe relative paths starting with a single `/`. External schemes (`http://`, `https://`), protocol-relative URLs (`//`), and `/login` loopbacks are rejected and fallback to `/`.
+## 5. Institution Application Wizard & Document Upload (FE-03)
+
+### 5.1 Architecture & Workflow Overview
+Milestone **FE-03** replaces the `/applications` placeholder with the complete application intake experience, providing a 5-step wizard connected directly to the `BE-04` and `DOC-01` backend endpoints:
+
+1. **Step 1 — Institution Affiliation & Academic Profile:**
+   - Shows applicant's institutional affiliation card bound to caller's `institutionId`.
+   - Inputs academic year adhering to `YYYY-YYYY` pattern (e.g., `2025-2026`).
+   - Selects approved program type from the frozen `ProgramType` enum (`ENGINEERING_TECHNOLOGY`, `MANAGEMENT`, `PHARMACY`, etc.).
+   - Dynamically previews the statutory document categories required under AICTE Approval Process Handbook (APH) regulations for that category.
+   - On advancement, creates or updates an editable draft via `POST /api/v1/applications` or `PATCH /api/v1/applications/:id`.
+
+2. **Step 2 — Physical Infrastructure & Metrics:**
+   - Captures land acreage, built-up floor area, faculty headcounts, library holdings, and lab counts.
+   - Dynamic proposed courses chip list allowing addition and removal of target programs and seat intakes.
+   - Persists metrics to backend draft inside `payloadJsonb`.
+
+3. **Step 3 — Statutory Document Uploads:**
+   - Real multipart file uploads against `POST /api/v1/applications/:id/documents` via `documentsService.uploadDocument`.
+   - Client-side preflight convenience checks: magic-byte file signature validation (`%PDF-`, `\xFF\xD8\xFF`, `\x89PNG`) and 15MB file size limit (`DOC-01`).
+   - Distinct slot states: `idle`, `uploading`, `uploaded`, and `error` with localized retry.
+   - Allows document deletion via `DELETE /api/v1/applications/:id/documents/:docId`.
+   - Clearly flags missing mandatory document categories before proceeding.
+
+4. **Step 4 — Review & Statutory Declaration:**
+   - Read-only summary of all entered information across all steps.
+   - Quick "Edit Section" controls to jump directly to any step to correct errors.
+   - Prominent missing document warning banner if required statutory evidence is absent.
+   - AICTE statutory declaration oath checkbox. Final submission is disabled until checked.
+
+5. **Step 5 — Submission Confirmation Receipt:**
+   - Dispatches `POST /api/v1/applications/:id/submit` under PostgreSQL row-level pessimistic write lock.
+   - Renders official receipt displaying server-generated Application Number (`APP-YYYY-XXXXXXXX`), UUID, timestamp, and next steps roadmap.
+   - Provides print receipt action (`window.print()`).
+
+### 5.2 API Services Integration
+- **`applicationsService` (`src/api/services/applicationsService.ts`):**
+  - `createDraft(data)` -> `POST /api/v1/applications`
+  - `updateDraft(id, data)` -> `PATCH /api/v1/applications/:id`
+  - `getApplication(id)` -> `GET /api/v1/applications/:id`
+  - `listApplications(params)` -> `GET /api/v1/applications`
+  - `submitApplication(id)` -> `POST /api/v1/applications/:id/submit`
+  - `getApplicationDocuments(id)` -> `GET /api/v1/applications/:id/documents`
+- **`documentsService` (`src/api/services/documentsService.ts`):**
+  - `uploadDocument(applicationId, file, documentType, description)` -> `POST /api/v1/applications/:id/documents` (Constructs multipart `FormData` without boundary overwrites)
+  - `getDocument(applicationId, documentId)` -> `GET /api/v1/applications/:id/documents/:documentId`
+  - `deleteDocument(applicationId, documentId)` -> `DELETE /api/v1/applications/:id/documents/:documentId`
+
+### 5.3 Human Sovereignty Principle (ADR-004)
+Uploaded documents are strictly labeled **"Uploaded & Stored (Pending Regulatory Scrutiny)"**. The interface explicitly clarifies that document upload does not constitute regulatory authenticity or approval.
+
+### 5.4 Extending or Modifying Wizard Steps
+To safely add or modify a step in the wizard:
+1. Update `src/applications/types.ts` to extend `ApplicationFormData` and step constants.
+2. Add step validation functions to `src/applications/validation.ts`.
+3. Create a step component under `src/components/wizard/` accepting `{ data, onChange, onNext, onPrev, ... }`.
+4. Register the step component and total step count in `src/pages/ApplicationWizardPage.tsx`.
+5. Update `WizardStepper.tsx` step labels.
+6. Add unit test coverage in `src/__tests__/application-wizard.spec.tsx`.
 
 ---
 
-## 5. Local Development & Quality Gates
+## 6. Local Development & Quality Gates
 
-### 5.1 Installation
+### 6.1 Installation
 ```bash
 cd frontend
 npm install
 ```
 
-### 5.2 Running the Development Server
+### 6.2 Running the Development Server
 ```bash
 npm run dev
 ```
 The application will be served at `http://localhost:5173`.
 By default, requests to `/api` are automatically proxied to the NestJS backend at `http://localhost:3000`.
 
-### 5.3 Quality Gates & Validation Commands
+### 6.3 Quality Gates & Validation Commands
 All commands run from `frontend/`:
 
 | Check | Command | Purpose |
@@ -183,12 +255,12 @@ All commands run from `frontend/`:
 | **Linting** | `npm run lint` | Runs ESLint across all `.ts` and `.tsx` source files (`--max-warnings=0`) |
 | **Formatting** | `npm run format:check` | Checks code formatting against Prettier rules |
 | **Auto-Format** | `npm run format` | Auto-formats code with Prettier |
-| **Unit Tests** | `npm test` | Runs the Vitest test runner across all 8 test suites (54 tests) |
+| **Unit Tests** | `npm test` | Runs the Vitest test runner across all 11 test suites (69 tests) |
 | **Production Build** | `npm run build` | Compiles TypeScript and produces optimized production bundle in `dist/` |
 
 ---
 
-## 6. Environment Configuration
+## 7. Environment Configuration
 
 Copy `.env.example` to `.env.local` to override local environment variables:
 ```bash
@@ -208,9 +280,9 @@ VITE_APP_ENV=development
 
 ---
 
-## 7. Downstream Extension Guide
+## 8. Downstream Extension Guide
 
-When implementing downstream chunks (`FE-03` through `FE-07`):
+When implementing downstream chunks (`FE-04` through `FE-07`):
 1. **Reuse Components:** Utilize components from `@/components/ui` (`Button`, `Card`, `Badge`, `FormField`, `Alert`, `Modal`, `EmptyState`, `PageHeader`).
 2. **Access Current User:** Use `const { user, logout } = useAuth()` to access safe profile projection and role.
 3. **Protect New Routes:** Wrap routes in `<ProtectedRoute allowedRoles={[...]}>`.
