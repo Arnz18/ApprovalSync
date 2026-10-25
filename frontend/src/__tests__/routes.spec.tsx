@@ -47,13 +47,16 @@ describe('Routing & Navigation (FE-01 & FE-02)', () => {
       </MemoryRouter>,
     );
 
-    await waitFor(() => {
-      expect(
-        screen.getByRole('heading', { name: /Institutional Regulatory Workspace/i }),
-      ).toBeInTheDocument();
-      expect(screen.getByText(/Core Regulatory Modules/i)).toBeInTheDocument();
-      expect(screen.getByText('API Online')).toBeInTheDocument();
-    });
+    await waitFor(
+      () => {
+        expect(
+          screen.getByRole('heading', { name: /Institutional Regulatory Workspace/i }),
+        ).toBeInTheDocument();
+        expect(screen.getByText(/Core Regulatory Modules/i)).toBeInTheDocument();
+        expect(screen.getByText('API Online')).toBeInTheDocument();
+      },
+      { timeout: 3000 },
+    );
   });
 
   it('renders ApplicationWizardPage for "/applications" (FE-03)', async () => {

@@ -27,11 +27,20 @@ import {
 import {
   validateInstitutionStep,
   validateFacilitiesStep,
-  validateDocumentsStep,
   validateReviewStep,
 } from '../applications/validation';
 import { applicationsService } from '../api/services/applicationsService';
 import { ApiClientError } from '../api/client';
+
+function safeScrollToTop() {
+  if (typeof window !== 'undefined' && typeof window.scrollTo === 'function') {
+    try {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch {
+      // In JSDOM / headless test runners
+    }
+  }
+}
 
 export function ApplicationWizardPage(): React.ReactElement {
   const [state, setState] = useState<ApplicationWizardState>(INITIAL_WIZARD_STATE);
@@ -201,9 +210,9 @@ export function ApplicationWizardPage(): React.ReactElement {
       result = validateInstitutionStep(state);
     } else if (state.currentStep === WizardStep.PROGRAM_FACILITIES) {
       result = validateFacilitiesStep(state);
-    } else if (state.currentStep === WizardStep.DOCUMENT_UPLOAD) {
-      result = validateDocumentsStep(state);
     }
+    // On Step 3 (DOCUMENT_UPLOAD), allow advancing to Review step where missing
+    // documents are highlighted and submission is safely gated by validateReviewStep.
 
     if (!result.isValid) {
       setActiveErrors(result.errors);
@@ -227,7 +236,7 @@ export function ApplicationWizardPage(): React.ReactElement {
         currentStep: nextStep,
         highestVisitedStep: Math.max(prev.highestVisitedStep, nextStep) as WizardStep,
       }));
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      safeScrollToTop();
     } catch (err) {
       console.error('Auto-save on step advance failed:', err);
     }
@@ -241,7 +250,7 @@ export function ApplicationWizardPage(): React.ReactElement {
       ...prev,
       currentStep: prevStep,
     }));
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    safeScrollToTop();
   };
 
   const handleStepClick = (step: WizardStep) => {
@@ -251,7 +260,7 @@ export function ApplicationWizardPage(): React.ReactElement {
       ...prev,
       currentStep: step,
     }));
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    safeScrollToTop();
   };
 
   /**
@@ -288,7 +297,7 @@ export function ApplicationWizardPage(): React.ReactElement {
         isSubmitting: false,
         saveStatus: 'saved',
       }));
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      safeScrollToTop();
     } catch (err: unknown) {
       let msg = 'Failed to submit application. Please review and try again.';
       if (err instanceof ApiClientError) {
