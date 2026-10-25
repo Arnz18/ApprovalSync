@@ -27,6 +27,20 @@ describe('Routing & Navigation (FE-01 & FE-02)', () => {
             }),
         } as unknown as Response;
       }
+      if (String(url).includes('/applications')) {
+        return {
+          ok: true,
+          status: 200,
+          text: async () =>
+            JSON.stringify({
+              success: true,
+              data: {
+                items: [],
+                pagination: { totalItems: 0, totalPages: 1, currentPage: 1, limit: 10 },
+              },
+            }),
+        } as unknown as Response;
+      }
       // Health probe
       return {
         ok: true,
@@ -80,7 +94,7 @@ describe('Routing & Navigation (FE-01 & FE-02)', () => {
     });
   });
 
-  it('renders FeaturePlaceholderPage for "/scrutiny" explaining FE-04', async () => {
+  it('renders ScrutinyQueuePage for "/scrutiny" (FE-04)', async () => {
     render(
       <MemoryRouter initialEntries={['/scrutiny']}>
         <AppRoutes />
@@ -89,9 +103,8 @@ describe('Routing & Navigation (FE-01 & FE-02)', () => {
 
     await waitFor(() => {
       expect(
-        screen.getByRole('heading', { name: /Scrutiny Officer Review Queue/i }),
+        screen.getByRole('heading', { name: /Scrutiny Review Queue/i }),
       ).toBeInTheDocument();
-      expect(screen.getByText(/Chunk FE-04 — BLOCKED/i)).toBeInTheDocument();
       expect(screen.getByText('API Online')).toBeInTheDocument();
     });
   });

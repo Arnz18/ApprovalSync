@@ -16,6 +16,8 @@ import { EmptyState } from '../components/ui/EmptyState';
 import { CaseHeader } from '../components/scrutiny/CaseHeader';
 import { ApplicationDataTab } from '../components/scrutiny/ApplicationDataTab';
 import { CaseTimelineView } from '../components/scrutiny/CaseTimelineView';
+import { DossierFindingsView } from '../components/scrutiny/DossierFindingsView';
+import { DocumentVerificationMatrixView } from '../components/scrutiny/DocumentVerificationMatrixView';
 import { scrutinyService } from '../api/services/scrutinyService';
 import { workflowService } from '../api/services/workflowService';
 import { dossierService } from '../api/services/dossierService';
@@ -177,6 +179,28 @@ export const CaseDetailPage: React.FC = () => {
       </div>
     );
   }
+
+  const handleReevaluateDossier = async () => {
+    if (!applicationId) return;
+    setIsDossierLoading(true);
+    setError(null);
+    try {
+      const report = await dossierService.evaluateDossier(applicationId);
+      setDossierReport(report);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(`Dossier evaluation failed: ${err.message}`);
+      } else {
+        setError('Failed to re-evaluate dossier verification report.');
+      }
+    } finally {
+      setIsDossierLoading(false);
+    }
+  };
+
+  const handleJumpToDocument = (_documentId: string) => {
+    setActiveTab('matrix');
+  };
 
   if (!application) return null;
 
@@ -370,27 +394,21 @@ export const CaseDetailPage: React.FC = () => {
         )}
 
         {activeTab === 'dossier' && (
-          <div id="dossier-tab-content">
-            {/* Will be populated with DossierFindingsView in Milestone 4 */}
-            <div style={{ padding: 'var(--space-6)', textAlign: 'center', backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)' }}>
-              {isDossierLoading ? (
-                <Spinner size="md" label="Loading dossier findings..." />
-              ) : dossierReport ? (
-                <div>Dossier report loaded for {dossierReport.applicationNumber}</div>
-              ) : (
-                <div>No dossier verification evaluation generated yet.</div>
-              )}
-            </div>
-          </div>
+          <DossierFindingsView
+            dossierReport={dossierReport}
+            isLoading={isDossierLoading}
+            onEvaluate={handleReevaluateDossier}
+            onSelectDocument={handleJumpToDocument}
+          />
         )}
 
         {activeTab === 'matrix' && (
-          <div id="matrix-tab-content">
-            {/* Will be populated with DocumentMatrixView in Milestone 4 */}
-            <div style={{ padding: 'var(--space-6)', textAlign: 'center', backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)' }}>
-              Document Verification Matrix will be rendered here.
-            </div>
-          </div>
+          <DocumentVerificationMatrixView
+            documents={dossierReport?.documentMatrix || []}
+            onSelectDocumentFinding={(_docId) => {
+              setActiveTab('dossier');
+            }}
+          />
         )}
       </div>
     </div>
