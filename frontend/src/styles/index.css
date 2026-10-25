@@ -3,6 +3,8 @@
  * Milestone: FE-01
  */
 
+@import './components.css';
+
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
