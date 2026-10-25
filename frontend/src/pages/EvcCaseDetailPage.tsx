@@ -5,6 +5,9 @@ import { Alert } from '../components/ui/Alert';
 import { EvcCaseHeader } from '../components/evc/EvcCaseHeader';
 import { InfrastructureReviewView } from '../components/evc/InfrastructureReviewView';
 import { InspectionChecklistEvidenceView } from '../components/evc/InspectionChecklistEvidenceView';
+import { ExpertSchedulingView } from '../components/evc/ExpertSchedulingView';
+import { CommitteeReviewView } from '../components/evc/CommitteeReviewView';
+import { CaseTimelineView } from '../components/scrutiny/CaseTimelineView';
 import { ReviewActionModal } from '../components/scrutiny/ReviewActionModal';
 import { evcService } from '../api/services/evcService';
 import { complianceService } from '../api/services/complianceService';
@@ -26,7 +29,7 @@ export const EvcCaseDetailPage: React.FC = () => {
   const [application, setApplication] = useState<ApplicationProjection | null>(null);
   const [compliance, setCompliance] = useState<ComplianceAssessmentResult | null>(null);
   const [allowedTransitions, setAllowedTransitions] = useState<AllowedTransition[]>([]);
-  const [_timelineEvents, setTimelineEvents] = useState<WorkflowTimelineEvent[]>([]);
+  const [timelineEvents, setTimelineEvents] = useState<WorkflowTimelineEvent[]>([]);
   const [documents, setDocuments] = useState<DocumentMetadataProjection[]>([]);
   const [isLoadingDocuments, setIsLoadingDocuments] = useState(false);
 
@@ -373,6 +376,27 @@ export const EvcCaseDetailPage: React.FC = () => {
           documents={documents}
           isLoadingDocuments={isLoadingDocuments}
         />
+      )}
+
+      {activeTab === 'SCHEDULING' && (
+        <ExpertSchedulingView application={application} compliance={compliance} />
+      )}
+
+      {activeTab === 'COMMITTEE' && (
+        <CommitteeReviewView
+          application={application}
+          compliance={compliance}
+          timelineEvents={timelineEvents}
+          allowedTransitions={allowedTransitions}
+          onOpenTransitionModal={(targetStatus) => {
+            const trans = allowedTransitions.find((t) => t.toStatus === targetStatus);
+            if (trans) handleOpenTransitionModal(trans);
+          }}
+        />
+      )}
+
+      {activeTab === 'TIMELINE' && (
+        <CaseTimelineView events={timelineEvents} isLoading={isLoading} />
       )}
 
       {/* Transition Execution Modal */}
