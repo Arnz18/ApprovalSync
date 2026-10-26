@@ -19,6 +19,11 @@ import {
   RuleType,
   ChecklistItemType,
 } from '../../rules/enums';
+import {
+  UndertakingType,
+  UndertakingStatus,
+  UndertakingReviewStatus,
+} from '../../undertakings/enums';
 
 export interface SeedInstitution {
   name: string;
@@ -522,5 +527,110 @@ export const SEED_CHECKLIST_ITEMS: SeedChecklistItem[] = [
     displayOrder: 10,
     ruleCode: 'RULE-POLY-LAND-01',
     guidanceNotes: 'Demo verification of polytechnic land documents.',
+  },
+];
+
+export interface SeedUndertaking {
+  institutionRegistrationNumber: string;
+  applicationNumber?: string;
+  type: UndertakingType;
+  status: UndertakingStatus;
+  reviewStatus: UndertakingReviewStatus;
+  title: string;
+  description?: string;
+  documentNumber: string;
+  issuingAuthority: string;
+  counterpartyName?: string;
+  startDate: string;
+  expiryDate: string;
+  renewalLeadDays: number;
+  renewalDueDate?: string;
+  metadataJsonb?: Record<string, unknown>;
+}
+
+export const SEED_UNDERTAKINGS: SeedUndertaking[] = [
+  {
+    institutionRegistrationNumber: 'DEMO-INST-2026-001',
+    type: UndertakingType.LAND_LEASE,
+    status: UndertakingStatus.ACTIVE,
+    reviewStatus: UndertakingReviewStatus.VERIFIED,
+    title: '30-Year Registered Land Lease Deed (Haveli Survey No. 452/1)',
+    description:
+      'Registered lease for 7.5 contiguous acres granted by Maharashtra Industrial Development Corporation.',
+    documentNumber: 'DEED-MAH-2020-8841',
+    issuingAuthority: 'Sub-Registrar Haveli, Pune',
+    counterpartyName: 'Maharashtra Industrial Development Corporation (MIDC)',
+    startDate: '2020-01-15',
+    expiryDate: '2050-01-14',
+    renewalLeadDays: 180,
+    renewalDueDate: '2049-07-18',
+    metadataJsonb: {
+      surveyNumber: '452/1',
+      contiguousAcres: 7.5,
+      isSyntheticDemo: true,
+    },
+  },
+  {
+    institutionRegistrationNumber: 'DEMO-INST-2026-001',
+    applicationNumber: 'APP-2026-DEMO-001',
+    type: UndertakingType.AFFIDAVIT_UNDERTAKING,
+    status: UndertakingStatus.ACTIVE,
+    reviewStatus: UndertakingReviewStatus.VERIFIED,
+    title: 'AICTE Prescribed Compliance & Anti-Ragging Affidavit (Format 1)',
+    description:
+      'Statutory institutional undertaking affirming adherence to AICTE Approval Process Handbook norms.',
+    documentNumber: 'AFF-PUN-2026-0042',
+    issuingAuthority: 'Notary Public, Pune District Court',
+    counterpartyName: 'Member Secretary, AICTE',
+    startDate: '2026-01-01',
+    expiryDate: '2027-01-01',
+    renewalLeadDays: 30,
+    renewalDueDate: '2026-12-02',
+    metadataJsonb: {
+      formatId: 'FORMAT-1',
+      notaryRegistration: 'NOTARY-MAH-4412',
+      isSyntheticDemo: true,
+    },
+  },
+  {
+    institutionRegistrationNumber: 'DEMO-INST-2026-001',
+    type: UndertakingType.FIRE_SAFETY_CLEARANCE,
+    status: UndertakingStatus.ACTIVE,
+    reviewStatus: UndertakingReviewStatus.VERIFIED,
+    title: 'State Fire Service Annual Fire Safety No-Objection Certificate',
+    description:
+      'Annual building safety clearance for academic and administrative blocks.',
+    documentNumber: 'FIRE-PUN-2025-9921',
+    issuingAuthority: 'Pune Municipal Fire Brigade',
+    counterpartyName: 'Director of Fire Services, Maharashtra',
+    startDate: '2025-12-01',
+    expiryDate: '2026-11-30',
+    renewalLeadDays: 60,
+    renewalDueDate: '2026-10-01',
+    metadataJsonb: {
+      buildingBlocks: ['Block A (Academic)', 'Block B (Laboratories)'],
+      isSyntheticDemo: true,
+    },
+  },
+  {
+    institutionRegistrationNumber: 'DEMO-INST-2026-002',
+    type: UndertakingType.BUILDING_LEASE,
+    status: UndertakingStatus.EXPIRED,
+    reviewStatus: UndertakingReviewStatus.VERIFIED,
+    title: 'Short-Term Temporary Workshop Annex Lease (Expired)',
+    description:
+      'Expired lease agreement for temporary mechanical workshop annex prior to permanent workshop construction.',
+    documentNumber: 'LEASE-PUN-2023-0104',
+    issuingAuthority: 'Sub-Registrar Kothrud',
+    counterpartyName: 'Kothrud Industrial Estate Pvt Ltd',
+    startDate: '2023-01-01',
+    expiryDate: '2024-01-01',
+    renewalLeadDays: 90,
+    renewalDueDate: '2023-10-03',
+    metadataJsonb: {
+      expiredRemark:
+        'Replaced by permanent institutional workshop building; retained for historical audit trail.',
+      isSyntheticDemo: true,
+    },
   },
 ];

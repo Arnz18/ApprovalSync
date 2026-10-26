@@ -26,6 +26,7 @@ import { ProvidersModule } from './providers/providers.module';
 import { ComplianceModule } from './compliance/compliance.module';
 import { AuditModule } from './audit/audit.module';
 import { SlaModule } from './sla/sla.module';
+import { UndertakingsModule } from './undertakings/undertakings.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RolesGuard } from './auth/guards/roles.guard';
 
@@ -47,6 +48,7 @@ import { RolesGuard } from './auth/guards/roles.guard';
     WorkflowModule,
     AuditModule,
     SlaModule,
+    UndertakingsModule,
     DocumentsModule,
     AiModule,
     VerificationModule,

@@ -21,6 +21,8 @@ import {
   ChecklistTemplate,
   ChecklistItem,
   WorkflowTimelineEvent,
+  Undertaking,
+  UndertakingHistory,
 } from '../entities';
 import {
   SEED_INSTITUTIONS,
@@ -34,7 +36,9 @@ import {
   SEED_REGULATORY_RULES,
   SEED_CHECKLIST_TEMPLATES,
   SEED_CHECKLIST_ITEMS,
+  SEED_UNDERTAKINGS,
 } from './seed.data';
+import { calculateRenewalDueDate } from '../../undertakings/utils/date-calculations';
 
 export interface SeedReport {
   institutionsCreated: number;
@@ -49,6 +53,7 @@ export interface SeedReport {
   checklistTemplatesCreated: number;
   checklistItemsCreated: number;
   timelineEventsCreated: number;
+  undertakingsCreated: number;
   skippedExisting: number;
 }
 
@@ -67,6 +72,7 @@ export class SeedService {
       checklistTemplatesCreated: 0,
       checklistItemsCreated: 0,
       timelineEventsCreated: 0,
+      undertakingsCreated: 0,
       skippedExisting: 0,
     };
 
@@ -411,6 +417,76 @@ export class SeedService {
         } else {
           report.skippedExisting++;
         }
+      }
+    }
+
+    // 9. Seed Synthetic Undertakings & Leases
+    const undertakingRepo = dataSource.getRepository(Undertaking);
+    const historyRepo = dataSource.getRepository(UndertakingHistory);
+    for (const seedU of SEED_UNDERTAKINGS) {
+      const inst = institutionMap.get(seedU.institutionRegistrationNumber);
+      if (!inst) continue;
+
+      const app = seedU.applicationNumber
+        ? applicationMap.get(seedU.applicationNumber)
+        : null;
+
+      const existing = await undertakingRepo.findOne({
+        where: {
+          institutionId: inst.id,
+          documentNumber: seedU.documentNumber,
+        },
+      });
+
+      if (!existing) {
+        const renewalDue =
+          seedU.renewalDueDate ||
+          calculateRenewalDueDate(seedU.expiryDate, seedU.renewalLeadDays);
+
+        const undertaking = undertakingRepo.create({
+          institutionId: inst.id,
+          applicationId: app ? app.id : null,
+          type: seedU.type,
+          status: seedU.status,
+          reviewStatus: seedU.reviewStatus,
+          title: seedU.title,
+          description: seedU.description || null,
+          documentNumber: seedU.documentNumber,
+          issuingAuthority: seedU.issuingAuthority,
+          counterpartyName: seedU.counterpartyName || null,
+          startDate: seedU.startDate,
+          expiryDate: seedU.expiryDate,
+          renewalLeadDays: seedU.renewalLeadDays,
+          renewalDueDate: renewalDue,
+          metadataJsonb: seedU.metadataJsonb || {},
+        });
+        const saved = await undertakingRepo.save(undertaking);
+
+        const history = historyRepo.create({
+          undertakingId: saved.id,
+          action: 'SEEDED',
+          fromStatus: null,
+          toStatus: saved.status,
+          fromReviewStatus: null,
+          toReviewStatus: saved.reviewStatus,
+          actorId: 'seed-system',
+          actorRole: UserRole.SYSTEM_ADMIN,
+          actorEmail: 'system@synthetic.approvalsync.local',
+          changeReason: 'Initial synthetic demonstration seed',
+          snapshotJsonb: {
+            id: saved.id,
+            institutionId: saved.institutionId,
+            title: saved.title,
+            documentNumber: saved.documentNumber,
+            startDate: saved.startDate,
+            expiryDate: saved.expiryDate,
+            renewalDueDate: saved.renewalDueDate,
+          },
+        });
+        await historyRepo.save(history);
+        report.undertakingsCreated++;
+      } else {
+        report.skippedExisting++;
       }
     }
 

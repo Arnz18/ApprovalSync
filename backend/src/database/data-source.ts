@@ -22,12 +22,15 @@ import {
   WorkflowTimelineEvent,
   AuditCheckpoint,
   SlaEscalation,
+  Undertaking,
+  UndertakingHistory,
 } from './entities';
 import { InitialCoreSchema1729640000000 } from './migrations/1729640000000-InitialCoreSchema';
 import { CreateRulesAndChecklists1729720000000 } from './migrations/1729720000000-CreateRulesAndChecklists';
 import { CreateWorkflowTimelineEvents1729800000000 } from './migrations/1729800000000-CreateWorkflowTimelineEvents';
 import { CreateAuditCheckpoints1729880000000 } from './migrations/1729880000000-CreateAuditCheckpoints';
 import { EnhanceSlaTimersAndEscalations1729960000000 } from './migrations/1729960000000-EnhanceSlaTimersAndEscalations';
+import { CreateUndertakingsAndLeases1730040000000 } from './migrations/1730040000000-CreateUndertakingsAndLeases';
 
 export const dataSourceOptions: DataSourceOptions = {
   type: 'postgres',
@@ -55,6 +58,8 @@ export const dataSourceOptions: DataSourceOptions = {
     WorkflowTimelineEvent,
     AuditCheckpoint,
     SlaEscalation,
+    Undertaking,
+    UndertakingHistory,
   ],
   migrations: [
     InitialCoreSchema1729640000000,
@@ -62,6 +67,7 @@ export const dataSourceOptions: DataSourceOptions = {
     CreateWorkflowTimelineEvents1729800000000,
     CreateAuditCheckpoints1729880000000,
     EnhanceSlaTimersAndEscalations1729960000000,
+    CreateUndertakingsAndLeases1730040000000,
   ],
 
   synchronize: false,

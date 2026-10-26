@@ -41,6 +41,9 @@ async function runSeed(): Promise<void> {
     console.log(
       `  - Timeline events created:     ${report.timelineEventsCreated}`,
     );
+    console.log(
+      `  - Undertakings created:        ${report.undertakingsCreated}`,
+    );
     console.log(`  - Existing skipped:            ${report.skippedExisting}`);
   } catch (error: unknown) {
     console.error('[SeedRunner] Seeding failed:', error);
