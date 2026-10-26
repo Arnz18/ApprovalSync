@@ -7,10 +7,11 @@
 > - **FE-04** — Scrutiny queue, case detail and evidence review (`COMMITTED`)
 > - **FE-05** — Role-specific dashboards, SLA, alerts & analytics (`COMMITTED`)
 > - **FE-06** — EVC scheduling, inspection and committee workspace (`COMMITTED`)
+> - **FE-07** — Undertakings, expiry tracking, reports & cryptographic audit UI (`COMMITTED`)
 > **Lead Owner:** M4 — Frontend & Experience
 > **Framework:** React 18 + TypeScript 5 + Vite 5 Single-Page Application (SPA)
-> **Status:** FE-01 through FE-06 IMPLEMENTED & HARDENED (22 test suites, 177 automated tests passing)
-> **Documentation:** [`docs/ui/fe-05-dashboards-sla-alerts.md`](../docs/ui/fe-05-dashboards-sla-alerts.md), [`docs/ui/frontend-integration-audit.md`](../docs/ui/frontend-integration-audit.md), [`docs/ui/backend-integration-handoff.md`](../docs/ui/backend-integration-handoff.md)
+> **Status:** FE-01 through FE-07 IMPLEMENTED & HARDENED (30 test suites, 251 automated tests passing)
+> **Documentation:** [`docs/ui/fe-07-undertakings-expiry-reports-audit.md`](../docs/ui/fe-07-undertakings-expiry-reports-audit.md), [`docs/ui/fe-05-dashboards-sla-alerts.md`](../docs/ui/fe-05-dashboards-sla-alerts.md), [`docs/ui/frontend-integration-audit.md`](../docs/ui/frontend-integration-audit.md)
 
 ---
 
@@ -80,51 +81,41 @@ frontend/
     │       ├── evcService.ts          # FE-06 / BE-06 EVC Inspection Service
     │       ├── slaService.ts          # FE-05 / BE-08 SLA Timers, Policies & Escalations Service
     │       └── healthService.ts # Health check service (/health, /liveness, /readiness)
+    ├── undertakings/            # FE-07 Undertakings Domain & Utilities
+    │   ├── types.ts             # UndertakingType, UndertakingStatus, UndertakingReviewStatus, DTOs
+    │   └── undertakingUtils.ts  # UTC date handling, days remaining, CSV formula defense
+    ├── audit/                   # FE-07 Cryptographic Audit Domain & Utilities
+    │   ├── types.ts             # AuditLogProjection, Checkpoint, MerkleProof, Standalone DTOs
+    │   └── auditUtils.ts        # Hash truncation, event type labels, crypto assurance scope
     ├── components/
     │   ├── ui/                  # Reusable design system components
     │   ├── wizard/              # FE-03 Application Intake Wizard Components
     │   ├── scrutiny/            # FE-04 Scrutiny Review Components
     │   ├── evc/                 # FE-06 EVC Committee & Inspection Components
     │   ├── sla/                 # FE-05 SLA Timer, Modal & Escalation Components
-    │   │   ├── SlaTimerBadge.tsx       # Semantic status badges (ACTIVE, WARNING, BREACHED, PAUSED)
-    │   │   ├── SlaTimerCard.tsx        # SLA timer card with countdown & pause/resume triggers
-    │   │   ├── PauseTimerModal.tsx     # Mandatory human justification capture modal
-    │   │   ├── SlaEscalationList.tsx   # Filterable escalation table by tier & severity
-    │   │   ├── SlaPolicyModal.tsx      # Configured stage policies with demo disclaimer
-    │   │   └── ManualReconciliationBanner.tsx # Admin-gated manual SLA reconciliation sweep
     │   ├── dashboard/           # FE-05 Dashboard Metric & Analytics Components
-    │   │   ├── DashboardMetricsOverview.tsx # KPI summary cards
-    │   │   ├── ApplicationStatusChart.tsx   # Visual status progression meter
-    │   │   ├── ApplicationAgingBreakdown.tsx # Application turnaround & aging buckets
-    │   │   └── DerivedAlertsFeed.tsx        # Real server-derived operational alert feed
+    │   ├── undertakings/        # FE-07 Undertaking Table, Badges & Modals (Create, Review, Renew, Reconcile)
+    │   ├── audit/               # FE-07 Cryptographic Audit Chain Verifier, Table & Proof Modals
     │   └── layout/              # Application workspace shell
     ├── pages/
     │   ├── HomePage.tsx         # Primary institutional overview and interactive design sandbox
     │   ├── LoginPage.tsx        # Institutional login page with inline validation & dev helper
     │   ├── DashboardPage.tsx    # FE-05 Master Dashboard coordinator & role-aware dispatcher
     │   ├── dashboard/           # FE-05 Role-tailored dashboard views
-    │   │   ├── InstitutionDashboard.tsx # Institution tenant-isolated view
-    │   │   ├── ScrutinyDashboard.tsx    # Scrutiny officer queue & active SLA monitors
-    │   │   ├── RegionalDashboard.tsx    # Regional officer workload & Tier 2 escalations
-    │   │   ├── BureauDashboard.tsx      # Council throughput & Tier 3 escalations
-    │   │   └── AuditorAdminDashboard.tsx# Admin reconciliation / Auditor read-only oversight
     │   ├── ApplicationWizardPage.tsx  # FE-03 Master application intake wizard page
     │   ├── ScrutinyQueuePage.tsx      # FE-04 Scrutiny queue page
-    │   ├── CaseDetailPage.tsx         # FE-04 Case detail & document verification workspace
+    │   ├── CaseDetailPage.tsx         # FE-04 / FE-07 Case detail workspace with Undertakings & Audit tabs
     │   ├── EvcQueuePage.tsx           # FE-06 EVC inspection queue page
     │   ├── EvcCaseDetailPage.tsx      # FE-06 EVC case detail & committee review workspace
+    │   ├── UndertakingsPage.tsx       # FE-07 Undertakings & Leases primary workspace
+    │   ├── AuditLedgerPage.tsx        # FE-07 Cryptographic Audit Ledger & Proofs workspace
     │   ├── AccessDeniedPage.tsx # HTTP 403 Forbidden state with return to workspace action
     │   ├── FeaturePlaceholderPage.tsx # Standardized placeholder explaining downstream chunks
     │   └── NotFoundPage.tsx     # 404 Not Found page
     ├── routes/
     │   ├── ProtectedRoute.tsx   # Session guard, loading state, unauthenticated redirect, and 403 guard
     │   └── AppRoutes.tsx        # Centralized route mapping
-    └── __tests__/               # Frontend unit & integration test suites (22 suites, 167 tests)
-        ├── sla-service.spec.ts  # SLA API endpoints, query params & error parsing tests (7 tests)
-        ├── sla-utils.spec.ts    # SLA countdown, urgency & calendar aging tests (13 tests)
-        ├── sla-components.spec.tsx # SLA Badges, Pause modal & timer cards tests (11 tests)
-        ├── dashboard-page.spec.tsx # Role-specific dashboard views & failure isolation tests (8 tests)
-        └── ...                  # FE-01, FE-02, FE-03, FE-04, FE-06 test suites (128 tests)
+    └── __tests__/               # Frontend unit & integration test suites (30 suites, 251 tests passing)
 ```
 
 ---
@@ -294,7 +285,7 @@ All commands run from `frontend/`:
 | **Linting** | `npm run lint` | Runs ESLint across all `.ts` and `.tsx` source files (`--max-warnings=0`) |
 | **Formatting** | `npm run format:check` | Checks code formatting against Prettier rules |
 | **Auto-Format** | `npm run format` | Auto-formats code with Prettier |
-| **Unit Tests** | `npm test` | Runs Vitest across all 18 test suites (128 tests passing) |
+| **Unit Tests** | `npm test` | Runs Vitest across all 30 test suites (251 tests passing) |
 | **Production Build** | `npm run build` | Compiles TypeScript and produces optimized production bundle in `dist/` |
 
 ---
