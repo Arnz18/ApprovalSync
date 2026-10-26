@@ -1,20 +1,22 @@
-# ApprovalSync — Frontend Integration Audit & Release-Readiness Report (FE-01 through FE-06)
+# ApprovalSync — Frontend Integration Audit & Verification Report (FE-01 through FE-06)
 
 > **Audit Date:** 2026-10-26
 > **Auditor / Owner:** M4 — Frontend & Experience
 > **Repository:** `https://github.com/Arnz18/ApprovalSync.git`
 > **Branch:** `main`
 > **Audit Scope:** `FE-01`, `FE-02`, `FE-03`, `FE-04`, `FE-06`
-> **Deferred / Blocked Chunks:** `FE-05` (Blocked by BE-05), `FE-07` (Blocked by BE-07)
-> **Quality Gate Status:** All 18 Test Suites (128 Tests) Passing • TypeScript Strict Passed • ESLint Clean (0 Warnings) • Prettier Verified • Vite Production Build Clean (456 kB JS / 25.5 kB CSS)
+> **Blocked Downstream Chunks:** `FE-05` (Blocked by `BE-08`), `FE-07` (Blocked by `BE-09`, `BE-07`, `FE-04`)
+> **Verification Status:** 18 Test Suites (128 Tests) Passing • TypeScript Strict (0 Errors) • ESLint Clean (0 Warnings) • Prettier Verified • Production Build Clean (456 kB JS / 25.5 kB CSS) • Live Backend Integration Pending
 
 ---
 
 ## 1. Executive Summary & Purpose
 
-This audit constitutes a comprehensive, rigorous frontend integration and release-readiness review across all implemented milestones (`FE-01` through `FE-06`). Its purpose is to verify that the live user interface strictly matches the frozen backend REST contracts (`docs/contracts/`), NestJS controllers (`backend/src/`), multi-tenant authentication and RBAC boundaries, and documented task acceptance criteria.
+This audit constitutes a comprehensive, rigorous frontend integration and contract conformance review across all implemented milestones (**FE-01 through FE-06**). Its purpose is to verify that the live user interface strictly matches the frozen backend REST contracts (`docs/contracts/`), NestJS controllers (`backend/src/`), multi-tenant authentication and RBAC boundaries, and documented task acceptance criteria.
 
 All genuine frontend defects discovered during code inspection and headless browser testing have been corrected, regression tests have been authored, and interface boundary gaps requiring M1 (Lead/Architect) or M2 (Backend) coordination have been formally documented.
+
+**Important Scope Boundary:** This audit evaluates frontend source code, component behavior, and static contract alignment. Live end-to-end integration against a running backend daemon on port 3000 was **not exercised**, as no backend daemon was active during testing.
 
 ---
 
@@ -25,10 +27,10 @@ All genuine frontend defects discovered during code inspection and headless brow
 | **FE-01** | Application Shell, Swiss Design System, Route Guards, API Client | `GET /api/v1/health`<br>`GET /api/v1/health/liveness`<br>`GET /api/v1/health/readiness` | **ALIGNED** | Native typed `ApiClient` with correlation ID injection, error envelope unwrapping, and responsive enterprise layout. |
 | **FE-02** | Authentication, Session Lifecycle, RBAC Route Filtering | `POST /api/v1/auth/login`<br>`GET /api/v1/auth/me` | **ALIGNED** | Scoped `sessionStorage` token isolation; 8-role RBAC routing matrix; open-redirect sanitization; accessible 403 / 404 views. |
 | **FE-03** | Institution Intake Wizard, Multipart Uploads, Draft Auto-save | `POST /api/v1/applications`<br>`PATCH /api/v1/applications/:id`<br>`GET /api/v1/applications/:id`<br>`POST /api/v1/applications/:id/submit`<br>`POST /api/v1/applications/:id/documents`<br>`DELETE /api/v1/documents/:id` | **ALIGNED** | 5-step stepper with draft persistence, PDF binary magic byte verification, client-side quota validation, and statutory oath enforcement. |
-| **FE-04** | Scrutiny Queue, Dossier Findings, Matrix, Clarification Transitions | `GET /api/v1/applications`<br>`GET /api/v1/applications/:id`<br>`GET /api/v1/applications/:id/documents`<br>`GET /api/v1/documents/:id/download`<br>`GET /api/v1/applications/:id/dossier-report`<br>`POST /api/v1/applications/:id/dossier-report`<br>`GET /api/v1/applications/:id/allowed-transitions`<br>`POST /api/v1/applications/:id/transitions`<br>`GET /api/v1/applications/:id/timeline` | **ALIGNED** | ADR-004 Human Sovereignty disclaimers, simulated data badges, multi-role FSM transition modal, and mandatory justification comments. |
+| **FE-04** | Scrutiny Queue, Case Detail and Evidence Review | `GET /api/v1/applications`<br>`GET /api/v1/applications/:id`<br>`GET /api/v1/applications/:id/documents`<br>`GET /api/v1/documents/:id/download`<br>`GET /api/v1/applications/:id/dossier-report`<br>`POST /api/v1/applications/:id/dossier-report`<br>`GET /api/v1/applications/:id/allowed-transitions`<br>`POST /api/v1/applications/:id/transitions`<br>`GET /api/v1/applications/:id/timeline` | **ALIGNED** | ADR-004 Human Sovereignty disclaimers, simulated data badges, multi-role FSM transition modal, and mandatory justification comments. |
 | **FE-06** | EVC Scheduling & Queue, Infrastructure Review, Committee Workspace | `GET /api/v1/applications` (EVC filtered)<br>`GET /api/v1/applications/:id`<br>`GET /api/v1/applications/:id/compliance-assist`<br>`POST /api/v1/applications/:id/compliance-assist/evaluate`<br>`GET /api/v1/applications/:id/allowed-transitions`<br>`POST /api/v1/applications/:id/transitions`<br>`GET /api/v1/applications/:id/timeline` | **ALIGNED** | On-site inspection checklist aid, SHC committee review, escalation provenance audit trail, and advisory heuristics safeguards. |
-| **FE-05** | Deficiencies & Clarifications Resolution Workspace | Blocked by `BE-05` | **BLOCKED** | Kept in non-implemented blocked status per project plan. |
-| **FE-07** | Approvals & Rejections Dashboard | Blocked by `BE-07` | **BLOCKED** | Kept in non-implemented blocked status per project plan. |
+| **FE-05** | Role-Specific Dashboards, SLA, Alerts and Analytics | Blocked by `BE-08` (Depends on `FE-04`, `BE-08`) | **BLOCKED** | Kept in non-implemented blocked status per `PROJECT_STATE.md` dependency registry. |
+| **FE-07** | Undertakings, Expiry, Reports and Audit UI | Blocked by `BE-09`, `BE-07` (Depends on `BE-09`, `BE-07`, `FE-04`) | **BLOCKED** | Kept in non-implemented blocked status per `PROJECT_STATE.md` dependency registry. |
 
 ---
 
@@ -125,37 +127,93 @@ Test Files  18 passed (18)
 
 ---
 
-## 5. Live vs Mock Execution Status
+## 5. Testing Verification Levels & Live Testing Limitation
 
-- **Probing Status:** Local backend health probe on `http://localhost:3000/api/v1/health` confirmed that no backend daemon is active in the development environment.
-- **Mock Strategy:** All integration verification is conducted against the real, frozen backend interface contracts (`backend/src/applications/`, `backend/src/auth/`, `backend/src/workflow/`, `backend/src/dossier/`, `backend/src/compliance/`, and `docs/contracts/`).
-- **Safety Framing:** Synthetic mock records in the frontend clearly display `[SIMULATED]` indicators and ADR-004 human sovereignty governance notices.
+To maintain strict scientific and engineering rigor, the following testing tiers are explicitly distinguished:
 
----
+| Level | Testing Tier | Method / Environment | Status | Scope & Evidence |
+| :--- | :--- | :--- | :--- | :--- |
+| **Tier 1** | **Frontend Unit & Component Tests** | Vitest 2.1.9 + JSDOM + React Testing Library | **PASSED** | 18 test suites, 128 tests covering route guards, rendering, download triggers, stepper validation, and modal FSM transitions. |
+| **Tier 2** | **Source-Level Contract Inspection** | Static inspection of NestJS controllers (`backend/src/`) vs frontend service clients (`frontend/src/api/services/`) | **PASSED** | Verified route paths, DTO structures, `@Roles` decorators, and multi-tenant scoping. |
+| **Tier 3** | **Live Backend API Integration** | HTTP requests over port 3000 (`http://localhost:3000/api/v1/health`) | **NOT EXERCISED** | Probing with `curl.exe` confirmed no backend daemon was active during testing. No live network round-trips were performed. |
+| **Tier 4** | **Database-Backed End-to-End Testing** | Full stack with PostgreSQL 16 JSONB, Redis BullMQ, and Docker Compose | **NOT EXERCISED** | Database row locking, Redis SLA timers, and migration states were not evaluated in a live runtime. |
 
-## 6. Contract Gaps & Backend Dependencies for M1/M2 Handoff
-
-The following contract gaps and discrepancies were identified during the audit for handoff to M1 (Lead/Architect) and M2 (Backend):
-
-### 6.1 `SHC_SAC_MEMBER` Role Omission on Applications Controller
-- **Location:** `backend/src/applications/applications.controller.ts` (lines 90–98, 130–137)
-- **Issue:** The `@Roles(...)` decorator on `GET /applications` and `GET /applications/:id` includes `INSTITUTION_USER`, `SCRUTINY_OFFICER`, `REGIONAL_OFFICER`, `BUREAU_HEAD`, `SYSTEM_ADMIN`, `AUDITOR`, and `EVC_INSPECTOR`, but **omits** `SHC_SAC_MEMBER`.
-- **Impact:** While `frontend/src/auth/roleRoutes.ts` permits Standing Hearing Committee (`SHC_SAC_MEMBER`) members to navigate to `/evc` to review escalated hearings, requests to the backend for application lists or details will return HTTP 403 Forbidden.
-- **Recommendation for M2:** Add `UserRole.SHC_SAC_MEMBER` to `@Roles(...)` in `applications.controller.ts`.
-
-### 6.2 `BUREAU_HEAD` Role Omission on Dossier Re-evaluation
-- **Location:** `backend/src/dossier/dossier.controller.ts` (lines 48–56)
-- **Issue:** The `GET /applications/:id/dossier-report` endpoint allows `BUREAU_HEAD`, but `POST /applications/:id/dossier-report` (recalculate) omits `BUREAU_HEAD` in `@Roles(...)`.
-- **Recommendation for M2:** Align `POST` permissions with `GET` permissions if Bureau Heads should be able to trigger recalculation during high-level review.
-
-### 6.3 Finding-Level Clarification Annotation & Persistence
-- **Status:** In `FE-04`, the frontend provides finding-level inspection and status indicators. However, persisting reviewer annotations on individual findings requires the future clarification workflow (`BE-05` / `FE-05`). Currently, workflow transitions apply at the application level via `POST /api/v1/applications/:id/transitions`.
-
-### 6.4 EVC Inspection Photo & Expert Roster Persistence
-- **Status:** In `FE-06`, the Inspection Checklist & Evidence Aid tab provides a working local session aid for inspectors. Persistent on-site photo uploads and expert roster assignment endpoints belong to the upcoming `BE-07` milestone.
+> [!WARNING]
+> Because Tier 3 (Live Backend API Integration) and Tier 4 (Database E2E) were not exercised, the system is **contract-verified and unit-tested**, but **not certified as live-integrated**. Full live integration testing must take place once the backend daemon is started.
 
 ---
 
-## 7. Release-Readiness Certification
+## 6. Actionable Backend & Capability Handoff for M1 & M2
 
-The frontend workspace for ApprovalSync (`FE-01` through `FE-06`) is **hardened, fully tested, and release-ready** for human review and backend pairing. All tasks remain strictly within the frontend boundary, and no blocked milestones (`FE-05`, `FE-07`) have been started.
+For complete technical specifications and curl verification commands, refer to [`docs/ui/backend-integration-handoff.md`](./backend-integration-handoff.md).
+
+### 6.1 Formal Project-Chunk Dependency Graph (Authoritative `PROJECT_STATE.md`)
+The formal dependency graph defined in `PROJECT_STATE.md` governs milestone gating:
+- **`BE-05`:** Versioned regulatory rules and checklists (`backend/src/rules/`) — `COMMITTED`.
+- **`BE-06`:** Workflow FSM and transition guards (`backend/src/workflow/`) — `COMMITTED`.
+- **`BE-07`:** Cryptographic audit ledger and proof verification (`backend/src/audit/`) — `PLANNED` (Depends on `BE-02`).
+- **`BE-08`:** Durable SLA timers and escalation engine (`backend/src/sla/`) — `BLOCKED` (Depends on `BE-06`, `BE-07`).
+- **`BE-09`:** Undertakings, lease and expiry tracker (`backend/src/undertakings/`) — `BLOCKED` (Depends on `BE-05`, `BE-08`).
+- **`FE-05`:** Role-specific dashboards, SLA, alerts and analytics — `BLOCKED` (Depends on `FE-04`, `BE-08`).
+- **`FE-07`:** Undertakings, expiry, reports and audit UI — `BLOCKED` (Depends on `BE-09`, `BE-07`, `FE-04`).
+
+*Correction Note:* Downstream chunks `FE-05` and `FE-07` are blocked strictly by their declared dependencies (`BE-08` for `FE-05`; `BE-09` and `BE-07` for `FE-07`). They are NOT blocked by `BE-05` (which is already committed). Furthermore, finding-level clarification persistence and expert roster scheduling are unassigned interface gaps, not parts of `BE-05` or `BE-07`.
+
+### 6.2 Backend Permission / Authorization Findings
+
+#### Finding A — `SHC_SAC_MEMBER` Application Read Access
+- **Files & Lines:** `backend/src/applications/applications.controller.ts` (lines 90–98, 129–137, 258–267)
+- **Current Declaration:**
+  ```typescript
+  @Roles(
+    UserRole.INSTITUTION_USER,
+    UserRole.SCRUTINY_OFFICER,
+    UserRole.REGIONAL_OFFICER,
+    UserRole.BUREAU_HEAD,
+    UserRole.SYSTEM_ADMIN,
+    UserRole.AUDITOR,
+    UserRole.EVC_INSPECTOR,
+  )
+  ```
+- **Observed Behavior:** `UserRole.SHC_SAC_MEMBER` is omitted from `GET /applications`, `GET /applications/:id`, and `GET /applications/:id/documents`.
+- **Impact:** Standing Hearing Committee (`SHC_SAC_MEMBER`) members permitted by `frontend/src/auth/roleRoutes.ts` to access committee cases receive HTTP 403 Forbidden when attempting to view institutional applications, even though they are authorized to read dossier reports (`dossier-report`) and compliance assessments (`compliance-assist`).
+- **Recommendation for M2 & M1:** M2 to review with M1 whether `SHC_SAC_MEMBER` should be granted read-only access to institutional applications and document attachments, and if approved, add `UserRole.SHC_SAC_MEMBER` to the `@Roles(...)` decorators in `applications.controller.ts`.
+
+#### Finding B — `BUREAU_HEAD` Dossier Re-evaluation Mutation Policy
+- **Files & Lines:** `backend/src/verification/dossier-report.controller.ts` (lines 46–51, 87–92 vs lines 127–136)
+- **Current Declaration:**
+  - `GET /applications/:id/dossier-report`: Allows `INSTITUTION_USER`, `SCRUTINY_OFFICER`, `REGIONAL_OFFICER`, `EVC_INSPECTOR`, `SHC_SAC_MEMBER`, `BUREAU_HEAD`, `SYSTEM_ADMIN`, `AUDITOR`.
+  - `POST /applications/:id/dossier-report` & `POST .../evaluate`: Allows only `INSTITUTION_USER`, `SCRUTINY_OFFICER`, `REGIONAL_OFFICER`, `SYSTEM_ADMIN`.
+- **Analysis:** Read permission on `GET` does not inherently mandate mutation permission on `POST`. Bureau Heads may be intentionally configured as supervisory reviewers rather than operational recalculation actors.
+- **Recommendation for M2 & M1:** M2 and M1 should explicitly decide whether Bureau Heads require authority to trigger full multi-pipeline recalculation via `POST`. If authorized, update the decorator and controller tests; otherwise, maintain the current read-only boundary.
+
+### 6.3 Missing Backend Capabilities & Uncontracted Interface Gaps
+
+1. **Finding-Level Clarification/Disposition Persistence:**
+   - Currently, workflow state transitions apply at the application level via `POST /api/v1/applications/:id/transitions`.
+   - The backend does not yet provide endpoints or database entities to persist reviewer annotations or status changes on individual findings (`APPROVED_BY_OFFICER`, `DEFICIENCY_FLAGGED`, `OVERRIDDEN_WITH_JUSTIFICATION`).
+   - *Status:* Uncontracted feature seam. M1/M2 to define a contract when individual finding disposition persistence is scheduled.
+2. **Committee Hearing Minutes & Expert Scheduling Persistence:**
+   - In `FE-06`, the Inspection Checklist operates as a local session aid, and the Expert Scheduling tab displays workflow-bound state.
+   - The backend currently lacks a centralized expert roster table, conflict-of-interest declarations API, and committee hearing minutes persistence endpoint.
+   - *Status:* Uncontracted feature seam. M1/M2 to define dedicated scheduling contracts if persistent committee management is required.
+
+### 6.4 Frontend Functionality That Remains Intentionally Read-Only
+
+1. **Inspection Checklist & Evidence Aid (`FE-06`):**
+   - The interactive tri-state inspection checklist in `InspectionChecklistEvidenceView.tsx` operates in local component state as a session aid for visiting experts, explicitly labeled as local draft / non-persisted.
+2. **Expert Scheduling & Roster Overview (`FE-06`):**
+   - Renders current application assignment state, disables mutation triggers, and displays explicit notices explaining that expert assignment is managed externally.
+3. **ADR-004 Human Sovereignty Compliance:**
+   - All AI/automated heuristic findings, deficiency recommendations, and OCR scores remain prominently displayed as advisory inputs, ensuring statutory determinations stay with authorized officers.
+
+---
+
+## 7. Verification Status & Recommended Next Steps (Live Integration Pending)
+
+The frontend workspace for ApprovalSync (`FE-01` through `FE-06`) is **contract-verified, hardened, and unit-tested**.
+
+### Next Actions:
+1. **M1 / M2 Action:** Review Findings A and B in [`docs/ui/backend-integration-handoff.md`](./backend-integration-handoff.md) and establish policy on `SHC_SAC_MEMBER` and `BUREAU_HEAD` permissions.
+2. **Backend Spin-Up:** Launch the NestJS backend and PostgreSQL database to exercise Tier 3 (Live Backend API Integration).
+3. **Gating Discipline:** Do NOT start downstream frontend milestones `FE-05` (blocked by `BE-08`) or `FE-07` (blocked by `BE-09`, `BE-07`) until their prerequisite backend modules are committed.

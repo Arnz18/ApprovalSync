@@ -9,7 +9,7 @@
 > **Lead Owner:** M4 — Frontend & Experience
 > **Framework:** React 18 + TypeScript 5 + Vite 5 Single-Page Application (SPA)
 > **Status:** FE-01, FE-02, FE-03, FE-04 & FE-06 IMPLEMENTED & HARDENED (18 test suites, 128 automated tests passing)
-> **Integration Audit:** Documented in [`docs/ui/frontend-integration-audit.md`](../docs/ui/frontend-integration-audit.md)
+> **Integration Audit & Handoff:** Documented in [`docs/ui/frontend-integration-audit.md`](../docs/ui/frontend-integration-audit.md) and [`docs/ui/backend-integration-handoff.md`](../docs/ui/backend-integration-handoff.md)
 
 ---
 
