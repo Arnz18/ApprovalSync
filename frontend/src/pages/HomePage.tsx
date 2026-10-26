@@ -9,6 +9,7 @@ import {
   Sliders,
   Sparkles,
   ArrowRight,
+  Activity,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import {
@@ -57,6 +58,10 @@ export function HomePage(): React.ReactElement {
         breadcrumbs={[{ label: 'Home' }]}
         actions={
           <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
+            <Link to="/dashboard" className="btn btn-outline btn-sm">
+              <Activity size={14} aria-hidden="true" />
+              <span>Dashboards &amp; SLA</span>
+            </Link>
             <Button
               variant="outline"
               size="sm"
@@ -570,6 +575,57 @@ export function HomePage(): React.ReactElement {
             <CardFooter>
               <Link to="/audit" className="btn btn-outline btn-sm">
                 Inspect Audit Ledger <ArrowRight size={14} />
+              </Link>
+            </CardFooter>
+          </Card>
+
+          {/* Module 7: Role-Specific Dashboards & SLA */}
+          <Card>
+            <CardHeader>
+              <div
+                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+              >
+                <Badge variant="primary">Module FE-05 / BE-08</Badge>
+                <span
+                  style={{
+                    fontSize: 'var(--font-size-xs)',
+                    color: 'var(--color-muted-foreground)',
+                  }}
+                >
+                  All Stakeholders
+                </span>
+              </div>
+              <CardTitle style={{ fontSize: 'var(--font-size-base)', marginTop: 'var(--space-1)' }}>
+                Role Dashboards, SLA &amp; Analytics
+              </CardTitle>
+              <CardDescription>
+                Tailored regulatory cockpits for institutions, scrutiny officers, regional officers,
+                and bureau heads with real-time SLA monitors.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ul
+                style={{
+                  fontSize: 'var(--font-size-xs)',
+                  color: 'var(--color-muted-foreground)',
+                  paddingLeft: '1.25rem',
+                  lineHeight: 1.6,
+                }}
+              >
+                <li>
+                  Tenant-isolated institutional view &amp; deficiency response window countdown
+                </li>
+                <li>
+                  Stage SLA timers with warning thresholds, breach detection, and pause controls
+                </li>
+                <li>
+                  Three-tier escalation event history &amp; privileged database reconciliation
+                </li>
+              </ul>
+            </CardContent>
+            <CardFooter>
+              <Link to="/dashboard" className="btn btn-outline btn-sm">
+                Open Dashboards &rarr;
               </Link>
             </CardFooter>
           </Card>

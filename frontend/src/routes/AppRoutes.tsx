@@ -8,6 +8,7 @@ import { ScrutinyQueuePage } from '../pages/ScrutinyQueuePage';
 import { CaseDetailPage } from '../pages/CaseDetailPage';
 import { EvcQueuePage } from '../pages/EvcQueuePage';
 import { EvcCaseDetailPage } from '../pages/EvcCaseDetailPage';
+import { DashboardPage } from '../pages/DashboardPage';
 import { FeaturePlaceholderPage } from '../pages/FeaturePlaceholderPage';
 import { NotFoundPage } from '../pages/NotFoundPage';
 import { ProtectedRoute } from './ProtectedRoute';
@@ -37,6 +38,16 @@ export function AppRoutes(): React.ReactElement {
           element={
             <ProtectedRoute allowedRoles={ROUTE_PERMISSIONS['/'].allowedRoles}>
               <HomePage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Role-Specific Dashboards, SLA & Analytics (FE-05) */}
+        <Route
+          path="dashboard"
+          element={
+            <ProtectedRoute allowedRoles={ROUTE_PERMISSIONS['/dashboard'].allowedRoles}>
+              <DashboardPage />
             </ProtectedRoute>
           }
         />

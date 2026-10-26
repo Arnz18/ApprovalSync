@@ -37,6 +37,22 @@ export const ROUTE_PERMISSIONS: Record<string, RoutePermissionConfig> = {
     ],
     description: 'General system status, metrics, and role landing summary.',
   },
+  '/dashboard': {
+    path: '/dashboard',
+    label: 'Dashboards & SLA',
+    allowedRoles: [
+      UserRole.INSTITUTION_USER,
+      UserRole.SCRUTINY_OFFICER,
+      UserRole.REGIONAL_OFFICER,
+      UserRole.EVC_INSPECTOR,
+      UserRole.SHC_SAC_MEMBER,
+      UserRole.BUREAU_HEAD,
+      UserRole.SYSTEM_ADMIN,
+      UserRole.AUDITOR,
+    ],
+    description:
+      'Role-specific dashboards, real-time SLA monitors, alert streams, and regulatory analytics.',
+  },
   '/applications': {
     path: '/applications',
     label: 'Application Intake',

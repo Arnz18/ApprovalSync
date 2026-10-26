@@ -2,6 +2,7 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard,
+  Activity,
   FileText,
   ClipboardCheck,
   ShieldCheck,
@@ -31,6 +32,12 @@ export const NAV_ITEMS: { section: string; items: NavItemConfig[] }[] = [
         path: '/',
         label: 'Workspace Overview',
         icon: <LayoutDashboard className="nav-item-icon" aria-hidden="true" />,
+      },
+      {
+        path: '/dashboard',
+        label: 'Dashboards & SLA',
+        icon: <Activity className="nav-item-icon" aria-hidden="true" />,
+        badge: 'FE-05',
       },
       {
         path: '/applications',
