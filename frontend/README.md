@@ -5,9 +5,10 @@
 > - **FE-02** — Login, role-aware navigation and session handling (`COMMITTED`)
 > - **FE-03** — Institution application wizard and document upload (`COMMITTED`)
 > - **FE-04** — Scrutiny queue, case detail and evidence review (`COMMITTED`)
+> - **FE-06** — EVC scheduling, inspection and committee workspace (`COMMITTED`)
 > **Lead Owner:** M4 — Frontend & Experience
 > **Framework:** React 18 + TypeScript 5 + Vite 5 Single-Page Application (SPA)
-> **Status:** FE-01, FE-02, FE-03 & FE-04 IMPLEMENTED & HARDENED (14 test suites, 97 automated tests passing)
+> **Status:** FE-01, FE-02, FE-03, FE-04 & FE-06 IMPLEMENTED & HARDENED (17 test suites, 122 automated tests passing)
 
 ---
 
@@ -248,7 +249,23 @@ The Scrutiny Review Workspace (`src/scrutiny/`, `src/components/scrutiny/`, `src
 
 ---
 
-## 7. Local Development & Quality Gates
+## 7. EVC Ground Inspection & Committee Workspace (FE-06)
+
+Implemented in `src/pages/EvcQueuePage.tsx`, `src/pages/EvcCaseDetailPage.tsx`, and `src/components/evc/`. Detailed specification available in [`docs/ui/evc-inspection.md`](../docs/ui/evc-inspection.md).
+
+- **EVC Inspection Queue (`/evc`):** Queries `GET /api/v1/applications` filtering for `RECOMMENDED_FOR_EVC`, `EVC_IN_PROGRESS`, and `RECOMMENDED_FOR_SHC`. Applications are enriched asynchronously with DOC-06 compliance assist results (`GET /api/v1/applications/:id/compliance-assist`) and DOC-07 dossier summaries using bounded concurrency workers (max 3 concurrent requests).
+- **Case Inspection Workspace (`/evc/:applicationId`):** 5-tab regulatory workspace for EVC Inspectors, Regional Officers, Bureau Heads, and SHC Members:
+  1. **Tab 1: Infrastructure & Compliance Heuristics (DOC-06):** Displays evaluated compliance for Land, Built-up Area, Barrier-Free Access, and Fire Safety clearance, alongside EVC inspection triggers, heuristic limitations, and an evidence-linked findings matrix.
+  2. **Tab 2: Inspection Checklist & Evidence Aid:** Lists statutory document attachments with cryptographic SHA-256 checksums and streaming download triggers (`documentsService.downloadDocument`), mobile photo capture / geotagging notice, and an interactive tri-state working checklist aid explicitly labeled as local draft / non-persisted.
+  3. **Tab 3: Expert Scheduling & Roster Overview:** Shows workflow-bound assignment state, details the absence of centralized roster endpoints, disables unsupported schedule actions, and documents the proposed `POST /api/v1/applications/:id/evc-assignments` contract for M1/M2.
+  4. **Tab 4: Committee Review & Hearing (SHC):** Displays SHC escalation provenance, unaddressed critical deficiencies from DOC-06, authorized post-hearing decisions for `BUREAU_HEAD` (`APPLICATION_APPROVED`, `APPLICATION_REJECTED`) via BE-06 FSM, and proposed committee minutes contract specification.
+  5. **Tab 5: Audit Timeline (BE-06):** Chronological event log with timestamps, actor IDs, and transition justifications.
+- **Human Sovereignty Safeguards (ADR-004):** Prominent legal disclaimers emphasize that automated compliance heuristics and physical inspection triggers are advisory decision support only. Statutory decisions require sovereign human officer evaluation.
+- **Role-Based Permissions:** Accessible to `EVC_INSPECTOR`, `REGIONAL_OFFICER`, `BUREAU_HEAD`, and `SHC_SAC_MEMBER`.
+
+---
+
+## 8. Local Development & Quality Gates
 
 ### 7.1 Installation
 ```bash
@@ -272,12 +289,12 @@ All commands run from `frontend/`:
 | **Linting** | `npm run lint` | Runs ESLint across all `.ts` and `.tsx` source files (`--max-warnings=0`) |
 | **Formatting** | `npm run format:check` | Checks code formatting against Prettier rules |
 | **Auto-Format** | `npm run format` | Auto-formats code with Prettier |
-| **Unit Tests** | `npm test` | Runs Vitest across all 14 test suites (97 tests passing) |
+| **Unit Tests** | `npm test` | Runs Vitest across all 17 test suites (122 tests passing) |
 | **Production Build** | `npm run build` | Compiles TypeScript and produces optimized production bundle in `dist/` |
 
 ---
 
-## 8. Environment Configuration
+## 9. Environment Configuration
 
 Copy `.env.example` to `.env.local` to override local environment variables:
 ```bash
@@ -297,7 +314,7 @@ VITE_APP_ENV=development
 
 ---
 
-## 9. Downstream Extension Guide
+## 10. Downstream Extension Guide
 
 When implementing downstream chunks (`FE-05` through `FE-07`):
 1. **Reuse Components:** Utilize components from `@/components/ui` (`Button`, `Card`, `Badge`, `FormField`, `Alert`, `Modal`, `EmptyState`, `PageHeader`).
