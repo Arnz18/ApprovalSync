@@ -5,11 +5,12 @@
 > - **FE-02** — Login, role-aware navigation and session handling (`COMMITTED`)
 > - **FE-03** — Institution application wizard and document upload (`COMMITTED`)
 > - **FE-04** — Scrutiny queue, case detail and evidence review (`COMMITTED`)
+> - **FE-05** — Role-specific dashboards, SLA, alerts & analytics (`COMMITTED`)
 > - **FE-06** — EVC scheduling, inspection and committee workspace (`COMMITTED`)
 > **Lead Owner:** M4 — Frontend & Experience
 > **Framework:** React 18 + TypeScript 5 + Vite 5 Single-Page Application (SPA)
-> **Status:** FE-01, FE-02, FE-03, FE-04 & FE-06 IMPLEMENTED & HARDENED (18 test suites, 128 automated tests passing)
-> **Integration Audit & Handoff:** Documented in [`docs/ui/frontend-integration-audit.md`](../docs/ui/frontend-integration-audit.md) and [`docs/ui/backend-integration-handoff.md`](../docs/ui/backend-integration-handoff.md)
+> **Status:** FE-01 through FE-06 IMPLEMENTED & HARDENED (22 test suites, 167 automated tests passing)
+> **Documentation:** [`docs/ui/fe-05-dashboards-sla-alerts.md`](../docs/ui/fe-05-dashboards-sla-alerts.md), [`docs/ui/frontend-integration-audit.md`](../docs/ui/frontend-integration-audit.md), [`docs/ui/backend-integration-handoff.md`](../docs/ui/backend-integration-handoff.md)
 
 ---
 
@@ -64,6 +65,9 @@ frontend/
     │   ├── components.css       # Reusable component styles & wizard card layouts
     │   ├── layout.css           # Application shell, header, sidebar, mobile drawer, footer
     │   └── index.css            # Global base styles, reset, and focus rings
+    ├── sla/                     # FE-05 SLA Domain & Utilities
+    │   ├── types.ts             # SlaTimerStatus, SlaEscalationLevel, SlaPolicyClassification, DTOs
+    │   └── slaUtils.ts          # Timezone-safe countdown, SLA urgency derivation, calendar aging
     ├── api/
     │   ├── types.ts             # Shared DTO envelopes and frozen domain enums
     │   ├── client.ts            # Centralized typed ApiClient with correlation tracing & token injection
@@ -72,55 +76,55 @@ frontend/
     │       ├── authService.ts   # BE-03 Auth API Service (/auth/login, /auth/me)
     │       ├── applicationsService.ts # BE-04 Application Service (CRUD, drafts, submit, doc list)
     │       ├── documentsService.ts    # DOC-01 Document Upload Service (multipart upload, get, delete)
+    │       ├── scrutinyService.ts     # FE-04 / BE-05 Scrutiny Review Service
+    │       ├── evcService.ts          # FE-06 / BE-06 EVC Inspection Service
+    │       ├── slaService.ts          # FE-05 / BE-08 SLA Timers, Policies & Escalations Service
     │       └── healthService.ts # Health check service (/health, /liveness, /readiness)
     ├── components/
     │   ├── ui/                  # Reusable design system components
-    │   │   ├── Button.tsx       # Buttons with loading spinners, icons, variants
-    │   │   ├── Badge.tsx        # Semantic & domain status badges (ApplicationStatus, etc.)
-    │   │   ├── Card.tsx         # Card container, header, title, content, footer
-    │   │   ├── FormField.tsx    # Accessible inputs, select, textarea, error/helper text
-    │   │   ├── Alert.tsx        # Informational, success, warning, error alerts
-    │   │   ├── Loading.tsx      # Spinner and Skeleton loading primitives
-    │   │   ├── EmptyState.tsx   # Empty state displays with actions
-    │   │   ├── PageHeader.tsx   # Page titles, breadcrumbs, action slots
-    │   │   ├── Modal.tsx        # Accessible dialog primitive with focus trap and Esc handling
-    │   │   └── index.ts         # Export barrel for UI components
     │   ├── wizard/              # FE-03 Application Intake Wizard Components
-    │   │   ├── WizardStepper.tsx       # Accessible multi-step progress stepper
-    │   │   ├── InstitutionStep.tsx     # Step 1: Affiliation, academic year, program type
-    │   │   ├── FacilitiesStep.tsx      # Step 2: Land, built-up, faculty, library, dynamic courses
-    │   │   ├── DocumentUploadStep.tsx  # Step 3: Multipart uploads, slot states, retry/delete
-    │   │   ├── ReviewSubmitStep.tsx    # Step 4: Full summary audit, oath checkbox, submit trigger
-    │   │   ├── SubmissionConfirmationStep.tsx # Step 5: Official receipt & next steps walkthrough
-    │   │   └── index.ts                # Export barrel for wizard steps
+    │   ├── scrutiny/            # FE-04 Scrutiny Review Components
+    │   ├── evc/                 # FE-06 EVC Committee & Inspection Components
+    │   ├── sla/                 # FE-05 SLA Timer, Modal & Escalation Components
+    │   │   ├── SlaTimerBadge.tsx       # Semantic status badges (ACTIVE, WARNING, BREACHED, PAUSED)
+    │   │   ├── SlaTimerCard.tsx        # SLA timer card with countdown & pause/resume triggers
+    │   │   ├── PauseTimerModal.tsx     # Mandatory human justification capture modal
+    │   │   ├── SlaEscalationList.tsx   # Filterable escalation table by tier & severity
+    │   │   ├── SlaPolicyModal.tsx      # Configured stage policies with demo disclaimer
+    │   │   └── ManualReconciliationBanner.tsx # Admin-gated manual SLA reconciliation sweep
+    │   ├── dashboard/           # FE-05 Dashboard Metric & Analytics Components
+    │   │   ├── DashboardMetricsOverview.tsx # KPI summary cards
+    │   │   ├── ApplicationStatusChart.tsx   # Visual status progression meter
+    │   │   ├── ApplicationAgingBreakdown.tsx # Application turnaround & aging buckets
+    │   │   └── DerivedAlertsFeed.tsx        # Real server-derived operational alert feed
     │   └── layout/              # Application workspace shell
-    │       ├── Header.tsx       # Dynamic authenticated user profile, role badge, and logout
-    │       ├── Sidebar.tsx      # Role-filtered navigation with active route highlights
-    │       ├── MobileNav.tsx    # Responsive mobile drawer
-    │       ├── Footer.tsx       # Regulatory disclaimers and API documentation links
-    │       └── AppLayout.tsx    # Main layout shell with Outlet
     ├── pages/
     │   ├── HomePage.tsx         # Primary institutional overview and interactive design sandbox
     │   ├── LoginPage.tsx        # Institutional login page with inline validation & dev helper
+    │   ├── DashboardPage.tsx    # FE-05 Master Dashboard coordinator & role-aware dispatcher
+    │   ├── dashboard/           # FE-05 Role-tailored dashboard views
+    │   │   ├── InstitutionDashboard.tsx # Institution tenant-isolated view
+    │   │   ├── ScrutinyDashboard.tsx    # Scrutiny officer queue & active SLA monitors
+    │   │   ├── RegionalDashboard.tsx    # Regional officer workload & Tier 2 escalations
+    │   │   ├── BureauDashboard.tsx      # Council throughput & Tier 3 escalations
+    │   │   └── AuditorAdminDashboard.tsx# Admin reconciliation / Auditor read-only oversight
     │   ├── ApplicationWizardPage.tsx  # FE-03 Master application intake wizard page
+    │   ├── ScrutinyQueuePage.tsx      # FE-04 Scrutiny queue page
+    │   ├── CaseDetailPage.tsx         # FE-04 Case detail & document verification workspace
+    │   ├── EvcQueuePage.tsx           # FE-06 EVC inspection queue page
+    │   ├── EvcCaseDetailPage.tsx      # FE-06 EVC case detail & committee review workspace
     │   ├── AccessDeniedPage.tsx # HTTP 403 Forbidden state with return to workspace action
     │   ├── FeaturePlaceholderPage.tsx # Standardized placeholder explaining downstream chunks
     │   └── NotFoundPage.tsx     # 404 Not Found page
     ├── routes/
     │   ├── ProtectedRoute.tsx   # Session guard, loading state, unauthenticated redirect, and 403 guard
     │   └── AppRoutes.tsx        # Centralized route mapping
-    └── __tests__/               # Frontend unit & integration test suites (11 suites, 73 tests)
-        ├── application-wizard.spec.tsx  # Wizard navigation, validation, upload, error recovery & submit tests (10 tests)
-        ├── applications-service.spec.ts # Applications API service unit tests (6 tests)
-        ├── documents-service.spec.ts    # Documents upload & multipart API tests (3 tests)
-        ├── api-client.spec.ts   # API client request/error/timeout/upload tests (7 tests)
-        ├── auth-service.spec.ts # Auth service, token injection, and 401/403 tests (5 tests)
-        ├── auth-context.spec.tsx# AuthContext session bootstrap, storage, and logout tests (6 tests)
-        ├── login-page.spec.tsx  # LoginPage validation, credentials, and errors tests (8 tests)
-        ├── role-nav.spec.tsx    # Role matrix, safe return URL, and nav filtering tests (7 tests)
-        ├── routes.spec.tsx      # Routing, wizard mounting, protected redirect, and 403 tests (7 tests)
-        ├── components.spec.tsx  # UI components behavior & accessibility tests (11 tests)
-        └── shell.spec.tsx       # Shell layout and navigation tests (3 tests)
+    └── __tests__/               # Frontend unit & integration test suites (22 suites, 167 tests)
+        ├── sla-service.spec.ts  # SLA API endpoints, query params & error parsing tests (7 tests)
+        ├── sla-utils.spec.ts    # SLA countdown, urgency & calendar aging tests (13 tests)
+        ├── sla-components.spec.tsx # SLA Badges, Pause modal & timer cards tests (11 tests)
+        ├── dashboard-page.spec.tsx # Role-specific dashboard views & failure isolation tests (8 tests)
+        └── ...                  # FE-01, FE-02, FE-03, FE-04, FE-06 test suites (128 tests)
 ```
 
 ---
