@@ -6,8 +6,20 @@ import {
   calculateApplicationAgeDays,
   categorizeAgeBucket,
   formatIsoDateTime,
+  formatSlaTier,
+  formatEscalationLevel,
+  getEscalationSeverity,
+  isTimerManagementAuthorized,
+  SLA_TIMER_MANAGEMENT_ROLES,
 } from '../sla/slaUtils';
-import { SlaTimerProjection, SlaTimerStatus, ApplicationStatus, SlaTier } from '../sla/types';
+import {
+  SlaTimerProjection,
+  SlaTimerStatus,
+  ApplicationStatus,
+  SlaTier,
+  SlaEscalationLevel,
+  UserRole,
+} from '../sla/types';
 
 describe('SLA Utilities (FE-05)', () => {
   describe('formatSlaDuration', () => {
@@ -174,6 +186,66 @@ describe('SLA Utilities (FE-05)', () => {
       expect(formatIsoDateTime(undefined)).toBe('—');
       expect(formatIsoDateTime('invalid-date')).toBe('—');
       expect(formatIsoDateTime('2026-10-26T12:00:00.000Z')).toContain('2026');
+    });
+  });
+
+  describe('isTimerManagementAuthorized (BE-08 RBAC)', () => {
+    it('authorizes all four backend-permitted regulatory and admin roles', () => {
+      expect(SLA_TIMER_MANAGEMENT_ROLES).toContain(UserRole.SCRUTINY_OFFICER);
+      expect(SLA_TIMER_MANAGEMENT_ROLES).toContain(UserRole.REGIONAL_OFFICER);
+      expect(SLA_TIMER_MANAGEMENT_ROLES).toContain(UserRole.BUREAU_HEAD);
+      expect(SLA_TIMER_MANAGEMENT_ROLES).toContain(UserRole.SYSTEM_ADMIN);
+
+      expect(isTimerManagementAuthorized(UserRole.SCRUTINY_OFFICER)).toBe(true);
+      expect(isTimerManagementAuthorized(UserRole.REGIONAL_OFFICER)).toBe(true);
+      expect(isTimerManagementAuthorized(UserRole.BUREAU_HEAD)).toBe(true);
+      expect(isTimerManagementAuthorized(UserRole.SYSTEM_ADMIN)).toBe(true);
+    });
+
+    it('denies applicant, committee, and auditor roles without mutation access', () => {
+      expect(isTimerManagementAuthorized(UserRole.INSTITUTION_USER)).toBe(false);
+      expect(isTimerManagementAuthorized(UserRole.EVC_INSPECTOR)).toBe(false);
+      expect(isTimerManagementAuthorized(UserRole.SHC_SAC_MEMBER)).toBe(false);
+      expect(isTimerManagementAuthorized(UserRole.AUDITOR)).toBe(false);
+      expect(isTimerManagementAuthorized(null)).toBe(false);
+      expect(isTimerManagementAuthorized(undefined)).toBe(false);
+    });
+  });
+
+  describe('formatSlaTier & formatEscalationLevel (Escalation Presentation Resilience)', () => {
+    it('formats frozen SlaTier enum values and alternative role-based aliases cleanly', () => {
+      expect(formatSlaTier(SlaTier.TIER_1_RO_ALERT)).toBe('Tier 1 (RO Alert)');
+      expect(formatSlaTier('TIER_1_SCRUTINY_OFFICER')).toBe('Tier 1 (RO Alert)');
+
+      expect(formatSlaTier(SlaTier.TIER_2_DIRECTOR_BREACH)).toBe('Tier 2 (Director Breach)');
+      expect(formatSlaTier('TIER_2_REGIONAL_OFFICER')).toBe('Tier 2 (Director Breach)');
+
+      expect(formatSlaTier(SlaTier.TIER_3_COUNCIL_LOCK)).toBe('Tier 3 (Council Lock)');
+      expect(formatSlaTier('TIER_3_BUREAU_HEAD')).toBe('Tier 3 (Council Lock)');
+    });
+
+    it('gracefully handles unknown or custom tier strings without crashing', () => {
+      expect(formatSlaTier('TIER_4_SPECIAL_AUDIT')).toBe('Tier 4 Special Audit');
+      expect(formatSlaTier('CUSTOM_EMERGENCY_TIER')).toBe('Custom Emergency Tier');
+      expect(formatSlaTier(null)).toBe('Standard');
+      expect(formatSlaTier(undefined)).toBe('Standard');
+    });
+
+    it('formats escalation levels with human-readable titles', () => {
+      expect(formatEscalationLevel(SlaEscalationLevel.WARNING)).toBe('Warning');
+      expect(formatEscalationLevel(SlaEscalationLevel.BREACH)).toBe('Breach');
+      expect(formatEscalationLevel(SlaEscalationLevel.SEVERE_BREACH)).toBe('Severe Breach');
+      expect(formatEscalationLevel('STAGE_DEADLINE_EXCEEDED')).toBe('Stage Deadline Exceeded');
+      expect(formatEscalationLevel(null)).toBe('Notice');
+      expect(formatEscalationLevel(undefined)).toBe('Notice');
+    });
+
+    it('derives correct visual severity for known and unknown levels', () => {
+      expect(getEscalationSeverity(SlaEscalationLevel.BREACH)).toBe('breach');
+      expect(getEscalationSeverity(SlaEscalationLevel.SEVERE_BREACH)).toBe('breach');
+      expect(getEscalationSeverity(SlaEscalationLevel.WARNING)).toBe('warning');
+      expect(getEscalationSeverity('UNEXPECTED_LEVEL')).toBe('info');
+      expect(getEscalationSeverity(null)).toBe('info');
     });
   });
 });

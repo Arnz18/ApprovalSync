@@ -26,7 +26,12 @@ import {
   EmptyState,
 } from '../ui';
 import { SlaEscalationProjection, SlaTier, SlaEscalationLevel, UserRole } from '../../sla/types';
-import { formatIsoDateTime } from '../../sla/slaUtils';
+import {
+  formatIsoDateTime,
+  formatSlaTier,
+  formatEscalationLevel,
+  getEscalationSeverity,
+} from '../../sla/slaUtils';
 import { formatRoleName } from '../../auth/roleRoutes';
 
 export interface SlaEscalationListProps {
@@ -50,6 +55,19 @@ export function SlaEscalationList({
 }: SlaEscalationListProps): React.ReactElement {
   const [tierFilter, setTierFilter] = useState<string>('ALL');
   const [levelFilter, setLevelFilter] = useState<string>('ALL');
+
+  const availableTiers = useMemo(() => {
+    const known = [
+      SlaTier.TIER_1_RO_ALERT,
+      SlaTier.TIER_2_DIRECTOR_BREACH,
+      SlaTier.TIER_3_COUNCIL_LOCK,
+    ];
+    const set = new Set<string>(known);
+    escalations.forEach((e) => {
+      if (e.tier) set.add(e.tier);
+    });
+    return Array.from(set);
+  }, [escalations]);
 
   const filteredEscalations = useMemo(() => {
     return escalations.filter((esc) => {
@@ -137,9 +155,11 @@ export function SlaEscalationList({
               aria-label="Filter escalations by tier"
             >
               <option value="ALL">All Tiers ({escalations.length})</option>
-              <option value={SlaTier.TIER_1_RO_ALERT}>Tier 1 (RO Alert)</option>
-              <option value={SlaTier.TIER_2_DIRECTOR_BREACH}>Tier 2 (Director Breach)</option>
-              <option value={SlaTier.TIER_3_COUNCIL_LOCK}>Tier 3 (Council Lock)</option>
+              {availableTiers.map((tierValue) => (
+                <option key={tierValue} value={tierValue}>
+                  {formatSlaTier(tierValue)}
+                </option>
+              ))}
             </select>
           </label>
 
@@ -240,13 +260,12 @@ export function SlaEscalationList({
               </thead>
               <tbody>
                 {filteredEscalations.map((esc) => {
-                  const isBreach =
-                    esc.escalationLevel === SlaEscalationLevel.BREACH ||
-                    esc.escalationLevel === SlaEscalationLevel.SEVERE_BREACH;
+                  const severity = getEscalationSeverity(esc.escalationLevel);
+                  const isBreach = severity === 'breach';
                   const caseUrl =
                     userRole === UserRole.INSTITUTION_USER
                       ? '/applications'
-                      : `/scrutiny/${esc.applicationId}`;
+                      : `/scrutiny/${esc.applicationId || ''}`;
 
                   return (
                     <tr
@@ -277,13 +296,13 @@ export function SlaEscalationList({
                           ) : (
                             <AlertTriangle size={12} aria-hidden="true" />
                           )}
-                          <span>{esc.escalationLevel.replace(/_/g, ' ')}</span>
+                          <span>{formatEscalationLevel(esc.escalationLevel)}</span>
                         </span>
                       </td>
 
                       <td style={{ padding: 'var(--space-2) var(--space-3)' }}>
                         <span className="badge badge-default" style={{ fontSize: '0.6875rem' }}>
-                          {esc.tier.replace(/_/g, ' ')}
+                          {formatSlaTier(esc.tier)}
                         </span>
                       </td>
 
@@ -292,11 +311,13 @@ export function SlaEscalationList({
                       </td>
 
                       <td style={{ padding: 'var(--space-2) var(--space-3)' }}>
-                        <div style={{ fontWeight: 600 }}>{esc.applicationId.slice(0, 8)}...</div>
+                        <div style={{ fontWeight: 600 }}>
+                          {esc.applicationId ? `${esc.applicationId.slice(0, 8)}...` : '—'}
+                        </div>
                         <div
                           style={{ color: 'var(--color-muted-foreground)', fontSize: '0.6875rem' }}
                         >
-                          {esc.stage.replace(/_/g, ' ')}
+                          {esc.stage ? String(esc.stage).replace(/_/g, ' ') : '—'}
                         </div>
                       </td>
 

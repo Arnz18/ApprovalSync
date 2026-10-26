@@ -120,6 +120,32 @@ The frontend integrates directly with the verified BE-08 API surface via `src/ap
 In compliance with regulatory standards, configured policies displayed in `SlaPolicyModal` bear a mandatory disclaimer banner:
 > **Regulatory Disclaimer:** *Illustrative demonstration SLA policy only. AICTE statutory processing timelines are determined by the AICTE Approval Process Handbook (APH) and official gazette notifications. Automated timers provide operational tracking and do not establish binding statutory deadlines.*
 
+### 5.4 Contract Verification & Discrepancy Reconciliation
+
+During the FE-05 hardening and contract verification audit against BE-08 authoritative backend source code, the following items were verified and reconciled:
+
+1. **SLA Pause/Resume Role Clearances**:
+   - *Issue Investigated:* `PROJECT_STATE.md` (lines 517–518) described the endpoints as `(BUREAU_HEAD, REGIONAL_OFFICER, SYSTEM_ADMIN)`.
+   - *Authoritative Backend Reality:* Both `backend/src/sla/sla.controller.ts` (lines 118–123 and 154–159) and `backend/src/sla/sla.service.ts` (lines 644–656, `assertCanManageTimers`) explicitly authorize four roles:
+     - `UserRole.SCRUTINY_OFFICER`
+     - `UserRole.REGIONAL_OFFICER`
+     - `UserRole.BUREAU_HEAD`
+     - `UserRole.SYSTEM_ADMIN`
+   - *Evidence:* Backend unit tests in `backend/src/sla/sla.service.spec.ts` (lines 238 and 307) explicitly execute `service.pauseTimer` and `service.resumeTimer` with `scrutinyOfficer` and verify success.
+   - *Frontend Implementation:* `frontend/src/sla/slaUtils.ts` defines `SLA_TIMER_MANAGEMENT_ROLES` and `isTimerManagementAuthorized()`. Non-managing roles (`INSTITUTION_USER`, `AUDITOR`, `EVC_INSPECTOR`, `SHC_SAC_MEMBER`) have pause and resume actions strictly hidden in the UI.
+
+2. **Escalation Tier Enum Values**:
+   - *Issue Investigated:* A descriptive summary in `PROJECT_STATE.md` (line 509) listed `(TIER_1_SCRUTINY_OFFICER, TIER_2_REGIONAL_OFFICER, TIER_3_BUREAU_HEAD)`.
+   - *Authoritative Backend Reality:* The frozen database and contract enum defined in `backend/src/shared/contracts/enums.ts` (lines 93–97) and schema migrations is `SlaTier`:
+     - `TIER_1_RO_ALERT = 'TIER_1_RO_ALERT'`
+     - `TIER_2_DIRECTOR_BREACH = 'TIER_2_DIRECTOR_BREACH'`
+     - `TIER_3_COUNCIL_LOCK = 'TIER_3_COUNCIL_LOCK'`
+   - *Frontend Implementation:* `frontend/src/api/types.ts` and `frontend/src/sla/types.ts` use the exact frozen `SlaTier` enum. In `slaUtils.ts`, `formatSlaTier()` provides human-readable labels (`Tier 1 (RO Alert)`, `Tier 2 (Director Breach)`, `Tier 3 (Council Lock)`) while also gracefully handling legacy aliases and unknown future tier strings without crashing.
+
+3. **Pause/Resume Request Payload Contract**:
+   - *Authoritative Backend DTO:* `backend/src/sla/dto/pause-timer.dto.ts` requires `{ reason: string }` with `@MinLength(5)` and `@MaxLength(500)`.
+   - *Frontend Implementation:* `PauseTimerModal` strictly enforces a non-empty, trimmed `reason` between 5 and 500 characters, disables submission below 5 characters, and presents a live character counter. Server 400 validation and 403 authorization failures are surfaced cleanly in contextual error alerts.
+
 ---
 
 ## 6. Resilience, Failure Isolation & Accessibility
@@ -148,14 +174,14 @@ All frontend quality gates have been executed and verified:
 | **Typecheck** | `npm run typecheck` | **PASS (0 errors)** | TypeScript 5.5 compiler in strict mode (`--noEmit`) |
 | **Lint** | `npm run lint` | **PASS (0 errors, 0 warnings)** | ESLint with `--max-warnings=0` |
 | **Code Style** | `npm run format:check` | **PASS (0 errors)** | Prettier format verification |
-| **Production Build** | `npm run build` | **PASS (0 errors)** | Vite production bundle generated in `dist/` (16.7s) |
-| **Full Test Suite** | `npm test` | **PASS (22/22 suites, 167/167 tests)** | 100% test pass rate across all milestones |
+| **Production Build** | `npm run build` | **PASS (0 errors)** | Vite production bundle generated in `dist/` |
+| **Full Test Suite** | `npm test` | **PASS (22/22 suites, 177/177 tests)** | 100% test pass rate across all milestones |
 
 ### Dedicated FE-05 Test Suites
 1. `src/__tests__/sla-service.spec.ts` (7 tests): Covers all 7 API endpoints, URL serialization, correlation tracing, error handling, and parameter serialization.
-2. `src/__tests__/sla-utils.spec.ts` (13 tests): Covers time formatting, countdown calculations, urgency derivation, and calendar aging bucketing.
-3. `src/__tests__/sla-components.spec.tsx` (11 tests): Covers `SlaTimerBadge`, `PauseTimerModal` validation, `SlaTimerCard` actions, and `ManualReconciliationBanner` confirmation.
-4. `src/__tests__/dashboard-page.spec.tsx` (8 tests): Covers role delegation for Institution, Scrutiny, Regional, Bureau, Admin, and Auditor roles, partial failure isolation, and alerts feed.
+2. `src/__tests__/sla-utils.spec.ts` (19 tests): Covers time formatting, countdown calculations, urgency derivation, calendar aging bucketing, `isTimerManagementAuthorized`, and resilient `formatSlaTier` / `formatEscalationLevel` handling.
+3. `src/__tests__/sla-components.spec.tsx` (15 tests): Covers `SlaTimerBadge`, `PauseTimerModal` validation and server rejection display, `SlaTimerCard` role-based control visibility and 403 error alerts, dynamic `SlaEscalationList` filtering, and `ManualReconciliationBanner` confirmation.
+4. `src/__tests__/dashboard-page.spec.tsx` (8 tests): Covers role delegation for Institution, Scrutiny, Regional, Bureau, Admin, and Auditor roles, partial failure isolation, and operational alerts feed.
 
 ---
 

@@ -204,6 +204,59 @@ describe('SLA Timer & Escalation Components (FE-05)', () => {
       expect(screen.getByRole('heading', { name: /Freeze Active SLA Clock/i })).toBeInTheDocument();
       expect(screen.getByLabelText(/Regulatory Pause Justification/i)).toBeInTheDocument();
     });
+
+    it('hides pause and resume buttons for unauthorized roles like INSTITUTION_USER and AUDITOR', () => {
+      const { rerender } = render(
+        <MemoryRouter>
+          <SlaTimerCard
+            timer={mockActiveTimer}
+            applicationNumber="AICTE-2026-001"
+            userRole={UserRole.INSTITUTION_USER}
+          />
+        </MemoryRouter>,
+      );
+
+      expect(screen.queryByRole('button', { name: /Pause Clock/i })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /Resume Clock/i })).not.toBeInTheDocument();
+
+      rerender(
+        <MemoryRouter>
+          <SlaTimerCard
+            timer={mockPausedTimer}
+            applicationNumber="AICTE-2026-001"
+            userRole={UserRole.AUDITOR}
+          />
+        </MemoryRouter>,
+      );
+
+      expect(screen.queryByRole('button', { name: /Pause Clock/i })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /Resume Clock/i })).not.toBeInTheDocument();
+    });
+
+    it('displays error banner when resumeTimer fails with HTTP 403 authorization error', async () => {
+      vi.spyOn(slaService, 'resumeTimer').mockRejectedValue(
+        new Error('Only designated regulatory officers can pause or resume SLA timers (HTTP 403)'),
+      );
+
+      render(
+        <MemoryRouter>
+          <SlaTimerCard
+            timer={mockPausedTimer}
+            applicationNumber="AICTE-2026-002"
+            userRole={UserRole.BUREAU_HEAD}
+          />
+        </MemoryRouter>,
+      );
+
+      const resumeBtn = screen.getByRole('button', { name: /Resume Clock/i });
+      fireEvent.click(resumeBtn);
+
+      await waitFor(() => {
+        expect(
+          screen.getByText(/Only designated regulatory officers can pause or resume SLA timers/i),
+        ).toBeInTheDocument();
+      });
+    });
   });
 
   describe('PauseTimerModal', () => {
@@ -247,6 +300,36 @@ describe('SLA Timer & Escalation Components (FE-05)', () => {
         expect(onCloseMock).toHaveBeenCalled();
       });
     });
+
+    it('displays server validation or authorization error when pauseTimer fails', async () => {
+      vi.spyOn(slaService, 'pauseTimer').mockRejectedValue(
+        new Error('SLA policy does not permit pausing for workflow stage (HTTP 400)'),
+      );
+
+      render(
+        <PauseTimerModal
+          isOpen={true}
+          onClose={vi.fn()}
+          applicationId="app-uuid-1"
+          applicationNumber="AICTE-2026-001"
+          onSuccess={vi.fn()}
+        />,
+      );
+
+      const textarea = screen.getByLabelText(/Regulatory Pause Justification/i);
+      fireEvent.change(textarea, {
+        target: { value: 'Attempting to pause disallowed timer' },
+      });
+
+      const submitBtn = screen.getByRole('button', { name: /Confirm Clock Freeze/i });
+      fireEvent.click(submitBtn);
+
+      await waitFor(() => {
+        expect(
+          screen.getAllByText(/SLA policy does not permit pausing for workflow stage/i).length,
+        ).toBeGreaterThan(0);
+      });
+    });
   });
 
   describe('SlaEscalationList', () => {
@@ -259,6 +342,8 @@ describe('SLA Timer & Escalation Components (FE-05)', () => {
 
       expect(screen.getByText('Recorded SLA Escalations')).toBeInTheDocument();
       expect(screen.getByText('Showing 2 of 2 events')).toBeInTheDocument();
+      expect(screen.getAllByText('Tier 1 (RO Alert)').length).toBeGreaterThan(0);
+      expect(screen.getAllByText('Tier 2 (Director Breach)').length).toBeGreaterThan(0);
 
       // Filter by Tier 2
       const tierSelect = screen.getByLabelText(/Filter escalations by tier/i);
@@ -270,6 +355,37 @@ describe('SLA Timer & Escalation Components (FE-05)', () => {
       // Reset filters
       fireEvent.click(screen.getByText('Reset Filters'));
       expect(screen.getByText('Showing 2 of 2 events')).toBeInTheDocument();
+    });
+
+    it('renders and filters escalations containing alternative or unknown tier values gracefully', () => {
+      const customEscalations: SlaEscalationProjection[] = [
+        {
+          id: 'esc-custom-1',
+          timerId: 'timer-005',
+          applicationId: 'app-uuid-5',
+          stage: ApplicationStatus.RECOMMENDED_FOR_EVC,
+          tier: 'TIER_1_SCRUTINY_OFFICER' as unknown as SlaTier,
+          escalationLevel: 'UNUSUAL_CUSTOM_WARNING' as unknown as SlaEscalationLevel,
+          idempotencyKey: 'key-custom-1',
+          targetRole: UserRole.SCRUTINY_OFFICER,
+          policyId: 'POL_CUSTOM',
+          policyVersion: '1.0.0',
+          targetDeadline: '2026-11-10T10:00:00.000Z',
+          detectedAt: '2026-10-25T12:00:00.000Z',
+          recipientDetailsJsonb: {},
+          isDispatched: true,
+          createdAt: '2026-10-25T12:00:00.000Z',
+        },
+      ];
+
+      render(
+        <MemoryRouter>
+          <SlaEscalationList escalations={customEscalations} />
+        </MemoryRouter>,
+      );
+
+      expect(screen.getAllByText('Tier 1 (RO Alert)').length).toBeGreaterThan(0);
+      expect(screen.getByText('Unusual Custom Warning')).toBeInTheDocument();
     });
 
     it('renders empty state when no escalations exist', () => {

@@ -6,7 +6,7 @@
  * SLA urgency derivations, and application aging bucket calculations.
  */
 
-import { SlaTimerProjection, SlaTimerStatus } from './types';
+import { SlaTimerProjection, SlaTimerStatus, UserRole, SlaTier, SlaEscalationLevel } from './types';
 
 export interface RemainingTimeResult {
   label: string;
@@ -163,4 +163,84 @@ export function formatIsoDateTime(isoString?: string | null): string {
     minute: '2-digit',
     timeZoneName: 'short',
   });
+}
+
+/**
+ * Authoritative list of roles permitted to pause or resume SLA timers.
+ * Matches backend assertCanManageTimers (sla.service.ts) and controller guards (sla.controller.ts).
+ */
+export const SLA_TIMER_MANAGEMENT_ROLES: readonly UserRole[] = [
+  UserRole.SCRUTINY_OFFICER,
+  UserRole.REGIONAL_OFFICER,
+  UserRole.BUREAU_HEAD,
+  UserRole.SYSTEM_ADMIN,
+] as const;
+
+/**
+ * Checks whether the given user role is authorized to pause or resume SLA clocks.
+ */
+export function isTimerManagementAuthorized(role?: UserRole | string | null): boolean {
+  if (!role) return false;
+  return SLA_TIMER_MANAGEMENT_ROLES.includes(role as UserRole);
+}
+
+/**
+ * Formats an SLA escalation tier into an accessible, human-readable display string.
+ * Gracefully handles frozen backend SlaTier enums, alternative labels, and unknown future values.
+ */
+export function formatSlaTier(tier?: SlaTier | string | null): string {
+  if (!tier) return 'Standard';
+  switch (tier) {
+    case SlaTier.TIER_1_RO_ALERT:
+    case 'TIER_1_SCRUTINY_OFFICER':
+      return 'Tier 1 (RO Alert)';
+    case SlaTier.TIER_2_DIRECTOR_BREACH:
+    case 'TIER_2_REGIONAL_OFFICER':
+      return 'Tier 2 (Director Breach)';
+    case SlaTier.TIER_3_COUNCIL_LOCK:
+    case 'TIER_3_BUREAU_HEAD':
+      return 'Tier 3 (Council Lock)';
+    default:
+      return String(tier)
+        .replace(/_/g, ' ')
+        .toLowerCase()
+        .replace(/\b\w/g, (c) => c.toUpperCase());
+  }
+}
+
+/**
+ * Formats an SLA escalation level into an accessible display string.
+ * Gracefully handles known and unknown level values.
+ */
+export function formatEscalationLevel(level?: SlaEscalationLevel | string | null): string {
+  if (!level) return 'Notice';
+  switch (level) {
+    case SlaEscalationLevel.WARNING:
+      return 'Warning';
+    case SlaEscalationLevel.BREACH:
+      return 'Breach';
+    case SlaEscalationLevel.SEVERE_BREACH:
+      return 'Severe Breach';
+    default:
+      return String(level)
+        .replace(/_/g, ' ')
+        .toLowerCase()
+        .replace(/\b\w/g, (c) => c.toUpperCase());
+  }
+}
+
+/**
+ * Derives visual severity for an escalation event.
+ */
+export function getEscalationSeverity(
+  level?: SlaEscalationLevel | string | null,
+): 'breach' | 'warning' | 'info' {
+  if (!level) return 'info';
+  if (level === SlaEscalationLevel.BREACH || level === SlaEscalationLevel.SEVERE_BREACH) {
+    return 'breach';
+  }
+  if (level === SlaEscalationLevel.WARNING) {
+    return 'warning';
+  }
+  return 'info';
 }

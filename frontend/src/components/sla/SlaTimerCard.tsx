@@ -18,6 +18,8 @@ import {
   formatSlaDuration,
   getSlaTimerUrgency,
   formatIsoDateTime,
+  isTimerManagementAuthorized,
+  formatSlaTier,
 } from '../../sla/slaUtils';
 import { slaService } from '../../api/services/slaService';
 
@@ -42,14 +44,7 @@ export function SlaTimerCard({
 
   const urgency = getSlaTimerUrgency(timer);
   const remaining = formatRemainingTime(timer.targetDeadline);
-  const canManage =
-    userRole &&
-    [
-      UserRole.SCRUTINY_OFFICER,
-      UserRole.REGIONAL_OFFICER,
-      UserRole.BUREAU_HEAD,
-      UserRole.SYSTEM_ADMIN,
-    ].includes(userRole);
+  const canManage = isTimerManagementAuthorized(userRole);
 
   const isPaused = timer.status === SlaTimerStatus.PAUSED;
   const isActive = timer.status === SlaTimerStatus.ACTIVE;
@@ -112,7 +107,7 @@ export function SlaTimerCard({
                   letterSpacing: '0.05em',
                 }}
               >
-                Stage Timer • {stageDisplay}
+                Stage Timer • {stageDisplay} • {formatSlaTier(timer.tier)}
               </span>
             </div>
             <h4

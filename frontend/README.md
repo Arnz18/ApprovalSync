@@ -9,7 +9,7 @@
 > - **FE-06** — EVC scheduling, inspection and committee workspace (`COMMITTED`)
 > **Lead Owner:** M4 — Frontend & Experience
 > **Framework:** React 18 + TypeScript 5 + Vite 5 Single-Page Application (SPA)
-> **Status:** FE-01 through FE-06 IMPLEMENTED & HARDENED (22 test suites, 167 automated tests passing)
+> **Status:** FE-01 through FE-06 IMPLEMENTED & HARDENED (22 test suites, 177 automated tests passing)
 > **Documentation:** [`docs/ui/fe-05-dashboards-sla-alerts.md`](../docs/ui/fe-05-dashboards-sla-alerts.md), [`docs/ui/frontend-integration-audit.md`](../docs/ui/frontend-integration-audit.md), [`docs/ui/backend-integration-handoff.md`](../docs/ui/backend-integration-handoff.md)
 
 ---
