@@ -42,14 +42,6 @@ describe('SlaService', () => {
     institutionId: instId1,
   };
 
-  const otherInstitutionUser: AuthUserPrincipal = {
-    id: 'u0000000-0000-0000-0000-000000000002',
-    email: 'college.b@synthetic.approvalsync.local',
-    name: 'College B User',
-    role: UserRole.INSTITUTION_USER,
-    institutionId: instId2,
-  };
-
   const scrutinyOfficer: AuthUserPrincipal = {
     id: 'u0000000-0000-0000-0000-000000000003',
     email: 'scrutiny@synthetic.approvalsync.local',
