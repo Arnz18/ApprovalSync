@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Compass, ClipboardList, CalendarCheck, Users, History, Shield } from 'lucide-react';
 import { Alert } from '../components/ui/Alert';
+import { Button } from '../components/ui/Button';
 import { EvcCaseHeader } from '../components/evc/EvcCaseHeader';
 import { InfrastructureReviewView } from '../components/evc/InfrastructureReviewView';
 import { InspectionChecklistEvidenceView } from '../components/evc/InspectionChecklistEvidenceView';
@@ -35,6 +36,8 @@ export const EvcCaseDetailPage: React.FC = () => {
 
   const [isLoading, setIsLoading] = useState(true);
   const [isEvaluating, setIsEvaluating] = useState(false);
+  const [complianceError, setComplianceError] = useState<string | null>(null);
+  const [transitionSuccessMessage, setTransitionSuccessMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   // Transition modal state
@@ -94,13 +97,19 @@ export const EvcCaseDetailPage: React.FC = () => {
   }, [loadCaseData]);
 
   const handleReevaluateCompliance = async () => {
-    if (!applicationId) return;
+    if (!applicationId || isEvaluating) return;
     setIsEvaluating(true);
+    setComplianceError(null);
     try {
       const compResult = await complianceService.evaluateCompliance(applicationId);
       setCompliance(compResult);
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Failed to re-evaluate compliance assist:', err);
+      setComplianceError(
+        err instanceof Error
+          ? err.message
+          : 'Failed to re-evaluate compliance rules. Please check backend connectivity.',
+      );
     } finally {
       setIsEvaluating(false);
     }
@@ -123,6 +132,7 @@ export const EvcCaseDetailPage: React.FC = () => {
       });
       setIsTransitionModalOpen(false);
       setSelectedTransition(null);
+      setTransitionSuccessMessage(`Application transitioned to ${targetStatus} successfully.`);
       await loadCaseData();
     } catch (err) {
       console.error('Failed to execute workflow transition:', err);
@@ -153,21 +163,9 @@ export const EvcCaseDetailPage: React.FC = () => {
           <Alert variant="error" title="Workspace Access Error">
             <p>{error || 'Unable to open application inspection workspace.'}</p>
             <div style={{ marginTop: 'var(--space-3)' }}>
-              <button
-                type="button"
-                onClick={() => navigate('/evc')}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: 'var(--color-error)',
-                  fontWeight: 'var(--font-weight-semibold)',
-                  cursor: 'pointer',
-                  textDecoration: 'underline',
-                  padding: 0,
-                }}
-              >
+              <Button type="button" variant="outline" size="sm" onClick={() => navigate('/evc')}>
                 Return to EVC Queue
-              </button>
+              </Button>
             </div>
           </Alert>
         </div>
@@ -177,6 +175,30 @@ export const EvcCaseDetailPage: React.FC = () => {
 
   return (
     <div className="scrutiny-workspace-container" style={{ padding: 'var(--space-6)' }}>
+      {transitionSuccessMessage && (
+        <div style={{ marginBottom: 'var(--space-4)' }}>
+          <Alert
+            variant="success"
+            title="Workflow Transition Recorded"
+            onClose={() => setTransitionSuccessMessage(null)}
+          >
+            <p>{transitionSuccessMessage}</p>
+          </Alert>
+        </div>
+      )}
+
+      {complianceError && (
+        <div style={{ marginBottom: 'var(--space-4)' }}>
+          <Alert
+            variant="error"
+            title="Compliance Evaluation Issue"
+            onClose={() => setComplianceError(null)}
+          >
+            <p>{complianceError}</p>
+          </Alert>
+        </div>
+      )}
+
       {/* Case Header & Actions Bar */}
       <EvcCaseHeader
         application={application}

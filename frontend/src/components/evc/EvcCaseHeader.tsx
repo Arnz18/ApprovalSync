@@ -83,25 +83,15 @@ export const EvcCaseHeader: React.FC<EvcCaseHeaderProps> = ({
           paddingBottom: 'var(--space-3)',
         }}
       >
-        <button
+        <Button
           type="button"
+          variant="outline"
+          size="sm"
           onClick={() => navigate('/evc')}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 'var(--space-2)',
-            background: 'none',
-            border: 'none',
-            color: 'var(--color-primary)',
-            fontSize: 'var(--font-size-sm)',
-            fontWeight: 'var(--font-weight-medium)',
-            cursor: 'pointer',
-            padding: 0,
-          }}
+          leftIcon={<ArrowLeft size={16} aria-hidden="true" />}
         >
-          <ArrowLeft size={16} aria-hidden="true" />
-          <span>Return to EVC Queue</span>
-        </button>
+          Return to EVC Queue
+        </Button>
 
         <div
           style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', flexWrap: 'wrap' }}

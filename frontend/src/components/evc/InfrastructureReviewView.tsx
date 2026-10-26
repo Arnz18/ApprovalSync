@@ -60,8 +60,9 @@ export const InfrastructureReviewView: React.FC<InfrastructureReviewViewProps> =
   }
 
   const { summary, infrastructureReview, findings } = compliance;
+  const safeFindings = Array.isArray(findings) ? findings : [];
 
-  const filteredFindings = findings.filter((f) => {
+  const filteredFindings = safeFindings.filter((f) => {
     if (selectedSeverity === 'ALL') return true;
     return f.severity === selectedSeverity;
   });
@@ -564,7 +565,7 @@ export const InfrastructureReviewView: React.FC<InfrastructureReviewViewProps> =
                       : 'var(--font-weight-normal)',
                 }}
               >
-                {sev === 'ALL' && `All (${findings.length})`}
+                {sev === 'ALL' && `All (${safeFindings.length})`}
                 {sev === 'CRITICAL_DEFICIENCY' && `Critical (${summary.criticalDeficienciesCount})`}
                 {sev === 'ADVISORY_FLAG' && `Advisory (${summary.advisoryFlagsCount})`}
                 {sev === 'COMPLIANT' && `Compliant (${summary.compliantCount})`}
