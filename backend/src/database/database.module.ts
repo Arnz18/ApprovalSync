@@ -22,6 +22,7 @@ import {
   ChecklistItem,
   WorkflowTimelineEvent,
   AuditCheckpoint,
+  SlaEscalation,
 } from './entities';
 
 export const coreEntities = [
@@ -38,6 +39,7 @@ export const coreEntities = [
   ChecklistItem,
   WorkflowTimelineEvent,
   AuditCheckpoint,
+  SlaEscalation,
 ];
 
 @Module({

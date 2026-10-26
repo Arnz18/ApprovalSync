@@ -13,6 +13,7 @@ import { ApplicationsController } from './applications.controller';
 import { UsersModule } from '../users/users.module';
 import { WorkflowModule } from '../workflow/workflow.module';
 import { AuditModule } from '../audit/audit.module';
+import { SlaModule } from '../sla/sla.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { AuditModule } from '../audit/audit.module';
     UsersModule,
     WorkflowModule,
     AuditModule,
+    SlaModule,
   ],
   controllers: [ApplicationsController],
   providers: [ApplicationsService],

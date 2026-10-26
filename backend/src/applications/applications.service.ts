@@ -26,6 +26,7 @@ import {
 import { AuthUserPrincipal } from '../auth/interfaces/auth-user.interface';
 import { WorkflowService } from '../workflow/workflow.service';
 import { AuditService } from '../audit/audit.service';
+import { SlaService } from '../sla/sla.service';
 import { CreateApplicationDto } from './dto/create-application.dto';
 import { UpdateApplicationDto } from './dto/update-application.dto';
 import { ApplicationQueryDto } from './dto/application-query.dto';
@@ -63,6 +64,8 @@ export class ApplicationsService {
     private readonly workflowService?: WorkflowService,
     @Optional()
     private readonly auditService?: AuditService,
+    @Optional()
+    private readonly slaService?: SlaService,
   ) {}
 
   /**
@@ -399,6 +402,17 @@ export class ApplicationsService {
             toStatus: ApplicationStatus.SUBMITTED,
             submittedAt: saved.submittedAt?.toISOString(),
           },
+        });
+      }
+
+      if (this.slaService) {
+        await this.slaService.handleWorkflowTransitionInTransaction(manager, {
+          applicationId: saved.id,
+          fromStatus: ApplicationStatus.DRAFT,
+          toStatus: ApplicationStatus.SUBMITTED,
+          actorId: currentUser.id,
+          actorRole: currentUser.role,
+          comment: 'Application submitted for scrutiny review',
         });
       }
 

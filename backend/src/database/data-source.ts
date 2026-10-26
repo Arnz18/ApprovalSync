@@ -21,11 +21,13 @@ import {
   ChecklistItem,
   WorkflowTimelineEvent,
   AuditCheckpoint,
+  SlaEscalation,
 } from './entities';
 import { InitialCoreSchema1729640000000 } from './migrations/1729640000000-InitialCoreSchema';
 import { CreateRulesAndChecklists1729720000000 } from './migrations/1729720000000-CreateRulesAndChecklists';
 import { CreateWorkflowTimelineEvents1729800000000 } from './migrations/1729800000000-CreateWorkflowTimelineEvents';
 import { CreateAuditCheckpoints1729880000000 } from './migrations/1729880000000-CreateAuditCheckpoints';
+import { EnhanceSlaTimersAndEscalations1729960000000 } from './migrations/1729960000000-EnhanceSlaTimersAndEscalations';
 
 export const dataSourceOptions: DataSourceOptions = {
   type: 'postgres',
@@ -52,12 +54,14 @@ export const dataSourceOptions: DataSourceOptions = {
     ChecklistItem,
     WorkflowTimelineEvent,
     AuditCheckpoint,
+    SlaEscalation,
   ],
   migrations: [
     InitialCoreSchema1729640000000,
     CreateRulesAndChecklists1729720000000,
     CreateWorkflowTimelineEvents1729800000000,
     CreateAuditCheckpoints1729880000000,
+    EnhanceSlaTimersAndEscalations1729960000000,
   ],
 
   synchronize: false,

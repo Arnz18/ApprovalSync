@@ -21,6 +21,7 @@ import { createAppValidationPipe } from '../src/core/pipes/validation.pipe';
 import { HttpExceptionFilter } from '../src/core/filters/http-exception.filter';
 import { LoggingInterceptor } from '../src/core/interceptors/logging.interceptor';
 import { TransformInterceptor } from '../src/core/interceptors/transform.interceptor';
+import * as crypto from 'crypto';
 import { Institution } from '../src/database/entities/institution.entity';
 import { User } from '../src/database/entities/user.entity';
 import { Application } from '../src/database/entities/application.entity';
@@ -183,7 +184,7 @@ describe('Dossier Verification Report API (e2e)', () => {
         mimeType: 'application/pdf',
         fileSizeBytes: 2048,
         storagePath: `documents/${appA.id}/land-deed.pdf`,
-        fileHashSha256: 'a'.repeat(64),
+        fileHashSha256: crypto.randomBytes(32).toString('hex'),
         processingStatus: DocumentProcessingStatus.OCR_EXTRACTED,
         metadata: {
           ocrConfidence: 0.96,
@@ -218,7 +219,7 @@ describe('Dossier Verification Report API (e2e)', () => {
         mimeType: 'application/pdf',
         fileSizeBytes: 4096,
         storagePath: `documents/${appA.id}/building-plan.pdf`,
-        fileHashSha256: 'b'.repeat(64),
+        fileHashSha256: crypto.randomBytes(32).toString('hex'),
         processingStatus: DocumentProcessingStatus.OCR_EXTRACTED,
         metadata: {
           ocrConfidence: 0.93,
@@ -238,6 +239,18 @@ describe('Dossier Verification Report API (e2e)', () => {
   });
 
   afterAll(async () => {
+    if (dataSource?.isInitialized) {
+      const docRepo = dataSource.getRepository(Document);
+      const appRepo = dataSource.getRepository(Application);
+      if (appA?.id) {
+        await docRepo.delete({ applicationId: appA.id });
+        await appRepo.delete({ id: appA.id });
+      }
+      if (appB?.id) {
+        await docRepo.delete({ applicationId: appB.id });
+        await appRepo.delete({ id: appB.id });
+      }
+    }
     if (app) {
       await app.close();
     }

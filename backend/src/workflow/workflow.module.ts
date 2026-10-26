@@ -11,12 +11,14 @@ import { WorkflowService } from './workflow.service';
 import { WorkflowController } from './workflow.controller';
 import { UsersModule } from '../users/users.module';
 import { AuditModule } from '../audit/audit.module';
+import { SlaModule } from '../sla/sla.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Application, WorkflowTimelineEvent]),
     UsersModule,
     AuditModule,
+    SlaModule,
   ],
   controllers: [WorkflowController],
   providers: [WorkflowService],

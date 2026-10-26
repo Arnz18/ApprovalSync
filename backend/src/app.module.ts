@@ -25,6 +25,7 @@ import { VerificationModule } from './verification/verification.module';
 import { ProvidersModule } from './providers/providers.module';
 import { ComplianceModule } from './compliance/compliance.module';
 import { AuditModule } from './audit/audit.module';
+import { SlaModule } from './sla/sla.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RolesGuard } from './auth/guards/roles.guard';
 
@@ -45,6 +46,7 @@ import { RolesGuard } from './auth/guards/roles.guard';
     RulesModule,
     WorkflowModule,
     AuditModule,
+    SlaModule,
     DocumentsModule,
     AiModule,
     VerificationModule,

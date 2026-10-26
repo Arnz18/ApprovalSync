@@ -19,6 +19,7 @@ import { Repository, DataSource, EntityManager } from 'typeorm';
 import { Application } from '../database/entities/application.entity';
 import { WorkflowTimelineEvent } from './entities/workflow-timeline-event.entity';
 import { AuditService } from '../audit/audit.service';
+import { SlaService } from '../sla/sla.service';
 import {
   ApplicationStatus,
   UserRole,
@@ -49,6 +50,8 @@ export class WorkflowService {
     private readonly dataSource: DataSource,
     @Optional()
     private readonly auditService?: AuditService,
+    @Optional()
+    private readonly slaService?: SlaService,
   ) {}
 
   /**
@@ -164,6 +167,17 @@ export class WorkflowService {
             comment: dto.comment ? dto.comment.trim() : null,
             correlationId: correlationId || null,
           },
+        });
+      }
+
+      if (this.slaService) {
+        await this.slaService.handleWorkflowTransitionInTransaction(manager, {
+          applicationId: savedApplication.id,
+          fromStatus: previousStatus,
+          toStatus: dto.targetStatus,
+          actorId: currentUser.id,
+          actorRole: currentUser.role,
+          comment: dto.comment ? dto.comment.trim() : null,
         });
       }
 
