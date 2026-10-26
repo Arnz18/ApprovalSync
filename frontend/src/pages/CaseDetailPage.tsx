@@ -8,6 +8,7 @@ import {
   CheckCircle2,
   FileCheck2,
   Info,
+  ShieldCheck,
 } from 'lucide-react';
 import { Alert } from '../components/ui/Alert';
 import { Spinner } from '../components/ui/Loading';
@@ -19,10 +20,21 @@ import { CaseTimelineView } from '../components/scrutiny/CaseTimelineView';
 import { DossierFindingsView } from '../components/scrutiny/DossierFindingsView';
 import { DocumentVerificationMatrixView } from '../components/scrutiny/DocumentVerificationMatrixView';
 import { ReviewActionModal } from '../components/scrutiny/ReviewActionModal';
+import {
+  AuditChainVerificationBadge,
+  AuditHistoryTable,
+  MerkleProofModal,
+} from '../components/audit';
+import { UndertakingTable, UndertakingDetailModal } from '../components/undertakings';
 import { scrutinyService } from '../api/services/scrutinyService';
 import { workflowService } from '../api/services/workflowService';
 import { dossierService } from '../api/services/dossierService';
+import { auditService } from '../api/services/auditService';
+import { undertakingsService } from '../api/services/undertakingsService';
 import { ApplicationProjection } from '../applications/types';
+import { AuditLogProjection } from '../audit/types';
+import { UndertakingProjection } from '../undertakings/types';
+import { PaginationMeta } from '../api/types';
 import {
   WorkflowTimelineEvent,
   DossierReport,
@@ -31,7 +43,8 @@ import {
 } from '../scrutiny/types';
 import { ApiClientError } from '../api/client';
 
-export type CaseDetailTab = 'dossier' | 'matrix' | 'application' | 'timeline';
+export type CaseDetailTab =
+  'dossier' | 'matrix' | 'application' | 'timeline' | 'audit' | 'undertakings';
 
 export const CaseDetailPage: React.FC = () => {
   const { applicationId } = useParams<{ applicationId: string }>();
@@ -56,6 +69,24 @@ export const CaseDetailPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [notFound, setNotFound] = useState<boolean>(false);
   const [forbidden, setForbidden] = useState<boolean>(false);
+
+  // Audit Ledger & Undertakings state (FE-07)
+  const [auditLogs, setAuditLogs] = useState<AuditLogProjection[]>([]);
+  const [auditPagination, setAuditPagination] = useState<PaginationMeta>({
+    page: 1,
+    limit: 50,
+    totalItems: 0,
+    totalPages: 1,
+    hasNextPage: false,
+    hasPreviousPage: false,
+  });
+  const [isAuditLoading, setIsAuditLoading] = useState(false);
+  const [selectedProofSequence, setSelectedProofSequence] = useState<string | null>(null);
+
+  const [caseUndertakings, setCaseUndertakings] = useState<UndertakingProjection[]>([]);
+  const [isUndertakingsLoading, setIsUndertakingsLoading] = useState(false);
+  const [selectedUndertakingDetail, setSelectedUndertakingDetail] =
+    useState<UndertakingProjection | null>(null);
 
   const fetchCaseData = useCallback(async () => {
     if (!applicationId) return;
@@ -124,6 +155,30 @@ export const CaseDetailPage: React.FC = () => {
   useEffect(() => {
     fetchCaseData();
   }, [fetchCaseData]);
+
+  useEffect(() => {
+    if (!applicationId) return;
+    if (activeTab === 'audit') {
+      setIsAuditLoading(true);
+      auditService
+        .getAuditLogs(applicationId, { page: auditPagination.page, limit: 50 })
+        .then((res) => {
+          setAuditLogs(res.items);
+          setAuditPagination(res.pagination);
+        })
+        .catch(() => {})
+        .finally(() => setIsAuditLoading(false));
+    } else if (activeTab === 'undertakings') {
+      setIsUndertakingsLoading(true);
+      undertakingsService
+        .getApplicationUndertakings(applicationId)
+        .then((res) => {
+          setCaseUndertakings(res.items);
+        })
+        .catch(() => {})
+        .finally(() => setIsUndertakingsLoading(false));
+    }
+  }, [applicationId, activeTab, auditPagination.page]);
 
   if (notFound) {
     return (
@@ -467,6 +522,51 @@ export const CaseDetailPage: React.FC = () => {
             {timelineEvents.length}
           </span>
         </button>
+
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === 'undertakings'}
+          onClick={() => setActiveTab('undertakings')}
+          className={`btn btn-ghost ${activeTab === 'undertakings' ? 'btn-primary' : ''}`}
+          style={{
+            borderRadius: 'var(--radius-md) var(--radius-md) 0 0',
+            borderBottom: activeTab === 'undertakings' ? '2px solid var(--color-primary)' : 'none',
+          }}
+        >
+          <FileText size={15} aria-hidden="true" />
+          <span>Undertakings & Leases</span>
+          {caseUndertakings.length > 0 && (
+            <span
+              style={{
+                backgroundColor: 'var(--color-muted)',
+                color: 'var(--color-foreground)',
+                fontSize: '11px',
+                padding: '1px 6px',
+                borderRadius: '999px',
+                fontWeight: 600,
+                marginLeft: '4px',
+              }}
+            >
+              {caseUndertakings.length}
+            </span>
+          )}
+        </button>
+
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === 'audit'}
+          onClick={() => setActiveTab('audit')}
+          className={`btn btn-ghost ${activeTab === 'audit' ? 'btn-primary' : ''}`}
+          style={{
+            borderRadius: 'var(--radius-md) var(--radius-md) 0 0',
+            borderBottom: activeTab === 'audit' ? '2px solid var(--color-primary)' : 'none',
+          }}
+        >
+          <ShieldCheck size={15} aria-hidden="true" />
+          <span>Cryptographic Audit Chain</span>
+        </button>
       </div>
 
       {/* Tab Panels */}
@@ -497,6 +597,62 @@ export const CaseDetailPage: React.FC = () => {
               setActiveTab('dossier');
             }}
           />
+        )}
+
+        {activeTab === 'undertakings' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {isUndertakingsLoading ? (
+              <div style={{ padding: '2rem 0', display: 'flex', justifyContent: 'center' }}>
+                <Spinner />
+              </div>
+            ) : caseUndertakings.length === 0 ? (
+              <EmptyState
+                title="No Undertakings Associated"
+                description="No statutory undertakings or registered leases are linked to this application case."
+                icon={<FileText size={32} />}
+              />
+            ) : (
+              <UndertakingTable
+                undertakings={caseUndertakings}
+                onSelectUndertaking={(u) => setSelectedUndertakingDetail(u)}
+              />
+            )}
+
+            <UndertakingDetailModal
+              undertaking={selectedUndertakingDetail}
+              isOpen={Boolean(selectedUndertakingDetail)}
+              onClose={() => setSelectedUndertakingDetail(null)}
+              onOpenHistory={() => {}}
+            />
+          </div>
+        )}
+
+        {activeTab === 'audit' && applicationId && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <AuditChainVerificationBadge applicationId={applicationId} />
+
+            {isAuditLoading ? (
+              <div style={{ padding: '2rem 0', display: 'flex', justifyContent: 'center' }}>
+                <Spinner />
+              </div>
+            ) : (
+              <AuditHistoryTable
+                logs={auditLogs}
+                applicationId={applicationId}
+                pagination={auditPagination}
+                onPageChange={(page) => setAuditPagination((prev) => ({ ...prev, page }))}
+                onOpenProof={(seq) => setSelectedProofSequence(seq)}
+                isLoading={isAuditLoading}
+              />
+            )}
+
+            <MerkleProofModal
+              applicationId={applicationId}
+              sequenceNumber={selectedProofSequence}
+              isOpen={Boolean(selectedProofSequence)}
+              onClose={() => setSelectedProofSequence(null)}
+            />
+          </div>
         )}
       </div>
 
