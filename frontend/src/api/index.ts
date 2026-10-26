@@ -7,3 +7,7 @@ export * from './services/documentsService';
 export * from './services/dossierService';
 export * from './services/workflowService';
 export * from './services/scrutinyService';
+export * from './services/evcService';
+export * from './services/slaService';
+export * from './services/undertakingsService';
+export * from './services/auditService';
