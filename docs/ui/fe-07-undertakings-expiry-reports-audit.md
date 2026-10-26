@@ -94,13 +94,31 @@ The frontend integrates with all 10 verified BE-09 endpoints via `src/api/servic
 ### 3.2 Cryptographic Audit Ledger & Merkle Proofs (BE-07)
 The frontend integrates with all 5 verified BE-07 audit endpoints via `src/api/services/auditService.ts`:
 
-| Method | Endpoint | Description | Permitted Roles |
+| Method | Endpoint | Description | Permitted Roles (Backend Decorators) |
 |---|---|---|---|
-| `GET` | `/api/v1/applications/:id/audit-logs` | Paginated application audit event ledger sorted chronologically | `INSTITUTION_USER` (own app), `AUDITOR`, `BUREAU_HEAD`, `SYSTEM_ADMIN` |
-| `GET` | `/api/v1/applications/:id/audit-logs/verify` | Executes sequential SHA-256 chain verification from genesis | `AUDITOR`, `BUREAU_HEAD`, `SYSTEM_ADMIN`, `SCRUTINY_OFFICER` |
-| `GET` | `/api/v1/applications/:id/audit-logs/checkpoint` | Retrieves active cryptographic checkpoint snapshot & Merkle root | `AUDITOR`, `BUREAU_HEAD`, `SYSTEM_ADMIN` |
-| `GET` | `/api/v1/applications/:id/audit-logs/:seq/proof` | Retrieves RFC 6962 Merkle inclusion proof for specific block | `AUDITOR`, `BUREAU_HEAD`, `SYSTEM_ADMIN` |
-| `POST` | `/api/v1/audit/verify-proof` | Standalone mathematical verification of proof steps to root | All authenticated roles |
+| `GET` | `/api/v1/applications/:id/audit-logs` | Paginated application audit event ledger sorted chronologically | All 8 roles (tenant-isolated for `INSTITUTION_USER`) |
+| `GET` | `/api/v1/applications/:id/audit-logs/verify` | Executes sequential SHA-256 chain verification from genesis | All 8 roles |
+| `GET` | `/api/v1/applications/:id/audit-logs/checkpoint` | Retrieves active cryptographic checkpoint snapshot & Merkle root | All 8 roles |
+| `GET` | `/api/v1/applications/:id/audit-logs/:sequenceNumber/proof` | Retrieves RFC 6962 Merkle inclusion proof for specific block | All 8 roles |
+| `POST` | `/api/v1/audit/verify-proof` | Standalone mathematical verification of proof steps to root | All 8 roles |
+
+> **Role Authorization Note**: In `backend/src/audit/audit.controller.ts`, all 5 endpoints are decorated with `@Roles(INSTITUTION_USER, SCRUTINY_OFFICER, REGIONAL_OFFICER, EVC_INSPECTOR, SHC_SAC_MEMBER, BUREAU_HEAD, SYSTEM_ADMIN, AUDITOR)`. For `INSTITUTION_USER`, `AuditService.assertApplicationAccess()` enforces strict tenant isolation against `application.institutionId`. In the frontend UI, contextual audit history is displayed in `CaseDetailPage` to officers scrutinizing an application, while the top-level `/audit` ledger explorer route in `roleRoutes.ts` is surfaced in navigation to oversight roles (`AUDITOR`, `BUREAU_HEAD`, `SYSTEM_ADMIN`).
+
+### 3.3 API Contract Audit & Verification Findings (FE-07 Audit)
+
+1. **Review Dispositions (BE-09 Contract Audit)**:
+   - **Contract Fact**: `backend/src/undertakings/enums/undertaking-review-status.enum.ts` defines `UndertakingReviewStatus`: `PENDING_REVIEW`, `VERIFIED`, `DEFICIENT`, `REJECTED`.
+   - **Validation Enforcement**: `backend/src/undertakings/dto/review-undertaking.dto.ts` applies `@IsEnum(UndertakingReviewStatus)` and `@MinLength(5) @MaxLength(2000)` to `reviewNotes`. Submitting `VERIFIED_CONCURRENT` or `CLARIFICATION_REQUESTED` is rejected with HTTP 400 Bad Request by the NestJS `ValidationPipe`.
+   - **Frontend UI Mapping**: `ReviewUndertakingModal` maps descriptive UI options directly to the supported enums:
+     - *"VERIFIED — Concurrent Compliance Corroborated"* $\rightarrow$ `UndertakingReviewStatus.VERIFIED`
+     - *"DEFICIENT — Clarification / Rectification Notice"* $\rightarrow$ `UndertakingReviewStatus.DEFICIENT`
+     - *"REJECTED — Non-Compliant / Revoked"* $\rightarrow$ `UndertakingReviewStatus.REJECTED`
+   - **Mandatory Human Review**: Validation prevents submission if `reviewNotes` is under 5 characters. Automated status reconciliation signals never overwrite officer determinations.
+
+2. **Merkle Proof Lookup Identifier (BE-07 Contract Audit)**:
+   - **Contract Fact**: `backend/src/audit/audit.controller.ts` line 140 explicitly exposes `@Get('applications/:id/audit-logs/:sequenceNumber/proof')` with parameter `sequenceNumber`.
+   - **Service Implementation**: `backend/src/audit/audit.service.ts` line 341-343 locates the target leaf via `logs.findIndex((log) => log.sequenceNumber.toString() === targetSeqStr)`.
+   - **Identifier Alignment**: The backend expects a block sequence number (e.g. `1`, `2`), **not** a log record UUID. Passing a log UUID results in HTTP 404 NotFound. The frontend implementation (`auditService.getMerkleProof`, `AuditHistoryTable`, `MerkleProofModal`) correctly passes `log.sequenceNumber`.
 
 ---
 

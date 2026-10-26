@@ -226,7 +226,7 @@ describe('Undertakings Utilities (FE-07)', () => {
   describe('CSV Formula-Injection Defense (escapeCsvCell & exportUndertakingsToCsv)', () => {
     it('neutralizes spreadsheet formula-injection prefixes with single-quote escaping', () => {
       expect(escapeCsvCell('=1+1')).toBe('"\'=1+1"');
-      expect(escapeCsvCell('+cmd|/C calc')).toBe('"\'"+cmd|/C calc"');
+      expect(escapeCsvCell('+cmd|/C calc')).toBe('"\'+cmd|/C calc"');
       expect(escapeCsvCell('-SUM(A1:B10)')).toBe('"\'-SUM(A1:B10)"');
       expect(escapeCsvCell('@HYPERLINK("evil.com")')).toBe('"\'@HYPERLINK(""evil.com"")"');
       expect(escapeCsvCell('\tDDE("cmd")')).toBe('"\'\tDDE(""cmd"")"');

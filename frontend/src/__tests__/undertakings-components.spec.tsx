@@ -225,7 +225,7 @@ describe('Undertakings Components (FE-07)', () => {
       expect(onSuccess).not.toHaveBeenCalled();
     });
 
-    it('submits review disposition via API when valid notes provided', async () => {
+    it('submits VERIFIED review disposition via API when valid notes provided', async () => {
       const reviewSpy = vi.spyOn(undertakingsService, 'reviewUndertaking').mockResolvedValue({
         ...unreviewedRecord,
         reviewStatus: UndertakingReviewStatus.VERIFIED,
@@ -262,6 +262,165 @@ describe('Undertakings Components (FE-07)', () => {
         expect(onSuccess).toHaveBeenCalled();
         expect(onClose).toHaveBeenCalled();
       });
+    });
+
+    it('rejects notes shorter than 5 characters with validation error', async () => {
+      const reviewSpy = vi.spyOn(undertakingsService, 'reviewUndertaking');
+      const onClose = vi.fn();
+      const onSuccess = vi.fn();
+
+      render(
+        <ReviewUndertakingModal
+          undertaking={unreviewedRecord}
+          isOpen={true}
+          onClose={onClose}
+          onSuccess={onSuccess}
+        />,
+      );
+
+      fireEvent.change(
+        screen.getByPlaceholderText(/Provide detailed justification, verified document register/i),
+        {
+          target: { value: 'Bad' },
+        },
+      );
+
+      fireEvent.click(screen.getByRole('button', { name: /Record Regulatory Review/i }));
+
+      await waitFor(() => {
+        expect(screen.getByText(/Review notes must be at least 5 characters/i)).toBeInTheDocument();
+      });
+
+      expect(reviewSpy).not.toHaveBeenCalled();
+      expect(onSuccess).not.toHaveBeenCalled();
+    });
+
+    it('submits DEFICIENT disposition without effectiveStatus payload', async () => {
+      const reviewSpy = vi.spyOn(undertakingsService, 'reviewUndertaking').mockResolvedValue({
+        ...unreviewedRecord,
+        reviewStatus: UndertakingReviewStatus.DEFICIENT,
+        reviewNotes: 'Sub-registrar registration seal is illegible. Clarification required.',
+      });
+
+      const onClose = vi.fn();
+      const onSuccess = vi.fn();
+
+      render(
+        <ReviewUndertakingModal
+          undertaking={unreviewedRecord}
+          isOpen={true}
+          onClose={onClose}
+          onSuccess={onSuccess}
+        />,
+      );
+
+      // Select DEFICIENT
+      fireEvent.change(screen.getByLabelText(/Officer Review Disposition/i), {
+        target: { value: UndertakingReviewStatus.DEFICIENT },
+      });
+
+      fireEvent.change(
+        screen.getByPlaceholderText(/Provide detailed justification, verified document register/i),
+        {
+          target: {
+            value: 'Sub-registrar registration seal is illegible. Clarification required.',
+          },
+        },
+      );
+
+      fireEvent.click(screen.getByRole('button', { name: /Record Regulatory Review/i }));
+
+      await waitFor(() => {
+        expect(reviewSpy).toHaveBeenCalledWith('und-101', {
+          reviewStatus: UndertakingReviewStatus.DEFICIENT,
+          reviewNotes: 'Sub-registrar registration seal is illegible. Clarification required.',
+          effectiveStatus: undefined,
+        });
+        expect(onSuccess).toHaveBeenCalled();
+        expect(onClose).toHaveBeenCalled();
+      });
+    });
+
+    it('submits REJECTED disposition without effectiveStatus payload', async () => {
+      const reviewSpy = vi.spyOn(undertakingsService, 'reviewUndertaking').mockResolvedValue({
+        ...unreviewedRecord,
+        reviewStatus: UndertakingReviewStatus.REJECTED,
+        reviewNotes: 'Building stability certificate revoked by municipal authority.',
+      });
+
+      const onClose = vi.fn();
+      const onSuccess = vi.fn();
+
+      render(
+        <ReviewUndertakingModal
+          undertaking={unreviewedRecord}
+          isOpen={true}
+          onClose={onClose}
+          onSuccess={onSuccess}
+        />,
+      );
+
+      // Select REJECTED
+      fireEvent.change(screen.getByLabelText(/Officer Review Disposition/i), {
+        target: { value: UndertakingReviewStatus.REJECTED },
+      });
+
+      fireEvent.change(
+        screen.getByPlaceholderText(/Provide detailed justification, verified document register/i),
+        {
+          target: {
+            value: 'Building stability certificate revoked by municipal authority.',
+          },
+        },
+      );
+
+      fireEvent.click(screen.getByRole('button', { name: /Record Regulatory Review/i }));
+
+      await waitFor(() => {
+        expect(reviewSpy).toHaveBeenCalledWith('und-101', {
+          reviewStatus: UndertakingReviewStatus.REJECTED,
+          reviewNotes: 'Building stability certificate revoked by municipal authority.',
+          effectiveStatus: undefined,
+        });
+        expect(onSuccess).toHaveBeenCalled();
+        expect(onClose).toHaveBeenCalled();
+      });
+    });
+
+    it('renders API error message when review request fails', async () => {
+      vi.spyOn(undertakingsService, 'reviewUndertaking').mockRejectedValue(
+        new Error('Unauthorized officer role or expired session.'),
+      );
+
+      const onClose = vi.fn();
+      const onSuccess = vi.fn();
+
+      render(
+        <ReviewUndertakingModal
+          undertaking={unreviewedRecord}
+          isOpen={true}
+          onClose={onClose}
+          onSuccess={onSuccess}
+        />,
+      );
+
+      fireEvent.change(
+        screen.getByPlaceholderText(/Provide detailed justification, verified document register/i),
+        {
+          target: { value: 'Valid review justification note' },
+        },
+      );
+
+      fireEvent.click(screen.getByRole('button', { name: /Record Regulatory Review/i }));
+
+      await waitFor(() => {
+        expect(
+          screen.getByText('Unauthorized officer role or expired session.'),
+        ).toBeInTheDocument();
+      });
+
+      expect(onSuccess).not.toHaveBeenCalled();
+      expect(onClose).not.toHaveBeenCalled();
     });
   });
 

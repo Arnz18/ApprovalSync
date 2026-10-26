@@ -167,22 +167,61 @@ describe('Undertakings API Service (FE-07)', () => {
     expect(res.status).toBe(UndertakingStatus.SUBMITTED);
   });
 
-  it('reviewUndertaking calls POST /undertakings/:id/review with review disposition', async () => {
+  it('reviewUndertaking calls POST /undertakings/:id/review with VERIFIED disposition', async () => {
     const postSpy = vi.spyOn(apiClient, 'post').mockResolvedValue({
       ...mockRecord,
       reviewStatus: UndertakingReviewStatus.VERIFIED,
       reviewNotes: 'Survey coordinates authenticated via revenue portal',
+      status: UndertakingStatus.ACTIVE,
     });
 
     const dto: ReviewUndertakingDto = {
       reviewStatus: UndertakingReviewStatus.VERIFIED,
       reviewNotes: 'Survey coordinates authenticated via revenue portal',
+      effectiveStatus: UndertakingStatus.ACTIVE,
     };
 
     const res = await undertakingsService.reviewUndertaking('und-uuid-1', dto);
 
     expect(postSpy).toHaveBeenCalledWith('/undertakings/und-uuid-1/review', dto);
     expect(res.reviewStatus).toBe(UndertakingReviewStatus.VERIFIED);
+    expect(res.status).toBe(UndertakingStatus.ACTIVE);
+  });
+
+  it('reviewUndertaking calls POST /undertakings/:id/review with DEFICIENT disposition', async () => {
+    const postSpy = vi.spyOn(apiClient, 'post').mockResolvedValue({
+      ...mockRecord,
+      reviewStatus: UndertakingReviewStatus.DEFICIENT,
+      reviewNotes: 'Clarification required regarding structural engineer signature',
+    });
+
+    const dto: ReviewUndertakingDto = {
+      reviewStatus: UndertakingReviewStatus.DEFICIENT,
+      reviewNotes: 'Clarification required regarding structural engineer signature',
+    };
+
+    const res = await undertakingsService.reviewUndertaking('und-uuid-1', dto);
+
+    expect(postSpy).toHaveBeenCalledWith('/undertakings/und-uuid-1/review', dto);
+    expect(res.reviewStatus).toBe(UndertakingReviewStatus.DEFICIENT);
+  });
+
+  it('reviewUndertaking calls POST /undertakings/:id/review with REJECTED disposition', async () => {
+    const postSpy = vi.spyOn(apiClient, 'post').mockResolvedValue({
+      ...mockRecord,
+      reviewStatus: UndertakingReviewStatus.REJECTED,
+      reviewNotes: 'Forged stamp detected on lease deed',
+    });
+
+    const dto: ReviewUndertakingDto = {
+      reviewStatus: UndertakingReviewStatus.REJECTED,
+      reviewNotes: 'Forged stamp detected on lease deed',
+    };
+
+    const res = await undertakingsService.reviewUndertaking('und-uuid-1', dto);
+
+    expect(postSpy).toHaveBeenCalledWith('/undertakings/und-uuid-1/review', dto);
+    expect(res.reviewStatus).toBe(UndertakingReviewStatus.REJECTED);
   });
 
   it('renewUndertaking calls POST /undertakings/:id/renew and creates superseding record', async () => {

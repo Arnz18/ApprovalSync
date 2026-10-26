@@ -138,6 +138,10 @@ describe('Audit API Service (FE-07)', () => {
     expect(getSpy).toHaveBeenCalledWith('/applications/app-uuid-1/audit-logs/1/proof');
     expect(res.sequenceNumber).toBe('1');
     expect(res.proofPath).toHaveLength(1);
+
+    // Also assert numeric sequence number is encoded properly and not confused with UUID
+    await auditService.getMerkleProof('app-uuid-1', 42);
+    expect(getSpy).toHaveBeenCalledWith('/applications/app-uuid-1/audit-logs/42/proof');
   });
 
   it('verifyStandaloneProof calls POST /audit/verify-proof with proof payload', async () => {
