@@ -8,7 +8,8 @@
 > - **FE-06** — EVC scheduling, inspection and committee workspace (`COMMITTED`)
 > **Lead Owner:** M4 — Frontend & Experience
 > **Framework:** React 18 + TypeScript 5 + Vite 5 Single-Page Application (SPA)
-> **Status:** FE-01, FE-02, FE-03, FE-04 & FE-06 IMPLEMENTED & HARDENED (17 test suites, 122 automated tests passing)
+> **Status:** FE-01, FE-02, FE-03, FE-04 & FE-06 IMPLEMENTED & HARDENED (18 test suites, 128 automated tests passing)
+> **Integration Audit:** Documented in [`docs/ui/frontend-integration-audit.md`](../docs/ui/frontend-integration-audit.md)
 
 ---
 
@@ -289,7 +290,7 @@ All commands run from `frontend/`:
 | **Linting** | `npm run lint` | Runs ESLint across all `.ts` and `.tsx` source files (`--max-warnings=0`) |
 | **Formatting** | `npm run format:check` | Checks code formatting against Prettier rules |
 | **Auto-Format** | `npm run format` | Auto-formats code with Prettier |
-| **Unit Tests** | `npm test` | Runs Vitest across all 17 test suites (122 tests passing) |
+| **Unit Tests** | `npm test` | Runs Vitest across all 18 test suites (128 tests passing) |
 | **Production Build** | `npm run build` | Compiles TypeScript and produces optimized production bundle in `dist/` |
 
 ---
