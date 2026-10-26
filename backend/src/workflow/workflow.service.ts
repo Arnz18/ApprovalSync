@@ -12,11 +12,13 @@ import {
   NotFoundException,
   ForbiddenException,
   BadRequestException,
+  Optional,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource, EntityManager } from 'typeorm';
 import { Application } from '../database/entities/application.entity';
 import { WorkflowTimelineEvent } from './entities/workflow-timeline-event.entity';
+import { AuditService } from '../audit/audit.service';
 import {
   ApplicationStatus,
   UserRole,
@@ -45,6 +47,8 @@ export class WorkflowService {
     @InjectRepository(WorkflowTimelineEvent)
     private readonly timelineRepository: Repository<WorkflowTimelineEvent>,
     private readonly dataSource: DataSource,
+    @Optional()
+    private readonly auditService?: AuditService,
   ) {}
 
   /**
@@ -146,6 +150,22 @@ export class WorkflowService {
         WorkflowTimelineEvent,
         timelineEvent,
       );
+
+      if (this.auditService) {
+        await this.auditService.appendInTransaction(manager, {
+          applicationId: savedApplication.id,
+          actorId: currentUser.id,
+          actorRole: currentUser.role,
+          eventType: rule.eventType,
+          payloadSnapshot: {
+            applicationNumber: savedApplication.applicationNumber,
+            fromStatus: previousStatus,
+            toStatus: dto.targetStatus,
+            comment: dto.comment ? dto.comment.trim() : null,
+            correlationId: correlationId || null,
+          },
+        });
+      }
 
       this.logger.log(
         `Application ${savedApplication.applicationNumber} (${savedApplication.id}) transitioned from ${previousStatus} to ${dto.targetStatus} [event: ${rule.eventType}] by user ${currentUser.id} (${currentUser.role})`,

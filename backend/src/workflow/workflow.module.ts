@@ -10,11 +10,13 @@ import { WorkflowTimelineEvent } from './entities/workflow-timeline-event.entity
 import { WorkflowService } from './workflow.service';
 import { WorkflowController } from './workflow.controller';
 import { UsersModule } from '../users/users.module';
+import { AuditModule } from '../audit/audit.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Application, WorkflowTimelineEvent]),
     UsersModule,
+    AuditModule,
   ],
   controllers: [WorkflowController],
   providers: [WorkflowService],

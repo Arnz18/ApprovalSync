@@ -25,6 +25,7 @@ import {
 } from '../shared/contracts';
 import { AuthUserPrincipal } from '../auth/interfaces/auth-user.interface';
 import { WorkflowService } from '../workflow/workflow.service';
+import { AuditService } from '../audit/audit.service';
 import { CreateApplicationDto } from './dto/create-application.dto';
 import { UpdateApplicationDto } from './dto/update-application.dto';
 import { ApplicationQueryDto } from './dto/application-query.dto';
@@ -60,6 +61,8 @@ export class ApplicationsService {
     private readonly dataSource: DataSource,
     @Optional()
     private readonly workflowService?: WorkflowService,
+    @Optional()
+    private readonly auditService?: AuditService,
   ) {}
 
   /**
@@ -381,6 +384,21 @@ export class ApplicationsService {
           actorId: currentUser.id,
           actorRole: currentUser.role,
           comment: 'Application submitted for scrutiny review',
+        });
+      }
+
+      if (this.auditService) {
+        await this.auditService.appendInTransaction(manager, {
+          applicationId: saved.id,
+          actorId: currentUser.id,
+          actorRole: currentUser.role,
+          eventType: 'APPLICATION_SUBMITTED',
+          payloadSnapshot: {
+            applicationNumber: saved.applicationNumber,
+            fromStatus: ApplicationStatus.DRAFT,
+            toStatus: ApplicationStatus.SUBMITTED,
+            submittedAt: saved.submittedAt?.toISOString(),
+          },
         });
       }
 
