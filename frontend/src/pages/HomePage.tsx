@@ -10,6 +10,7 @@ import {
   Sparkles,
   ArrowRight,
   Activity,
+  FileCheck,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import {
@@ -61,6 +62,10 @@ export function HomePage(): React.ReactElement {
             <Link to="/dashboard" className="btn btn-outline btn-sm">
               <Activity size={14} aria-hidden="true" />
               <span>Dashboards &amp; SLA</span>
+            </Link>
+            <Link to="/undertakings" className="btn btn-outline btn-sm">
+              <FileCheck size={14} aria-hidden="true" />
+              <span>Undertakings &amp; Leases</span>
             </Link>
             <Button
               variant="outline"

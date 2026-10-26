@@ -9,6 +9,8 @@ import { CaseDetailPage } from '../pages/CaseDetailPage';
 import { EvcQueuePage } from '../pages/EvcQueuePage';
 import { EvcCaseDetailPage } from '../pages/EvcCaseDetailPage';
 import { DashboardPage } from '../pages/DashboardPage';
+import { UndertakingsPage } from '../pages/UndertakingsPage';
+import { AuditLedgerPage } from '../pages/AuditLedgerPage';
 import { FeaturePlaceholderPage } from '../pages/FeaturePlaceholderPage';
 import { NotFoundPage } from '../pages/NotFoundPage';
 import { ProtectedRoute } from './ProtectedRoute';
@@ -146,19 +148,16 @@ export function AppRoutes(): React.ReactElement {
           path="audit"
           element={
             <ProtectedRoute allowedRoles={ROUTE_PERMISSIONS['/audit'].allowedRoles}>
-              <FeaturePlaceholderPage
-                moduleCode="AUDIT"
-                title="Cryptographic Audit Ledger & Proofs"
-                description="Append-only SHA-256 event chaining, tamper-evident hash ledger, and Merkle root verification."
-                assignedChunk="BE-07"
-                dependencies={['BE-02']}
-                dependencyStatus="PLANNED"
-                expectedFeatures={[
-                  'Append-only cryptographic event chain with SHA-256 block hashing',
-                  'Database trigger mutation defense blocking UPDATE and DELETE on audit logs',
-                  'Independent auditor read-only verification view and Merkle proof generation',
-                ]}
-              />
+              <AuditLedgerPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="undertakings"
+          element={
+            <ProtectedRoute allowedRoles={ROUTE_PERMISSIONS['/undertakings'].allowedRoles}>
+              <UndertakingsPage />
             </ProtectedRoute>
           }
         />

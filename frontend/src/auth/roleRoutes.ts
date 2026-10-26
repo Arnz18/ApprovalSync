@@ -112,6 +112,20 @@ export const ROUTE_PERMISSIONS: Record<string, RoutePermissionConfig> = {
     allowedRoles: [UserRole.AUDITOR, UserRole.BUREAU_HEAD, UserRole.SYSTEM_ADMIN],
     description: 'Append-only SHA-256 cryptographic audit event log and Merkle proofs.',
   },
+  '/undertakings': {
+    path: '/undertakings',
+    label: 'Undertakings & Leases',
+    allowedRoles: [
+      UserRole.INSTITUTION_USER,
+      UserRole.SCRUTINY_OFFICER,
+      UserRole.REGIONAL_OFFICER,
+      UserRole.BUREAU_HEAD,
+      UserRole.SYSTEM_ADMIN,
+      UserRole.AUDITOR,
+    ],
+    description:
+      'Institutional undertakings, registered land/facility leases, expiry tracking, and renewal management.',
+  },
   '/settings': {
     path: '/settings',
     label: 'Platform Settings',

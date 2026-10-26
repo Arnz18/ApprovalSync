@@ -4,6 +4,7 @@ import {
   LayoutDashboard,
   Activity,
   FileText,
+  FileCheck,
   ClipboardCheck,
   ShieldCheck,
   MapPin,
@@ -45,6 +46,12 @@ export const NAV_ITEMS: { section: string; items: NavItemConfig[] }[] = [
         icon: <FileText className="nav-item-icon" aria-hidden="true" />,
         badge: 'FE-03',
       },
+      {
+        path: '/undertakings',
+        label: 'Undertakings & Leases',
+        icon: <FileCheck className="nav-item-icon" aria-hidden="true" />,
+        badge: 'FE-07',
+      },
     ],
   },
   {
@@ -83,7 +90,7 @@ export const NAV_ITEMS: { section: string; items: NavItemConfig[] }[] = [
         path: '/audit',
         label: 'Audit Ledger & Proofs',
         icon: <History className="nav-item-icon" aria-hidden="true" />,
-        badge: 'BE-07',
+        badge: 'FE-07',
       },
       {
         path: '/settings',
