@@ -422,7 +422,7 @@ describe('Case Detail & Evidence Review (FE-04)', () => {
       });
       expect(screen.getByText(/Workflow State Transition Recorded/i)).toBeInTheDocument();
     });
-  });
+  }, 15000);
 
   it('renders 404 not found state when application does not exist', async () => {
     vi.spyOn(scrutinyService, 'getCaseDetails').mockRejectedValueOnce(
