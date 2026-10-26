@@ -58,8 +58,8 @@ export function AccessDeniedPage({ allowedRoles }: AccessDeniedPageProps): React
                 width: '40px',
                 height: '40px',
                 borderRadius: 'var(--radius-md)',
-                backgroundColor: '#fef2f2',
-                color: 'var(--color-danger)',
+                backgroundColor: 'var(--color-error-bg)',
+                color: 'var(--color-error)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -84,7 +84,7 @@ export function AccessDeniedPage({ allowedRoles }: AccessDeniedPageProps): React
               <p
                 style={{
                   fontSize: '0.8125rem',
-                  color: 'var(--color-danger)',
+                  color: 'var(--color-error)',
                   margin: '0.125rem 0 0 0',
                   fontWeight: 600,
                 }}

@@ -340,6 +340,9 @@ export function ApplicationWizardPage(): React.ReactElement {
    * Final atomic submission to BE-04
    */
   const handleSubmitApplication = async () => {
+    if (state.isSubmitting) {
+      return;
+    }
     const reviewResult = validateReviewStep(state);
     if (!reviewResult.isValid) {
       setActiveErrors(reviewResult.errors);

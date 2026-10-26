@@ -109,14 +109,18 @@ export const InspectionChecklistEvidenceView: React.FC<InspectionChecklistEviden
     setDownloadingDocId(docId);
     try {
       const { blob, fileName: resolvedName } = await documentsService.downloadDocument(docId);
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = resolvedName || fileName;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
+      if (typeof window !== 'undefined' && typeof window.URL?.createObjectURL === 'function') {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = resolvedName || fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        if (typeof window.URL.revokeObjectURL === 'function') {
+          window.URL.revokeObjectURL(url);
+        }
+      }
     } catch (err) {
       console.error('Document download failed:', err);
     } finally {

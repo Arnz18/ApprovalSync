@@ -26,14 +26,18 @@ export const DocumentVerificationMatrixView: React.FC<DocumentVerificationMatrix
 
     try {
       const { blob, fileName: resolvedFileName } = await documentsService.downloadDocument(docId);
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = resolvedFileName || fileName || 'document.pdf';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      if (typeof window !== 'undefined' && typeof window.URL?.createObjectURL === 'function') {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = resolvedFileName || fileName || 'document.pdf';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        if (typeof window.URL.revokeObjectURL === 'function') {
+          window.URL.revokeObjectURL(url);
+        }
+      }
     } catch (err: unknown) {
       if (err instanceof Error) {
         setDownloadError(`Failed to download ${fileName}: ${err.message}`);
@@ -130,9 +134,11 @@ export const DocumentVerificationMatrixView: React.FC<DocumentVerificationMatrix
                         borderRadius: 'var(--radius-sm)',
                         display: 'inline-block',
                       }}
-                      title={doc.sha256Checksum}
+                      title={doc.sha256Checksum || undefined}
                     >
-                      {doc.sha256Checksum.slice(0, 10)}...{doc.sha256Checksum.slice(-6)}
+                      {doc.sha256Checksum && doc.sha256Checksum.length >= 16
+                        ? `${doc.sha256Checksum.slice(0, 10)}...${doc.sha256Checksum.slice(-6)}`
+                        : doc.sha256Checksum || '—'}
                     </code>
                   </td>
 

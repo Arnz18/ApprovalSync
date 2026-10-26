@@ -58,6 +58,12 @@
 
   --color-ring: #1e3a5f;
 
+  /* Semantic Aliases for Text & Danger */
+  --color-text-main: var(--color-foreground);
+  --color-text-muted: var(--color-muted-foreground);
+  --color-danger: var(--color-error);
+  --color-danger-bg: var(--color-error-bg);
+
   /* Typography Scale */
   --font-family-heading:
     'Lexend', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;

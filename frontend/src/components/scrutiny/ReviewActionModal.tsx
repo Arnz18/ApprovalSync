@@ -77,7 +77,15 @@ export const ReviewActionModal: React.FC<ReviewActionModalProps> = ({
       return;
     }
 
-    await onSubmit(transition.toStatus, trimmedComment || undefined);
+    try {
+      await onSubmit(transition.toStatus, trimmedComment || undefined);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setValidationError(err.message);
+      } else {
+        setValidationError('Failed to record workflow transition. Please try again.');
+      }
+    }
   };
 
   return (
