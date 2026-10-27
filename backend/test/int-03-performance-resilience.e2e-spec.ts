@@ -138,6 +138,7 @@ describe('INT-03: Performance, Concurrency & Resilience Validation (e2e)', () =>
     );
 
     await app.init();
+    await app.listen(0);
 
     dataSource = moduleFixture.get<DataSource>(DataSource);
     slaService = moduleFixture.get<SlaService>(SlaService);
@@ -1067,13 +1068,15 @@ describe('INT-03: Performance, Concurrency & Resilience Validation (e2e)', () =>
       const instARequests = Array.from({ length: 10 }, () =>
         request(app.getHttpServer())
           .get(`/api/v1/applications/${appA.id}`)
-          .set('Authorization', `Bearer ${tokenInstA}`),
+          .set('Authorization', `Bearer ${tokenInstA}`)
+          .set('Connection', 'close'),
       );
 
       const instBRequests = Array.from({ length: 10 }, () =>
         request(app.getHttpServer())
           .get(`/api/v1/applications/${appB.id}`)
-          .set('Authorization', `Bearer ${tokenInstB}`),
+          .set('Authorization', `Bearer ${tokenInstB}`)
+          .set('Connection', 'close'),
       );
 
       const allResponses = await Promise.all([
@@ -1252,6 +1255,7 @@ describe('INT-03: Performance, Concurrency & Resilience Validation (e2e)', () =>
       const uploadRes = await request(app.getHttpServer())
         .post(`/api/v1/applications/${appId}/documents`)
         .set('Authorization', `Bearer ${tokenInstA}`)
+        .set('Connection', 'close')
         .field('documentType', 'LAND_TITLE_DEED')
         .attach('file', Buffer.from(''), 'empty.pdf')
         .expect(400);
@@ -1280,7 +1284,10 @@ describe('INT-03: Performance, Concurrency & Resilience Validation (e2e)', () =>
     it('RESIL-05: Invariant Security & Human Sovereignty under Concurrency', async () => {
       // 1. Unauthenticated requests during concurrent burst are denied with 401
       const unauthPromises = Array.from({ length: 5 }, () =>
-        request(app.getHttpServer()).get('/api/v1/applications').expect(401),
+        request(app.getHttpServer())
+          .get('/api/v1/applications')
+          .set('Connection', 'close')
+          .expect(401),
       );
       const unauthResults = await Promise.all(unauthPromises);
       for (const r of unauthResults) {
@@ -1303,7 +1310,8 @@ describe('INT-03: Performance, Concurrency & Resilience Validation (e2e)', () =>
       const crossTenantPromises = Array.from({ length: 5 }, () =>
         request(app.getHttpServer())
           .get(`/api/v1/applications/${appAId}`)
-          .set('Authorization', `Bearer ${tokenInstB}`),
+          .set('Authorization', `Bearer ${tokenInstB}`)
+          .set('Connection', 'close'),
       );
       const crossResults = await Promise.all(crossTenantPromises);
       for (const r of crossResults) {
