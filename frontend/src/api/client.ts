@@ -10,7 +10,7 @@
  * - Typed error extraction
  */
 
-import { ApiResponse, ApiErrorResponse, FieldError } from './types';
+import { ApiResponse, ApiErrorResponse, FieldError, PaginationMeta } from './types';
 
 export class ApiClientError extends Error {
   public readonly code: string;
@@ -337,10 +337,34 @@ export class ApiClient {
   }
 
   /**
-   * Convenience method to extract directly the `data` property of ApiResponse<T>
+   * Convenience method to extract directly the `data` property of ApiResponse<T>.
+   * When the backend standardizes paginated responses as { data: items[], meta: { pagination } },
+   * seamlessly attaches .items and .pagination onto the returned array so that callers expecting
+   * either { items, pagination } or a raw Array both receive their expected contract.
    */
   public async request<T>(path: string, options: RequestOptions = {}): Promise<T> {
     const envelope = await this.requestEnvelope<T>(path, options);
+    if (envelope.meta?.pagination && Array.isArray(envelope.data)) {
+      const arrayWithPagination = envelope.data as unknown as {
+        items: unknown[];
+        pagination: PaginationMeta;
+      } & unknown[];
+      Object.defineProperties(arrayWithPagination, {
+        items: {
+          value: envelope.data,
+          writable: true,
+          enumerable: true,
+          configurable: true,
+        },
+        pagination: {
+          value: envelope.meta.pagination,
+          writable: true,
+          enumerable: true,
+          configurable: true,
+        },
+      });
+      return arrayWithPagination as unknown as T;
+    }
     return envelope.data;
   }
 
