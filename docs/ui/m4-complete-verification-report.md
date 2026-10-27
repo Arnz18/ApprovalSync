@@ -243,3 +243,52 @@ To prevent a jarring or ambiguous failure when an `SHC_SAC_MEMBER` accesses the 
 - **Prettier:** `prettier --check "src/**/*.{ts,tsx,css,html}"` exited code 0 (100% compliant).
 - **Production Build:** `vite build` produced optimized production bundle in 3.58s.
 - **Git Diff Whitespace Check:** `git diff --check` reported zero whitespace errors.
+
+---
+
+## 11. Final Closeout Addendum — Complete Verification & Handoff
+
+> **Closeout Timestamp:** 2026-10-27T13:00:00+05:30<br />
+> **Audited Commit Reference:** `0c31437fdf351cde31be71a87ce2703b33fa7a2d`<br />
+> **Auditor Role:** M4 — Frontend & Experience
+
+### 11.1 Re-Checked Issue Status & Resolution Categorization
+
+| Finding ID | Classification | Resolution Summary | Responsible Owner |
+|---|:---:|---|:---:|
+| **DEF-CI-01** | **Fixed and Tested** | Added `frontend-quality-gates` job to `.github/workflows/ci.yml` running `npm ci`, `format:check`, `lint`, `typecheck`, `test`, and `build` on Node 22 LTS. YAML validated with Python. | **M4 (Closed)** |
+| **DEF-DOC-01**| **Fixed and Tested** | Updated `PROJECT_STATE.md` to reflect `COMMITTED` for `FE-05` and `FE-07`. Corrected stale BE-09 review status enums to match actual source (`PENDING_REVIEW`, `VERIFIED`, `DEFICIENT`, `REJECTED`) with 5–2000 character notes constraint. | **M4 (Closed)** |
+| **FE-06 403 UX** | **Fixed and Tested** | Implemented resilient, non-alarming advisory notices in `EvcQueuePage.tsx` and `DashboardPage.tsx` that gracefully handle HTTP 403 for `SHC_SAC_MEMBER` while keeping panels usable. Tested in `evc-queue.spec.tsx` and `dashboard-page.spec.tsx`. | **M4 (Closed)** |
+| **DEF-BE-01** | **Awaiting Policy Decision** | `applications.service.ts` currently implements tenant scoping exclusively for `INSTITUTION_USER`. Adding `SHC_SAC_MEMBER` to `@Roles(...)` without a committee hearing assignment or status filter (`RECOMMENDED_FOR_SHC`) would grant committee members unrestricted access across all institutions. Left backend unchanged per safety instructions pending M2/governance scoping decision. | **M2 / Governance** |
+| **DEF-BE-02** | **Awaiting Policy Decision** | `BUREAU_HEAD` has read access (`GET /applications/:id/dossier-report`), while evaluation mutation (`POST`) is restricted to operational review roles. Executive read-only oversight is architecturally consistent; if mutation privileges are desired, an explicit governance sign-off is required. | **M2 / M1** |
+| **Live DB / E2E**| **Environment-Blocked** | Docker Desktop is inactive and host PostgreSQL rejects dev credentials. Live DB migrations and live HTTP E2E tests remain blocked on local machine (verified passing in remote GitHub Actions CI). | **Host Environment** |
+
+### 11.2 Scope of Changes Made in Final Session
+1. **`.github/workflows/ci.yml`:** Added `frontend-quality-gates` job executing in parallel with `backend-quality-gates` across all frontend checks.
+2. **`PROJECT_STATE.md`:** Updated chunk table entries for `FE-05` and `FE-07` to `COMMITTED`; updated summary list; corrected BE-09 review enum documentation to reflect actual entity (`UndertakingReviewStatus`) and DTO (`ReviewUndertakingDto`).
+3. **`docs/ui/m4-complete-verification-report.md`:** Appended Section 11 closeout addendum.
+
+### 11.3 Quality Gate Execution Verification
+- **Frontend Test Suite:** `npm test` — **30 test files passed, 258 tests passed**, 0 failed (100% pass rate).
+- **TypeScript Typecheck:** `npm run typecheck` (`tsc --noEmit`) — 0 errors.
+- **ESLint:** `npm run lint` (`eslint "src/**/*.{ts,tsx}" --max-warnings=0`) — 0 errors, 0 warnings.
+- **Prettier:** `npm run format:check` — 100% compliant.
+- **Production Build:** `npm run build` (`vite build`) — Production bundle generated in 15.65s (gzip: 149.14 kB).
+- **Git Whitespace:** `git diff --check` — 0 whitespace errors.
+- **CI Workflow Validation:** `.github/workflows/ci.yml` validated via `python -c "import yaml; yaml.safe_load(...)"` — Valid.
+
+### 11.4 Handoff & Action Items for Remaining Roles
+
+#### For M1 (Platform & Integration Lead):
+1. **Milestone INT-01 Execution:** With all prerequisites committed (`BE-04..09`, `DOC-07`, `FE-03..07`), begin formal cross-module integration tests in owner-approved paths.
+2. **Standardize Dev Database Environment:** Provide standardized credentials or automated local container scripts for local PostgreSQL E2E execution outside of GitHub Actions CI.
+
+#### For M2 (Backend Core Lead):
+1. **`DEF-BE-01` Resolution:** Define the authorization policy for `SHC_SAC_MEMBER`:
+   - *Option A (Status-Scoped):* Filter `applications.service.ts` so committee members can only query applications where `status IN ('RECOMMENDED_FOR_SHC', 'RECOMMENDED_FOR_EVC', 'EVC_IN_PROGRESS')`.
+   - *Option B (Roster/Hearing Assignment):* Implement an explicit hearing committee assignment table binding committee members to designated case IDs.
+   - *Action:* Apply the chosen policy and add `UserRole.SHC_SAC_MEMBER` to `@Roles(...)` in `applications.controller.ts`.
+2. **`DEF-BE-02` Resolution:** Clarify whether `BUREAU_HEAD` requires `POST /applications/:id/dossier-report` mutation rights or remains a supervisory read-only consumer.
+
+#### For M3 (Document AI Lead):
+1. Maintain explicit `isSimulated: true` tags on simulated DigiLocker and Land Registry adapters for evaluator transparency.
