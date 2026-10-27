@@ -96,18 +96,50 @@ describe('INT-01: Cross-Module Integration & Primary Evaluator Journey (e2e)', (
     expect(institutionB).toBeDefined();
 
     // 2. Resolve seeded users
-    instAUser = (await userRepo.findOne({
-      where: { email: 'demo.institution@synthetic.approvalsync.local' },
-    }))!;
-    instBUser = (await userRepo.findOne({
-      where: { email: 'college.b@synthetic.approvalsync.local' },
-    }))!;
-    scrutinyOfficer = (await userRepo.findOne({
-      where: { email: 'demo.scrutiny@synthetic.approvalsync.local' },
-    }))!;
-    systemAdmin = (await userRepo.findOne({
-      where: { email: 'demo.admin@synthetic.approvalsync.local' },
-    }))!;
+    const ensureUser = async (
+      email: string,
+      name: string,
+      role: UserRole,
+      institutionId?: string,
+    ): Promise<User> => {
+      let u = await userRepo.findOne({ where: { email } });
+      if (!u) {
+        u = userRepo.create({
+          name,
+          email,
+          role,
+          passwordHash:
+            '$2b$10$5tdfV.pdkzzJIE9eyS58EOT/ioZcveA4AsuPQc1kZ7PwOslVXx9Oe',
+          institutionId: institutionId || null,
+          isActive: true,
+        });
+        await userRepo.save(u);
+      }
+      return u;
+    };
+
+    instAUser = await ensureUser(
+      'demo.institution@synthetic.approvalsync.local',
+      'Demo Institution Representative',
+      UserRole.INSTITUTION_USER,
+      institutionA?.id,
+    );
+    instBUser = await ensureUser(
+      'college.b@synthetic.approvalsync.local',
+      'Representative College B',
+      UserRole.INSTITUTION_USER,
+      institutionB?.id,
+    );
+    scrutinyOfficer = await ensureUser(
+      'demo.scrutiny@synthetic.approvalsync.local',
+      'Demo Scrutiny Officer',
+      UserRole.SCRUTINY_OFFICER,
+    );
+    systemAdmin = await ensureUser(
+      'demo.admin@synthetic.approvalsync.local',
+      'Demo System Administrator',
+      UserRole.SYSTEM_ADMIN,
+    );
 
     expect(instAUser).toBeDefined();
     expect(instBUser).toBeDefined();

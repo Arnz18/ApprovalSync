@@ -181,6 +181,15 @@ export const SEED_USERS: SeedUser[] = [
     isActive: true,
   },
   {
+    name: 'Demo Institution Representative College B',
+    email: 'college.b@synthetic.approvalsync.local',
+    role: UserRole.INSTITUTION_USER,
+    passwordHash:
+      '$2b$10$5tdfV.pdkzzJIE9eyS58EOT/ioZcveA4AsuPQc1kZ7PwOslVXx9Oe',
+    institutionRegistrationNumber: 'DEMO-INST-2026-002',
+    isActive: true,
+  },
+  {
     name: 'Demo Scrutiny Officer',
     email: 'demo.scrutiny@synthetic.approvalsync.local',
     role: UserRole.SCRUTINY_OFFICER,
