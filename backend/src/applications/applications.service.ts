@@ -46,6 +46,26 @@ const RESERVED_PAYLOAD_KEYS = [
   'approvalOutcome',
   'reviewDisposition',
   'verified',
+  // Subsystem report, assessment, and verification caches
+  'documentValidation',
+  'dossierReport',
+  'dossierSummary',
+  'complianceAssessment',
+  'issuerVerification',
+  'integrityReport',
+  'duplicateDetection',
+  'anomalyDetection',
+  'slaTimers',
+  'timeline',
+  'audit',
+  'auditTrail',
+  'verificationHistory',
+  'workflowHistory',
+  'deficiencyReport',
+  // Prototype pollution keys
+  '__proto__',
+  'constructor',
+  'prototype',
 ];
 
 @Injectable()
@@ -83,12 +103,17 @@ export class ApplicationsService {
    * Sanitizes dynamic payload JSONB by removing reserved server-managed keys.
    */
   sanitizePayload(payload?: Record<string, unknown>): Record<string, unknown> {
-    if (!payload || typeof payload !== 'object') {
+    if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
       return {};
     }
     const sanitized: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(payload)) {
-      if (!RESERVED_PAYLOAD_KEYS.includes(key)) {
+      if (
+        !RESERVED_PAYLOAD_KEYS.includes(key) &&
+        !key.startsWith('__') &&
+        key !== 'constructor' &&
+        key !== 'prototype'
+      ) {
         sanitized[key] = value;
       }
     }

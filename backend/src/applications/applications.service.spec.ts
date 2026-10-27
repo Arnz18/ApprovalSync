@@ -149,6 +149,9 @@ describe('ApplicationsService', () => {
         institutionId: 'hacked-id',
         submittedAt: 'yesterday',
         validDetail: 'preserved',
+        dossierReport: { status: 'CLEARED' },
+        documentValidation: { status: 'PASSED' },
+        __proto__: { isAdmin: true },
       };
       const clean = service.sanitizePayload(dirty);
       expect(clean).toEqual({
@@ -157,6 +160,8 @@ describe('ApplicationsService', () => {
       });
       expect(clean.status).toBeUndefined();
       expect(clean.institutionId).toBeUndefined();
+      expect(clean.dossierReport).toBeUndefined();
+      expect(clean.documentValidation).toBeUndefined();
     });
   });
 

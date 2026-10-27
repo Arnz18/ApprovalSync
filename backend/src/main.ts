@@ -41,20 +41,62 @@ async function bootstrap(): Promise<void> {
     new TransformInterceptor(),
   );
 
+  // Defensive HTTP Security Headers and Information Disclosure Prevention
+  app.use(
+    (
+      _req: unknown,
+      res: {
+        setHeader: (name: string, value: string) => void;
+        removeHeader?: (name: string) => void;
+      },
+      next: () => void,
+    ) => {
+      res.setHeader('X-Content-Type-Options', 'nosniff');
+      res.setHeader('X-Frame-Options', 'DENY');
+      res.setHeader('X-XSS-Protection', '0');
+      res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+      res.setHeader(
+        'Content-Security-Policy',
+        "default-src 'none'; frame-ancestors 'none'",
+      );
+      if (typeof res.removeHeader === 'function') {
+        res.removeHeader('X-Powered-By');
+      }
+      next();
+    },
+  );
+
+  const httpAdapter = app.getHttpAdapter();
+  if (httpAdapter && typeof (httpAdapter as any).getInstance === 'function') {
+    const instance = (httpAdapter as any).getInstance();
+    if (typeof instance?.disable === 'function') {
+      instance.disable('x-powered-by');
+    }
+  }
+
+  const nodeEnv = configService.get<string>('app.nodeEnv', 'development');
+  const allowDevHeaders =
+    nodeEnv !== 'production' &&
+    configService.get<string>('ALLOW_DEV_HEADER_AUTH') !== 'false';
+
+  const allowedHeaders = [
+    'Content-Type',
+    'Authorization',
+    'X-Correlation-Id',
+    'X-Idempotency-Key',
+    'X-Institution-Id',
+  ];
+
+  if (allowDevHeaders) {
+    allowedHeaders.push('X-Dev-User-Id', 'X-Dev-User-Role');
+  }
+
   // Cross-Origin Resource Sharing (CORS)
   app.enableCors({
     origin: corsOrigins,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     credentials: true,
-    allowedHeaders: [
-      'Content-Type',
-      'Authorization',
-      'X-Correlation-Id',
-      'X-Idempotency-Key',
-      'X-Institution-Id',
-      'X-Dev-User-Id',
-      'X-Dev-User-Role',
-    ],
+    allowedHeaders,
     exposedHeaders: ['X-Correlation-Id', 'X-ApprovalSync-Simulation'],
   });
 

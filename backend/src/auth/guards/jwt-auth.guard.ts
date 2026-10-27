@@ -50,12 +50,16 @@ export class JwtAuthGuard implements CanActivate {
     const token = this.extractTokenFromHeader(request);
 
     if (!token) {
-      // In non-production environments only, check for documented developer header stubs
+      // In non-production environments only, check for documented developer header stubs when explicitly allowed
       const nodeEnv = this.configService.get<string>(
         'app.nodeEnv',
         'development',
       );
-      if (nodeEnv !== 'production') {
+      const allowDevHeaders =
+        nodeEnv !== 'production' &&
+        this.configService.get<string>('ALLOW_DEV_HEADER_AUTH') !== 'false';
+
+      if (allowDevHeaders) {
         const devUserId = request.headers['x-dev-user-id'] as string;
         const devRole = request.headers['x-dev-user-role'] as string;
         if (

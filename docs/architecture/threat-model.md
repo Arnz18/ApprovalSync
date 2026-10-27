@@ -118,13 +118,16 @@ ApprovalSync processes institutional dossiers for AICTE statutory approval. A se
 |                                    Security Controls Progression                                   |
 +----------------------------------------------------------------------------------------------------+
 |  Phase 1: Pre-Demo Controls (Hackathon Baseline — Required for FND-03 / INT-02)                     |
-|  [ ] Magic byte validation for all document uploads (Reject non-PDF/JPEG).                         |
-|  [ ] 15MB file size limit & Multer memory streaming buffers.                                       |
-|  [ ] Strict RBAC guards: Institution cannot access Scrutiny / Admin endpoints.                     |
-|  [ ] Tenant isolation: Application queries scoped by institution ID across all read/write paths.   |
-|  [ ] Database trigger on audit_logs preventing routine UPDATE and DELETE queries.                  |
-|  [ ] Synthetic demo fixtures only (Zero real Aadhaar, PAN, or personal data).                     |
-|  [ ] Visual mock indicators on all simulated DigiLocker and Land Registry responses.               |
+|  [x] Magic byte validation for all document uploads (Reject non-PDF/JPEG/PNG).                      |
+|  [x] 15MB file size limit & Multer memory streaming buffers.                                       |
+|  [x] Strict RBAC guards: Institution cannot access Scrutiny / Admin endpoints.                     |
+|  [x] Tenant isolation: Application queries scoped by institution ID across all read/write paths.   |
+|  [x] Database trigger on audit_logs preventing routine UPDATE and DELETE queries.                  |
+|  [x] Synthetic demo fixtures only (Zero real Aadhaar, PAN, or personal data).                     |
+|  [x] Visual mock indicators on all simulated DigiLocker and Land Registry responses.               |
+|  [x] Server-managed payload sanitization: blocks injection of dossier/validation caches.          |
+|  [x] Global defensive HTTP security headers: nosniff, DENY, CSP, X-Powered-By suppression.        |
+|  [x] Automated security regression suite: backend/test/int-02-security-authorization.e2e-spec.ts. |
 +----------------------------------------------------------------------------------------------------+
 |  Phase 2: Pre-Production Hardening (Production Milestone — DEP-01)                                 |
 |  [ ] ClamAV / VirusTotal antivirus scanning container in upload pipeline.                          |
@@ -139,3 +142,41 @@ ApprovalSync processes institutional dossiers for AICTE statutory approval. A se
 |  [ ] Cert-In empaneled third-party vulnerability assessment & penetration testing (VAPT).          |
 +----------------------------------------------------------------------------------------------------+
 ```
+
+---
+
+## 6. Milestone INT-02 Security Review Findings & Verification Evidence
+
+As part of Milestone **INT-02 (Security, Privacy & Authorization Review)** conducted by Role M1 (Platform & Integration Lead), the integrated ApprovalSync system was systematically reviewed and hardened.
+
+### 6.1 Review Methodology & Scope
+The review encompassed all 16 backend controllers, TypeORM entity models, authentication guards (`JwtAuthGuard`, `RolesGuard`), exception filters (`HttpExceptionFilter`), interceptors, document upload security services (`FileValidatorService`, `LocalStorageAdapter`), cryptographic audit ledger (`AuditService`), finite state machine (`workflow-fsm`), and frontend boundary behavior.
+
+Testing was conducted using real PostgreSQL 16 persistence under Docker, verifying both positive authorization flows and negative security edge cases.
+
+### 6.2 Confirmed Findings, Risk Classification & Remediation
+
+| Finding ID | Component & Endpoint | Severity | Threat Scenario & Impact | Remediation Applied | Status |
+|---|---|---|---|---|---|
+| **SEC-01** | `ApplicationsService.sanitizePayload`<br>`POST /applications`<br>`PATCH /applications/:id` | **High** | **Server-Managed Key Injection in `payloadJsonb`:** Clients could inject forged verification keys (`dossierReport`, `documentValidation`, `complianceAssessment`, `__proto__`) into application payload. Because orchestrators check payload cache, malicious applicants could attempt to bypass scrutiny. | Expanded `RESERVED_PAYLOAD_KEYS` to strip all subsystem caches, verification results, audit trails, and prototype pollution keys. Added unit test and E2E regression assertions. | **FIXED** |
+| **SEC-02** | `main.ts` & `JwtAuthGuard`<br>`All protected endpoints` | **Medium** | **Insecure Dev Header Exposure & Killswitch:** `X-Dev-User-Id` and `X-Dev-User-Role` were unconditionally listed in CORS `allowedHeaders`, and guard bypassed JWT verification solely on `nodeEnv !== 'production'`. | Added `ALLOW_DEV_HEADER_AUTH` killswitch in `JwtAuthGuard`, gated CORS `allowedHeaders` in `main.ts`, and enforced in `config.validation.ts` that dev headers cannot be enabled in production. | **FIXED** |
+| **SEC-03** | `main.ts`<br>`All HTTP responses` | **Medium** | **Missing Defensive Headers & Server Leak:** API responses leaked `X-Powered-By: Express` and omitted defensive browser security headers. | Added global security headers middleware setting `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `X-XSS-Protection: 0`, `Referrer-Policy: strict-origin-when-cross-origin`, `Content-Security-Policy: default-src 'none'; frame-ancestors 'none'`, and suppressed `X-Powered-By`. | **FIXED** |
+| **SEC-04** | All paginated controllers (`applications`, `audit`, `sla`, `undertakings`) | **Low** | **Resource Exhaustion via Unbounded Limit:** Querying with extreme `limit` parameters could cause memory spikes or database load. | Confirmed defensive clamping (`take(limit)`) with maximum limit bounded to 100 and positive integer validation across controllers. | **VERIFIED** |
+
+### 6.3 Automated Security Test Suite (`int-02-security-authorization.e2e-spec.ts`)
+A dedicated automated regression test suite was created in `backend/test/int-02-security-authorization.e2e-spec.ts` executing 33 automated tests across 8 security categories:
+1. **SEC-AUTH (5 tests):** 401 on unauthenticated access across all protected resources, 401 on malformed tokens, 401 on tampered signatures, 401 on expired tokens, 401 on dev header bypass attempts.
+2. **SEC-TENANT (12 tests):** Cross-tenant read, update, submit, document listing, upload, download, metadata, deletion, audit inspection, chain verification, and SLA timer isolation; uniform 403/404 anti-enumeration responses on random non-existent UUIDs.
+3. **SEC-RBAC (4 tests):** Role-based permission enforcement; institution user blocked from regulatory transitions; scrutiny officer blocked from document uploads; illegal FSM state jumps rejected with 400; mandatory human justification comments enforced for deficiency notices.
+4. **SEC-DOC (5 tests):** Rejection of PE executables (`.exe` extension and MZ magic bytes); rejection of archives (`.zip` extension and PK magic bytes); rejection of MIME-spoofed HTML-as-PDF; rejection of empty 0-byte files; path traversal sanitization in uploaded filenames.
+5. **SEC-INJECT (2 tests):** Stripping of client-injected `dossierReport`, `documentValidation`, `complianceAssessment`, and prototype pollution from draft creation and updates.
+6. **SEC-HEADERS (1 test):** Verification of global defensive headers (`nosniff`, `DENY`, `CSP`) and suppression of `X-Powered-By`.
+7. **SEC-AUDIT (2 tests):** Cryptographic SHA-256 Merkle root verification on uncorrupted chains; PostgreSQL trigger enforcement rejecting direct `UPDATE` or `DELETE` on `audit_logs`.
+8. **SEC-ADVISORY (2 tests):** Preservation of `isAdvisory: true` and simulation markers; verification that automated outputs cannot autonomously trigger statutory approval.
+
+**Result: 33 passed, 33 total (100% pass rate).**
+
+### 6.4 Trust Assumptions & Operational Boundaries
+- **Mock Identity & Provider Simulation:** ApprovalSync operates against synthetic institutions, users, and simulated issuer adapters for demonstration and test purposes. All simulated data is explicitly marked with `isSimulated: true` and `X-ApprovalSync-Simulation`.
+- **Audit Ledger Immutability:** Audit immutability is enforced at the database level via PostgreSQL triggers `prevent_audit_log_mutation()` and `prevent_audit_checkpoint_mutation()`. The cryptographic hash chain detects sequential tampering under application boundaries. (Note: A database superuser who intentionally alters database trigger code could rewrite history; production enterprise deployments should anchor checkpoints to an independent write-once external ledger as planned in Phase 2).
+- **Human Authority:** AI and automated rule-evaluation pipelines are strictly advisory decision-support systems. No statutory approval, rejection, or closure can occur without explicit human officer digital disposition.

@@ -94,6 +94,12 @@ export function validateConfig(
         'Configuration error: Production environment requires a strong, unique JWT_SECRET of at least 32 characters.',
       );
     }
+
+    if (config.ALLOW_DEV_HEADER_AUTH === 'true') {
+      throw new Error(
+        'Configuration error: ALLOW_DEV_HEADER_AUTH cannot be enabled in production mode.',
+      );
+    }
   }
 
   return config;
