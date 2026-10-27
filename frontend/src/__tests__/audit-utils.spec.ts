@@ -87,6 +87,8 @@ describe('Audit Utilities (FE-07)', () => {
       // Mock DOM URL and click
       const originalCreateObjectURL = URL.createObjectURL;
       const originalRevokeObjectURL = URL.revokeObjectURL;
+      const originalClick = HTMLAnchorElement.prototype.click;
+      HTMLAnchorElement.prototype.click = vi.fn();
       URL.createObjectURL = vi.fn().mockReturnValue('blob:mock-url');
       URL.revokeObjectURL = vi.fn();
 
@@ -95,6 +97,7 @@ describe('Audit Utilities (FE-07)', () => {
       expect(URL.createObjectURL).toHaveBeenCalled();
       expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:mock-url');
 
+      HTMLAnchorElement.prototype.click = originalClick;
       URL.createObjectURL = originalCreateObjectURL;
       URL.revokeObjectURL = originalRevokeObjectURL;
     });

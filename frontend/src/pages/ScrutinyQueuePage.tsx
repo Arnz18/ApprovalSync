@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useTransition } from 'react';
+import React, { useState, useEffect, useCallback, useTransition, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { AlertCircle, Info, RefreshCw, FileText } from 'lucide-react';
 import { PageHeader } from '../components/ui/PageHeader';
@@ -137,12 +137,17 @@ export const ScrutinyQueuePage: React.FC = () => {
     fetchQueue();
   }, [fetchQueue]);
 
+  const isFirstRender = useRef(true);
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    updateUrlParams(filters);
+  }, [filters, updateUrlParams]);
+
   const handleFilterChange = (newFilters: Partial<ScrutinyFilterState>) => {
-    setFilters((prev) => {
-      const updated = { ...prev, ...newFilters };
-      updateUrlParams(updated);
-      return updated;
-    });
+    setFilters((prev) => ({ ...prev, ...newFilters }));
   };
 
   const handleResetFilters = () => {
@@ -155,7 +160,6 @@ export const ScrutinyQueuePage: React.FC = () => {
       limit: filters.limit,
     };
     setFilters(defaultFilters);
-    updateUrlParams(defaultFilters);
   };
 
   const handlePageChange = (newPage: number) => {

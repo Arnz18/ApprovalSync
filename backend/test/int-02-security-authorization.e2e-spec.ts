@@ -28,7 +28,6 @@ import {
   Institution,
   User,
   Application,
-  Document,
   AuditLog,
 } from '../src/database/entities';
 import { ApplicationStatus, UserRole } from '../src/shared/contracts';
@@ -44,12 +43,10 @@ describe('INT-02: Security, Privacy & Authorization Review (e2e)', () => {
   let instAUser: User;
   let instBUser: User;
   let scrutinyOfficer: User;
-  let systemAdmin: User;
 
   let tokenInstA: string;
   let tokenInstB: string;
   let tokenOfficer: string;
-  let tokenAdmin: string;
 
   const demoPassword = 'DemoPass@123';
   const fixturesDir = path.resolve(__dirname, 'fixtures/documents');
@@ -126,9 +123,6 @@ describe('INT-02: Security, Privacy & Authorization Review (e2e)', () => {
     scrutinyOfficer = (await userRepo.findOne({
       where: { email: 'demo.scrutiny@synthetic.approvalsync.local' },
     }))!;
-    systemAdmin = (await userRepo.findOne({
-      where: { email: 'demo.admin@synthetic.approvalsync.local' },
-    }))!;
 
     const login = async (email: string) => {
       const res = await request(app.getHttpServer())
@@ -141,7 +135,6 @@ describe('INT-02: Security, Privacy & Authorization Review (e2e)', () => {
     tokenInstA = await login(instAUser.email);
     tokenInstB = await login(instBUser.email);
     tokenOfficer = await login(scrutinyOfficer.email);
-    tokenAdmin = await login(systemAdmin.email);
 
     // Setup initial applications for tenant isolation tests
     const appResA = await request(app.getHttpServer())

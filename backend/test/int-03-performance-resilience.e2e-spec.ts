@@ -12,8 +12,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
-import * as path from 'path';
-import * as jwt from 'jsonwebtoken';
 import { DataSource } from 'typeorm';
 import { AppModule } from '../src/app.module';
 import { createAppValidationPipe } from '../src/core/pipes/validation.pipe';
@@ -95,9 +93,6 @@ describe('INT-03: Performance, Concurrency & Resilience Validation (e2e)', () =>
   let tokenInstB: string;
   let tokenOfficer: string;
   let tokenAdmin: string;
-
-  const fixturesDir = path.resolve(__dirname, 'fixtures/documents');
-  const validPdfPath = path.join(fixturesDir, 'valid-sample.pdf');
 
   // Collected empirical benchmark metrics for reporting
   const benchmarkResults: Record<string, BenchmarkMetric> = {};
