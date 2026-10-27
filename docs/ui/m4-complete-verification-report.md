@@ -197,3 +197,49 @@ The ApprovalSync platform is structurally robust, architecturally sound, and rea
    - `regional.officer@synthetic.approvalsync.local` (Regional Dashboard & SLA Monitor)
    - `evc.inspector@synthetic.approvalsync.local` (EVC Ground Inspection Workspace)
    - `lead.auditor@synthetic.approvalsync.local` (Cryptographic Audit Ledger & Standalone Merkle Verifier)
+
+---
+
+## 10. Post-Audit Integration Support & Verification Addendum (Commit `adc6fa7` Follow-up)
+
+> **Addendum Timestamp:** 2026-10-27T10:25:00+05:30<br />
+> **Audited Commit Reference:** `adc6fa7919d84b628264dc956d9f85000f73008c`<br />
+> **Auditor Role:** M4 — Frontend & Experience
+
+### 10.1 Remote `origin/main` State & Teammate Defect Audit Confirmation
+A fresh inspection of `origin/main` at commit `adc6fa7` confirmed:
+1. **`DEF-BE-01` (SHC/SAC Authorization, Owned by M2):** Still unpatched in `backend/src/applications/applications.controller.ts` (lines 90–98, 128–137). `UserRole.SHC_SAC_MEMBER` is omitted from `@Roles(...)`. Standing Hearing Committee requests to `GET /applications` produce HTTP 403 Forbidden.
+2. **`DEF-BE-02` (Dossier Evaluation Mutation for Bureau Head, Owned by M2/M1):** Unchanged in `backend/src/verification/dossier-report.controller.ts` (lines 46–51). `UserRole.BUREAU_HEAD` is omitted from `POST /dossier-report`.
+3. **`DEF-DOC-01` (Governance Ledger Status, Owned by M1):** `PROJECT_STATE.md` (lines 132, 134, 908, 909) still documents `FE-05` and `FE-07` as `PLANNED`.
+4. **`DEF-CI-01` (Missing Frontend Quality Gates in CI, Owned by M1):** `.github/workflows/ci.yml` still executes only backend quality gates.
+5. **M3 Simulated Provider Transparency:** Verified present in code (`isSimulated: true` flags on synthetic verification adapters).
+
+### 10.2 Host Environment & Live Database Availability Diagnostics
+- **Docker Daemon Availability:** `docker ps` returns:
+  `failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.` Docker Desktop is not running on the host.
+- **PostgreSQL Database Daemon:** A native Windows service `postgresql-x64-18` is listening on port 5432 (PID 7684).
+- **Backend Startup Verification:** Launched `node dist/main.js` from `backend/`. The TypeORM initialization attempted connection to `localhost:5432` with user `postgres` and default development credentials, failing with:
+  `[ExceptionHandler] password authentication failed for user "postgres"`.
+- **Integrity Guarantee:** In accordance with instructions, no databases were wiped, no volume files were modified, and no credentials were exposed. Live database operations are genuinely blocked by host configuration, while mock, unit, and local browser suites pass 100%.
+
+### 10.3 M4-Owned Permission-Aware UX Hardening
+To prevent a jarring or ambiguous failure when an `SHC_SAC_MEMBER` accesses the platform queue and dashboard prior to M2's backend patch:
+1. **EVC & Committee Workspace (`EvcQueuePage.tsx`):**
+   - Intercepts `ApiClientError` with `statusCode === 403`.
+   - Transitions alert variant from error to warning.
+   - Renders explicit institutional guidance (`data-testid="permission-denied-guidance"`):
+     *"Standing Hearing Committee (SHC) & Standing Appellate Committee (SAC) Notice: Application read authorization for committee members is currently pending backend controller clearance (DEF-BE-01 in applications.controller.ts). Committee inspection hearings and schedules will become accessible once backend role authorization is updated by M2."*
+2. **Role-Tailored Dashboards (`DashboardPage.tsx`):**
+   - When application dossier loading fails for `UserRole.SHC_SAC_MEMBER`, renders a dedicated warning banner (`data-testid="shc-dashboard-guidance"`):
+     *"Standing Hearing Committee (SHC) application read authorization is pending backend controller clearance (DEF-BE-01). Other dashboard panels and regulatory timer feeds remain active."*
+3. **Test Suite Expansion:**
+   - Updated `frontend/src/__tests__/evc-queue.spec.tsx` to assert graceful 403 handling and committee advisory presence.
+   - Added test in `frontend/src/__tests__/dashboard-page.spec.tsx` asserting SHC dashboard guidance on 403 application failure.
+
+### 10.4 Re-Verification of Frontend Quality Gates
+- **Frontend Test Suite:** 30 passed test files, **258 passed tests** (0 failed, 100% pass rate).
+- **Typecheck:** `tsc --noEmit` exited code 0 (0 type errors).
+- **ESLint:** `eslint "src/**/*.{ts,tsx}" --max-warnings=0` exited code 0 (0 errors, 0 warnings).
+- **Prettier:** `prettier --check "src/**/*.{ts,tsx,css,html}"` exited code 0 (100% compliant).
+- **Production Build:** `vite build` produced optimized production bundle in 3.58s.
+- **Git Diff Whitespace Check:** `git diff --check` reported zero whitespace errors.

@@ -33,10 +33,12 @@ export const EvcQueuePage: React.FC = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isPermissionDenied, setIsPermissionDenied] = useState(false);
 
   const fetchQueue = useCallback(async () => {
     setIsLoading(true);
     setError(null);
+    setIsPermissionDenied(false);
     try {
       const response = await evcService.getEvcQueue(filters);
       setItems(response.items);
@@ -67,6 +69,9 @@ export const EvcQueuePage: React.FC = () => {
       }
     } catch (err) {
       if (err instanceof ApiClientError) {
+        if (err.statusCode === 403) {
+          setIsPermissionDenied(true);
+        }
         setError(
           `Failed to retrieve EVC applications queue: ${err.message} (HTTP ${err.statusCode})`,
         );
@@ -158,23 +163,57 @@ export const EvcQueuePage: React.FC = () => {
       {/* Error Alert with Retry */}
       {error && (
         <div style={{ marginBottom: 'var(--space-4)' }}>
-          <Alert variant="error" title="Queue Retrieval Error">
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span>{error}</span>
-              <button
-                type="button"
-                onClick={fetchQueue}
+          <Alert
+            variant={isPermissionDenied ? 'warning' : 'error'}
+            title={isPermissionDenied ? 'Access Authorization Notice' : 'Queue Retrieval Error'}
+          >
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
+              <div
                 style={{
-                  background: 'none',
-                  border: 'none',
-                  color: 'var(--color-error)',
-                  fontWeight: 'var(--font-weight-semibold)',
-                  cursor: 'pointer',
-                  textDecoration: 'underline',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
                 }}
               >
-                Retry
-              </button>
+                <span>{error}</span>
+                <button
+                  type="button"
+                  onClick={fetchQueue}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: isPermissionDenied
+                      ? 'var(--color-warning, #d97706)'
+                      : 'var(--color-error)',
+                    fontWeight: 'var(--font-weight-semibold)',
+                    cursor: 'pointer',
+                    textDecoration: 'underline',
+                  }}
+                >
+                  Retry
+                </button>
+              </div>
+              {isPermissionDenied && (
+                <div
+                  data-testid="permission-denied-guidance"
+                  style={{
+                    fontSize: 'var(--font-size-xs)',
+                    color: 'var(--color-muted-foreground)',
+                    borderTop: '1px solid var(--color-border)',
+                    paddingTop: 'var(--space-2)',
+                    marginTop: 'var(--space-1)',
+                  }}
+                >
+                  <strong>
+                    Standing Hearing Committee (SHC) &amp; Standing Appellate Committee (SAC)
+                    Notice:
+                  </strong>{' '}
+                  Application read authorization for committee members is currently pending backend
+                  controller clearance (DEF-BE-01 in applications.controller.ts). Committee
+                  inspection hearings and schedules will become accessible once backend role
+                  authorization is updated by M2.
+                </div>
+              )}
             </div>
           </Alert>
         </div>

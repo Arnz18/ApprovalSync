@@ -192,9 +192,23 @@ export function DashboardPage(): React.ReactElement {
 
       {/* Partial Data Failure Warnings */}
       {appsError && (
-        <Alert variant="error" title="Applications Data Service Notice">
-          Failed to load application dossier records ({appsError}). Other panels will continue to
-          render where data is available.
+        <Alert
+          variant={effectiveRole === UserRole.SHC_SAC_MEMBER ? 'warning' : 'error'}
+          title={
+            effectiveRole === UserRole.SHC_SAC_MEMBER
+              ? 'Committee Application Access Notice (DEF-BE-01)'
+              : 'Applications Data Service Notice'
+          }
+        >
+          {effectiveRole === UserRole.SHC_SAC_MEMBER ? (
+            <div data-testid="shc-dashboard-guidance">
+              Standing Hearing Committee (SHC) application read authorization is pending backend
+              controller clearance (DEF-BE-01). Other dashboard panels and regulatory timer feeds
+              remain active.
+            </div>
+          ) : (
+            `Failed to load application dossier records (${appsError}). Other panels will continue to render where data is available.`
+          )}
         </Alert>
       )}
 

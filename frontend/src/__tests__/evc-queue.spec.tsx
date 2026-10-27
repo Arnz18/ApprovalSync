@@ -293,7 +293,7 @@ describe('EVC Queue & Application Selection (FE-06)', () => {
     });
   });
 
-  it('handles 403 access forbidden error gracefully', async () => {
+  it('handles 403 access forbidden error gracefully and displays permission guidance', async () => {
     vi.spyOn(evcService, 'getEvcQueue').mockRejectedValueOnce(
       new ApiClientError({
         message: 'User does not hold required regulatory permissions',
@@ -308,6 +308,13 @@ describe('EVC Queue & Application Selection (FE-06)', () => {
       expect(
         screen.getByText(/User does not hold required regulatory permissions/i),
       ).toBeInTheDocument();
+      expect(screen.getByTestId('permission-denied-guidance')).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          /Standing Hearing Committee \(SHC\) & Standing Appellate Committee \(SAC\) Notice/i,
+        ),
+      ).toBeInTheDocument();
+      expect(screen.getByText('Access Authorization Notice')).toBeInTheDocument();
     });
   });
 

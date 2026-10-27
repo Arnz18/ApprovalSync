@@ -311,4 +311,24 @@ describe('DashboardPage & Role Dashboards (FE-05)', () => {
     ).toBeInTheDocument();
     expect(screen.getByText(/TIER 1 RO ALERT Escalation Event/i)).toBeInTheDocument();
   });
+
+  it('displays permission-aware warning for SHC_SAC_MEMBER when applications fail with 403', async () => {
+    vi.spyOn(applicationsService, 'listApplications').mockRejectedValue(
+      new Error('Forbidden: User does not hold required regulatory permissions'),
+    );
+
+    renderWithRole(UserRole.SHC_SAC_MEMBER);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(/Committee Application Access Notice \(DEF-BE-01\)/i),
+      ).toBeInTheDocument();
+      expect(screen.getByTestId('shc-dashboard-guidance')).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          /Standing Hearing Committee \(SHC\) application read authorization is pending/i,
+        ),
+      ).toBeInTheDocument();
+    });
+  });
 });
