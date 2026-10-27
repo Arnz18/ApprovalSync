@@ -12,6 +12,7 @@ import { DashboardPage } from '../pages/DashboardPage';
 import { UndertakingsPage } from '../pages/UndertakingsPage';
 import { AuditLedgerPage } from '../pages/AuditLedgerPage';
 import { FeaturePlaceholderPage } from '../pages/FeaturePlaceholderPage';
+import { SettingsPage } from '../pages/SettingsPage';
 import { NotFoundPage } from '../pages/NotFoundPage';
 import { ProtectedRoute } from './ProtectedRoute';
 import { ROUTE_PERMISSIONS } from '../auth/roleRoutes';
@@ -166,19 +167,7 @@ export function AppRoutes(): React.ReactElement {
           path="settings"
           element={
             <ProtectedRoute allowedRoles={ROUTE_PERMISSIONS['/settings'].allowedRoles}>
-              <FeaturePlaceholderPage
-                moduleCode="SETTINGS"
-                title="Platform Settings & Environment Status"
-                description="Configuration parameters, environment endpoints, and developer controls."
-                assignedChunk="FE-01"
-                dependencies={['FND-02', 'FND-03']}
-                dependencyStatus="COMMITTED"
-                expectedFeatures={[
-                  'Vite environment variables and API base URL configuration',
-                  'System health status probe and response latency monitoring',
-                  'Design system theme tokens and accessibility preferences',
-                ]}
-              />
+              <SettingsPage />
             </ProtectedRoute>
           }
         />

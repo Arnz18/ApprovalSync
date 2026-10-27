@@ -19,12 +19,30 @@ import { Alert } from '../components/ui/Alert';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-// Synthetic development credentials defined in backend seed.data.ts
-const DEV_DEMO_CREDENTIALS = {
-  email: 'demo.institution@synthetic.approvalsync.local',
-  password: 'DemoPass@123',
-  role: 'INSTITUTION_USER',
-};
+// Synthetic development personas defined in backend seed.data.ts
+const DEMO_PERSONAS = [
+  {
+    label: 'Scrutiny Officer',
+    email: 'demo.scrutiny@synthetic.approvalsync.local',
+    role: 'SCRUTINY_OFFICER',
+  },
+  {
+    label: 'Institution User',
+    email: 'demo.institution@synthetic.approvalsync.local',
+    role: 'INSTITUTION_USER',
+  },
+  {
+    label: 'Regional Officer',
+    email: 'demo.regional@synthetic.approvalsync.local',
+    role: 'REGIONAL_OFFICER',
+  },
+  {
+    label: 'System Admin',
+    email: 'demo.admin@synthetic.approvalsync.local',
+    role: 'SYSTEM_ADMIN',
+  },
+];
+const DEMO_PASSWORD = 'DemoPass@123';
 
 export function LoginPage(): React.ReactElement {
   const { login, isAuthenticated, status } = useAuth();
@@ -104,9 +122,9 @@ export function LoginPage(): React.ReactElement {
     }
   };
 
-  const handleFillDemoCredentials = () => {
-    setEmail(DEV_DEMO_CREDENTIALS.email);
-    setPassword(DEV_DEMO_CREDENTIALS.password);
+  const handleFillDemoCredentials = (targetEmail?: string) => {
+    setEmail(targetEmail || DEMO_PERSONAS[0].email);
+    setPassword(DEMO_PASSWORD);
     setErrors({});
     setFormError(null);
   };
@@ -358,7 +376,7 @@ export function LoginPage(): React.ReactElement {
                   }}
                 >
                   <Info size={14} aria-hidden="true" />
-                  <span>Development Mode — Synthetic Account</span>
+                  <span>Sandbox Environment — Synthetic Personas</span>
                 </div>
 
                 <p
@@ -368,7 +386,7 @@ export function LoginPage(): React.ReactElement {
                     lineHeight: 1.4,
                   }}
                 >
-                  Pre-configured development seed account from <code>seed.data.ts</code>.
+                  Pre-configured development seed account from <code>seed.data.ts</code>:
                 </p>
 
                 <div
@@ -381,6 +399,7 @@ export function LoginPage(): React.ReactElement {
                     padding: '0.5rem 0.625rem',
                     borderRadius: 'var(--radius-sm)',
                     border: '1px solid var(--color-border)',
+                    marginBottom: '0.5rem',
                   }}
                 >
                   <div style={{ overflow: 'hidden' }}>
@@ -394,7 +413,7 @@ export function LoginPage(): React.ReactElement {
 
                   <button
                     type="button"
-                    onClick={handleFillDemoCredentials}
+                    onClick={() => handleFillDemoCredentials(DEMO_PERSONAS[1].email)}
                     style={{
                       background: 'none',
                       border: '1px solid var(--color-primary)',
@@ -408,6 +427,58 @@ export function LoginPage(): React.ReactElement {
                     }}
                   >
                     Use Account
+                  </button>
+                </div>
+
+                {/* Switch to Other Personas */}
+                <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleFillDemoCredentials('demo.scrutiny@synthetic.approvalsync.local')
+                    }
+                    style={{
+                      fontSize: '0.625rem',
+                      padding: '2px 6px',
+                      borderRadius: 'var(--radius-sm)',
+                      border: '1px solid var(--color-border)',
+                      backgroundColor: '#ffffff',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Scrutiny Officer
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleFillDemoCredentials('demo.regional@synthetic.approvalsync.local')
+                    }
+                    style={{
+                      fontSize: '0.625rem',
+                      padding: '2px 6px',
+                      borderRadius: 'var(--radius-sm)',
+                      border: '1px solid var(--color-border)',
+                      backgroundColor: '#ffffff',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Regional Officer
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      handleFillDemoCredentials('demo.admin@synthetic.approvalsync.local')
+                    }
+                    style={{
+                      fontSize: '0.625rem',
+                      padding: '2px 6px',
+                      borderRadius: 'var(--radius-sm)',
+                      border: '1px solid var(--color-border)',
+                      backgroundColor: '#ffffff',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    System Admin
                   </button>
                 </div>
               </div>

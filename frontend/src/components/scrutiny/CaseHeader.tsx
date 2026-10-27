@@ -1,6 +1,14 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Building2, Calendar, BookOpen, Clock, RefreshCw } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import {
+  ArrowLeft,
+  Building2,
+  Calendar,
+  BookOpen,
+  Clock,
+  RefreshCw,
+  ChevronRight,
+} from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 import { ApplicationProjection } from '../../applications/types';
@@ -15,6 +23,14 @@ interface CaseHeaderProps {
 export const CaseHeader: React.FC<CaseHeaderProps> = ({ application, onRefresh, isLoading }) => {
   const navigate = useNavigate();
 
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate('/scrutiny');
+    }
+  };
+
   const getStatusBadge = (status: ApplicationStatus) => {
     switch (status) {
       case ApplicationStatus.APPROVED:
@@ -22,7 +38,7 @@ export const CaseHeader: React.FC<CaseHeaderProps> = ({ application, onRefresh, 
       case ApplicationStatus.REJECTED:
         return <Badge variant="error">Rejected</Badge>;
       case ApplicationStatus.DEFICIENCY_ISSUED:
-        return <Badge variant="warning">Deficiency Issued</Badge>;
+        return <Badge variant="warning">Deficiency Notice Issued</Badge>;
       case ApplicationStatus.UNDER_SCRUTINY:
         return <Badge variant="primary">Under Scrutiny</Badge>;
       case ApplicationStatus.SUBMITTED:
@@ -30,7 +46,7 @@ export const CaseHeader: React.FC<CaseHeaderProps> = ({ application, onRefresh, 
       case ApplicationStatus.RESUBMITTED:
         return <Badge variant="warning">Resubmitted</Badge>;
       case ApplicationStatus.RECOMMENDED_FOR_EVC:
-        return <Badge variant="primary">EVC Recommended</Badge>;
+        return <Badge variant="primary">Recommended for EVC</Badge>;
       case ApplicationStatus.WITHDRAWN:
         return <Badge variant="default">Withdrawn</Badge>;
       case ApplicationStatus.DRAFT:
@@ -40,7 +56,7 @@ export const CaseHeader: React.FC<CaseHeaderProps> = ({ application, onRefresh, 
   };
 
   const formatDate = (isoString?: string | null) => {
-    if (!isoString) return 'Not yet submitted';
+    if (!isoString) return 'Pending formal submission';
     try {
       const d = new Date(isoString);
       return d.toLocaleDateString(undefined, {
@@ -66,6 +82,47 @@ export const CaseHeader: React.FC<CaseHeaderProps> = ({ application, onRefresh, 
         boxShadow: 'var(--shadow-sm)',
       }}
     >
+      {/* Breadcrumb Trail */}
+      <nav aria-label="Breadcrumb" style={{ marginBottom: 'var(--space-3)' }}>
+        <ol
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 'var(--space-2)',
+            listStyle: 'none',
+            padding: 0,
+            margin: 0,
+            fontSize: 'var(--font-size-xs)',
+            color: 'var(--color-muted-foreground)',
+          }}
+        >
+          <li>
+            <Link to="/" style={{ color: 'var(--color-muted-foreground)', textDecoration: 'none' }}>
+              Workspace
+            </Link>
+          </li>
+          <li>
+            <ChevronRight size={12} aria-hidden="true" />
+          </li>
+          <li>
+            <Link
+              to="/scrutiny"
+              style={{ color: 'var(--color-muted-foreground)', textDecoration: 'none' }}
+            >
+              Scrutiny Queue
+            </Link>
+          </li>
+          <li>
+            <ChevronRight size={12} aria-hidden="true" />
+          </li>
+          <li>
+            <span style={{ color: 'var(--color-foreground)', fontWeight: 600 }}>
+              Case {application.applicationNumber}
+            </span>
+          </li>
+        </ol>
+      </nav>
+
       {/* Top action row */}
       <div
         style={{
@@ -83,8 +140,8 @@ export const CaseHeader: React.FC<CaseHeaderProps> = ({ application, onRefresh, 
           type="button"
           variant="outline"
           size="sm"
-          onClick={() => navigate('/scrutiny')}
-          aria-label="Return to scrutiny queue"
+          onClick={handleBack}
+          aria-label="Return to previous queue view"
         >
           <ArrowLeft size={14} aria-hidden="true" />
           <span>Back to Scrutiny Queue</span>
@@ -142,11 +199,13 @@ export const CaseHeader: React.FC<CaseHeaderProps> = ({ application, onRefresh, 
             style={{
               fontSize: 'var(--font-size-xs)',
               color: 'var(--color-muted-foreground)',
-              fontFamily: 'var(--font-family-mono, monospace)',
               marginTop: 'var(--space-1)',
             }}
           >
-            Case UUID: {application.id}
+            Regulatory Docket ID:{' '}
+            <span style={{ fontFamily: 'var(--font-family-mono, monospace)' }}>
+              {application.id.slice(0, 8)}...{application.id.slice(-4)}
+            </span>
           </div>
         </div>
 
@@ -181,7 +240,9 @@ export const CaseHeader: React.FC<CaseHeaderProps> = ({ application, onRefresh, 
               marginTop: '2px',
             }}
           >
-            <span>Reg No: {application.institution?.registrationNumber || 'AICTE-REG-001'}</span>
+            <span>
+              Registration: {application.institution?.registrationNumber || 'AICTE-REG-001'}
+            </span>
             {application.institution?.state && <span> • {application.institution.state}</span>}
           </div>
         </div>
@@ -193,7 +254,7 @@ export const CaseHeader: React.FC<CaseHeaderProps> = ({ application, onRefresh, 
           display: 'flex',
           alignItems: 'center',
           flexWrap: 'wrap',
-          gap: 'var(--space-4)',
+          gap: 'var(--space-5)',
           marginTop: 'var(--space-4)',
           paddingTop: 'var(--space-3)',
           borderTop: '1px solid var(--color-border-subtle)',

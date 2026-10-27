@@ -526,7 +526,7 @@ export const DossierFindingsView: React.FC<DossierFindingsViewProps> = ({
             </CardContent>
           </Card>
         ) : (
-          filteredFindings.map((finding) => {
+          filteredFindings.map((finding, idx) => {
             const isExpanded = !!expandedFindings[finding.id];
             const cardClass =
               finding.severity === 'CRITICAL_DEFICIENCY'
@@ -536,7 +536,7 @@ export const DossierFindingsView: React.FC<DossierFindingsViewProps> = ({
                   : 'finding-card finding-card-compliant';
 
             return (
-              <div key={finding.id} className={cardClass}>
+              <div key={`${finding.id}-${idx}`} className={cardClass}>
                 <div
                   style={{
                     display: 'flex',

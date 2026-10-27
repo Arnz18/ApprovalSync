@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import {
   ArrowLeft,
   Building,
@@ -9,6 +9,7 @@ import {
   ShieldCheck,
   RefreshCw,
   AlertTriangle,
+  ChevronRight,
 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
@@ -34,6 +35,14 @@ export const EvcCaseHeader: React.FC<EvcCaseHeaderProps> = ({
   isEvaluating,
 }) => {
   const navigate = useNavigate();
+
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate('/evc');
+    }
+  };
 
   const getStatusBadge = (status: ApplicationStatus) => {
     switch (status) {
@@ -70,6 +79,47 @@ export const EvcCaseHeader: React.FC<EvcCaseHeaderProps> = ({
         boxShadow: 'var(--shadow-sm)',
       }}
     >
+      {/* Breadcrumb */}
+      <nav aria-label="Breadcrumb" style={{ marginBottom: 'var(--space-3)' }}>
+        <ol
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 'var(--space-2)',
+            listStyle: 'none',
+            padding: 0,
+            margin: 0,
+            fontSize: 'var(--font-size-xs)',
+            color: 'var(--color-muted-foreground)',
+          }}
+        >
+          <li>
+            <Link to="/" style={{ color: 'var(--color-muted-foreground)', textDecoration: 'none' }}>
+              Workspace
+            </Link>
+          </li>
+          <li>
+            <ChevronRight size={12} aria-hidden="true" />
+          </li>
+          <li>
+            <Link
+              to="/evc"
+              style={{ color: 'var(--color-muted-foreground)', textDecoration: 'none' }}
+            >
+              EVC Inspection Queue
+            </Link>
+          </li>
+          <li>
+            <ChevronRight size={12} aria-hidden="true" />
+          </li>
+          <li>
+            <span style={{ color: 'var(--color-foreground)', fontWeight: 600 }}>
+              Inspection {application.applicationNumber}
+            </span>
+          </li>
+        </ol>
+      </nav>
+
       {/* Top Bar: Back link, Status and Re-evaluate Action */}
       <div
         style={{
@@ -87,7 +137,7 @@ export const EvcCaseHeader: React.FC<EvcCaseHeaderProps> = ({
           type="button"
           variant="outline"
           size="sm"
-          onClick={() => navigate('/evc')}
+          onClick={handleBack}
           leftIcon={<ArrowLeft size={16} aria-hidden="true" />}
         >
           Return to EVC Queue

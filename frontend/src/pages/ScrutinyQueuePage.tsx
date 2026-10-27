@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useCallback, useTransition, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { AlertCircle, Info, RefreshCw, FileText } from 'lucide-react';
+import { AlertCircle, RefreshCw, FileText } from 'lucide-react';
 import { PageHeader } from '../components/ui/PageHeader';
 import { Alert } from '../components/ui/Alert';
 import { EmptyState } from '../components/ui/EmptyState';
@@ -8,6 +8,7 @@ import { Spinner } from '../components/ui/Loading';
 import { Button } from '../components/ui/Button';
 import { ScrutinyQueueFilters } from '../components/scrutiny/ScrutinyQueueFilters';
 import { ScrutinyQueueTable } from '../components/scrutiny/ScrutinyQueueTable';
+import { HumanSovereigntyNotice } from '../components/common/HumanSovereigntyNotice';
 import { scrutinyService } from '../api/services/scrutinyService';
 import { ScrutinyQueueItem, ScrutinyFilterState } from '../scrutiny/types';
 import { ApiClientError } from '../api/client';
@@ -15,17 +16,20 @@ import { ApiClientError } from '../api/client';
 export const ScrutinyQueuePage: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [, startTransition] = useTransition();
+  const isMountedRef = useRef<boolean>(true);
 
-  // Initialize filters from URL search params or defaults
-  const [filters, setFilters] = useState<ScrutinyFilterState>(() => ({
-    search: searchParams.get('search') || '',
-    status: searchParams.get('status') || 'ALL',
-    sortBy: searchParams.get('sortBy') || 'createdAt',
-    sortOrder: (searchParams.get('sortOrder') as 'ASC' | 'DESC') || 'DESC',
-    page: Number(searchParams.get('page')) || 1,
-    limit: Number(searchParams.get('limit')) || 20,
-  }));
+  // Derive filters directly from URL search params as single source of truth
+  const filters: ScrutinyFilterState = useMemo(
+    () => ({
+      search: searchParams.get('search') || '',
+      status: searchParams.get('status') || 'ALL',
+      sortBy: searchParams.get('sortBy') || 'createdAt',
+      sortOrder: (searchParams.get('sortOrder') as 'ASC' | 'DESC') || 'DESC',
+      page: Number(searchParams.get('page')) || 1,
+      limit: Number(searchParams.get('limit')) || 20,
+    }),
+    [searchParams],
+  );
 
   const [queueItems, setQueueItems] = useState<ScrutinyQueueItem[]>([]);
   const [pagination, setPagination] = useState({
@@ -40,23 +44,59 @@ export const ScrutinyQueuePage: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Sync state changes to URL query parameters
-  const updateUrlParams = useCallback(
-    (newFilters: ScrutinyFilterState) => {
-      const params = new URLSearchParams();
-      if (newFilters.search) params.set('search', newFilters.search);
-      if (newFilters.status !== 'ALL') params.set('status', newFilters.status);
-      if (newFilters.sortBy !== 'createdAt') params.set('sortBy', newFilters.sortBy);
-      if (newFilters.sortOrder !== 'DESC') params.set('sortOrder', newFilters.sortOrder);
-      if (newFilters.page > 1) params.set('page', String(newFilters.page));
-      if (newFilters.limit !== 20) params.set('limit', String(newFilters.limit));
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
-      startTransition(() => {
-        setSearchParams(params, { replace: true });
-      });
+  const handleFilterChange = useCallback(
+    (newFilters: Partial<ScrutinyFilterState>) => {
+      setSearchParams(
+        (prevParams) => {
+          const merged: ScrutinyFilterState = {
+            search:
+              newFilters.search !== undefined ? newFilters.search : prevParams.get('search') || '',
+            status:
+              newFilters.status !== undefined
+                ? newFilters.status
+                : prevParams.get('status') || 'ALL',
+            sortBy:
+              newFilters.sortBy !== undefined
+                ? newFilters.sortBy
+                : prevParams.get('sortBy') || 'createdAt',
+            sortOrder:
+              newFilters.sortOrder !== undefined
+                ? newFilters.sortOrder
+                : (prevParams.get('sortOrder') as 'ASC' | 'DESC') || 'DESC',
+            page:
+              newFilters.page !== undefined ? newFilters.page : Number(prevParams.get('page')) || 1,
+            limit:
+              newFilters.limit !== undefined
+                ? newFilters.limit
+                : Number(prevParams.get('limit')) || 20,
+          };
+
+          const params = new URLSearchParams();
+          if (merged.search.trim()) params.set('search', merged.search.trim());
+          if (merged.status !== 'ALL') params.set('status', merged.status);
+          if (merged.sortBy !== 'createdAt') params.set('sortBy', merged.sortBy);
+          if (merged.sortOrder !== 'DESC') params.set('sortOrder', merged.sortOrder);
+          if (merged.page > 1) params.set('page', String(merged.page));
+          if (merged.limit !== 20) params.set('limit', String(merged.limit));
+
+          return params;
+        },
+        { replace: true },
+      );
     },
     [setSearchParams],
   );
+
+  const handleResetFilters = useCallback(() => {
+    setSearchParams(new URLSearchParams(), { replace: true });
+  }, [setSearchParams]);
 
   const fetchQueue = useCallback(async () => {
     setIsLoading(true);
@@ -79,16 +119,19 @@ export const ScrutinyQueuePage: React.FC = () => {
       }
 
       const response = await scrutinyService.getQueue(queryParams);
+      if (!isMountedRef.current) return;
 
-      // Map response to initial queue items
-      const items: ScrutinyQueueItem[] = response.items.map((app) => ({
+      const rawItems = response?.items || [];
+      const items: ScrutinyQueueItem[] = rawItems.map((app) => ({
         ...app,
         dossierSummary: null,
         dossierSummaryLoading: app.status !== 'DRAFT',
       }));
 
       setQueueItems(items);
-      setPagination(response.pagination);
+      if (response?.pagination) {
+        setPagination(response.pagination);
+      }
       setIsLoading(false);
 
       // Asynchronously enrich with dossier verification summaries
@@ -96,6 +139,7 @@ export const ScrutinyQueuePage: React.FC = () => {
         scrutinyService
           .enrichQueueSummaries(items, 3)
           .then((summaries) => {
+            if (!isMountedRef.current) return;
             setQueueItems((prev) =>
               prev.map((it) => ({
                 ...it,
@@ -105,6 +149,7 @@ export const ScrutinyQueuePage: React.FC = () => {
             );
           })
           .catch(() => {
+            if (!isMountedRef.current) return;
             setQueueItems((prev) =>
               prev.map((it) => ({
                 ...it,
@@ -114,6 +159,7 @@ export const ScrutinyQueuePage: React.FC = () => {
           });
       }
     } catch (err: unknown) {
+      if (!isMountedRef.current) return;
       setIsLoading(false);
       if (err instanceof ApiClientError) {
         if (err.statusCode === 403) {
@@ -137,31 +183,6 @@ export const ScrutinyQueuePage: React.FC = () => {
     fetchQueue();
   }, [fetchQueue]);
 
-  const isFirstRender = useRef(true);
-  useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
-    }
-    updateUrlParams(filters);
-  }, [filters, updateUrlParams]);
-
-  const handleFilterChange = (newFilters: Partial<ScrutinyFilterState>) => {
-    setFilters((prev) => ({ ...prev, ...newFilters }));
-  };
-
-  const handleResetFilters = () => {
-    const defaultFilters: ScrutinyFilterState = {
-      search: '',
-      status: 'ALL',
-      sortBy: 'createdAt',
-      sortOrder: 'DESC',
-      page: 1,
-      limit: filters.limit,
-    };
-    setFilters(defaultFilters);
-  };
-
   const handlePageChange = (newPage: number) => {
     handleFilterChange({ page: newPage });
   };
@@ -179,7 +200,7 @@ export const ScrutinyQueuePage: React.FC = () => {
       {/* Page Header */}
       <PageHeader
         title="Scrutiny Review Queue"
-        description="Institutional application review, AI-assisted documentary verification, and human officer dispositions."
+        description="Institutional application review, documentary verification, and human officer dispositions."
         breadcrumbs={[
           { label: 'Workspace', href: '/' },
           { label: 'Regulatory Review', href: '/scrutiny' },
@@ -202,20 +223,8 @@ export const ScrutinyQueuePage: React.FC = () => {
         }
       />
 
-      {/* Human Sovereignty Regulatory Advisory Banner (ADR-004) */}
-      <div style={{ marginBottom: 'var(--space-4)' }}>
-        <Alert variant="info" title="ADR-004 Human Sovereignty Decision Support">
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--space-2)' }}>
-            <Info size={16} aria-hidden="true" style={{ flexShrink: 0, marginTop: '2px' }} />
-            <span>
-              Automated dossier verification findings, OCR extractions, and anomaly flags are
-              strictly advisory decision support under AICTE Approval Process Handbook norms.
-              Scrutiny officers and regional directors must review original uploaded evidence before
-              issuing deficiency notices or transitioning application states.
-            </span>
-          </div>
-        </Alert>
-      </div>
+      {/* Human Sovereignty Regulatory Advisory Notice (ADR-004) */}
+      <HumanSovereigntyNotice title="ADR-004 Human Sovereignty Decision Support" />
 
       {/* Filter and Search Bar */}
       <ScrutinyQueueFilters

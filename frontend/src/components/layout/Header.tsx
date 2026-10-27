@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ShieldCheck, Menu, User, Sparkles, LogOut, LogIn } from 'lucide-react';
-import { SimulatedDataBadge } from '../ui/Badge';
 import { healthService } from '../../api';
 import { useAuth } from '../../auth/useAuth';
 import { formatRoleName } from '../../auth/roleRoutes';
@@ -61,54 +60,71 @@ export function Header({ onToggleMobileNav, isMobileNavOpen }: HeaderProps): Rea
             <ShieldCheck size={22} />
           </div>
           <div className="header-title-group">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span className="header-title">ApprovalSync</span>
-              <span
-                style={{
-                  fontSize: '0.625rem',
-                  fontWeight: 600,
-                  backgroundColor: '#e0e7ff',
-                  color: '#3730a3',
-                  padding: '1px 6px',
-                  borderRadius: '9999px',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                }}
-              >
-                Prototype
-              </span>
-            </div>
-            <span className="header-subtitle">AICTE Regulatory Compliance &amp; Verification</span>
+            <span className="header-title">ApprovalSync</span>
+            <span className="header-subtitle">
+              AICTE Regulatory Compliance &amp; Institutional Approval Platform
+            </span>
           </div>
         </Link>
       </div>
 
       <div className="header-actions">
-        {/* Backend API Status Pill */}
-        <span
-          className={`badge ${apiStatus === 'online' ? 'badge-success' : 'badge-default'}`}
+        {/* Institutional Environment & API Status Indicator */}
+        <div
+          className="header-env-indicator"
+          role="status"
+          aria-label={
+            apiStatus === 'online'
+              ? 'Connected to live backend API. Institutional demonstration sandbox active.'
+              : 'Backend API is in standby mode.'
+          }
           title={
             apiStatus === 'online'
-              ? 'Backend API connected and responding normally'
-              : 'Backend API is offline or standby (run npm run start:dev in backend/)'
+              ? 'Backend API: Live (localhost:3000) • Institutional Sandbox (Synthetic test data & simulated registry adapters active)'
+              : 'Backend API: Standby mode'
           }
-          style={{ fontSize: '0.6875rem' }}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.375rem',
+            padding: '2px 8px',
+            borderRadius: 'var(--radius-full)',
+            backgroundColor: apiStatus === 'online' ? '#f0fdf4' : 'var(--color-muted)',
+            border: `1px solid ${apiStatus === 'online' ? '#bbf7d0' : 'var(--color-border)'}`,
+            fontSize: '0.6875rem',
+            fontWeight: 500,
+            color: apiStatus === 'online' ? '#166534' : 'var(--color-muted-foreground)',
+          }}
         >
           <span
             style={{
               width: 6,
               height: 6,
               borderRadius: '50%',
-              backgroundColor: apiStatus === 'online' ? 'var(--color-success)' : '#94a3b8',
+              backgroundColor: apiStatus === 'online' ? '#16a34a' : '#94a3b8',
               display: 'inline-block',
             }}
             aria-hidden="true"
           />
-          {apiStatus === 'online' ? 'API Online' : 'API Standby'}
-        </span>
+          <span>{apiStatus === 'online' ? 'API Online' : 'API Standby'}</span>
+        </div>
 
-        {/* Simulated data notice badge */}
-        <SimulatedDataBadge />
+        <span
+          className="header-prototype-badge"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            padding: '2px 6px',
+            borderRadius: 'var(--radius-sm)',
+            fontSize: '0.625rem',
+            fontWeight: 600,
+            backgroundColor: 'var(--color-muted)',
+            color: 'var(--color-muted-foreground)',
+            letterSpacing: '0.02em',
+          }}
+        >
+          Prototype • Simulated / Mock Data
+        </span>
 
         {/* Dynamic Authenticated User Info or Sign In Action */}
         {isAuthenticated && user ? (

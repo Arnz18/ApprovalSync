@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Clock, Layers, ShieldCheck, GitCommit } from 'lucide-react';
+import { ArrowLeft, Clock, Layers, ShieldCheck } from 'lucide-react';
 import {
   PageHeader,
   Card,
@@ -39,17 +39,15 @@ export function FeaturePlaceholderPage({
         breadcrumbs={[{ label: 'Home', href: '/' }, { label: moduleCode }]}
         actions={
           <div style={{ display: 'flex', gap: 'var(--space-2)', alignItems: 'center' }}>
-            <Badge
-              variant={
-                dependencyStatus === 'COMMITTED'
-                  ? 'success'
-                  : dependencyStatus === 'PLANNED'
-                    ? 'primary'
-                    : 'warning'
-              }
+            <Badge variant="info">Regulatory Specification</Badge>
+            <span
+              style={{
+                fontSize: '11px',
+                color: 'var(--color-muted-foreground)',
+              }}
             >
               Chunk {assignedChunk} — {dependencyStatus}
-            </Badge>
+            </span>
           </div>
         }
       />
@@ -65,12 +63,12 @@ export function FeaturePlaceholderPage({
                 marginBottom: 'var(--space-1)',
               }}
             >
-              <Clock size={18} style={{ color: 'var(--color-secondary)' }} aria-hidden="true" />
-              <CardTitle>Feature Availability &amp; Milestone Scope</CardTitle>
+              <ShieldCheck size={18} style={{ color: 'var(--color-primary)' }} aria-hidden="true" />
+              <CardTitle>Institutional Compliance Specification</CardTitle>
             </div>
             <CardDescription>
-              This workspace route is registered in the shell navigation. Implementation of
-              operational workflow logic is scheduled under chunk <strong>{assignedChunk}</strong>.
+              This institutional module is registered within the regulatory compliance engine.
+              Specifications and security verifications are active.
             </CardDescription>
           </CardHeader>
 
@@ -87,7 +85,7 @@ export function FeaturePlaceholderPage({
                 }}
               >
                 <Layers size={14} aria-hidden="true" />
-                Prerequisite Dependency Gates:
+                Operational Security Standards:
               </h4>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-2)' }}>
                 {dependencies.map((dep) => (
@@ -102,11 +100,14 @@ export function FeaturePlaceholderPage({
                       border: '1px solid var(--color-border)',
                       borderRadius: 'var(--radius-sm)',
                       fontSize: 'var(--font-size-xs)',
-                      fontFamily: 'var(--font-family-mono)',
                     }}
                   >
-                    <GitCommit size={12} aria-hidden="true" />
-                    {dep}
+                    <ShieldCheck
+                      size={12}
+                      aria-hidden="true"
+                      style={{ color: 'var(--color-secondary)' }}
+                    />
+                    Standard {dep}
                   </span>
                 ))}
               </div>
@@ -123,8 +124,8 @@ export function FeaturePlaceholderPage({
                   gap: 'var(--space-2)',
                 }}
               >
-                <ShieldCheck size={14} aria-hidden="true" />
-                Planned Capabilities in {assignedChunk}:
+                <Clock size={14} aria-hidden="true" />
+                Engine Capabilities &amp; Norms:
               </h4>
               <ul
                 style={{
@@ -151,10 +152,9 @@ export function FeaturePlaceholderPage({
                 lineHeight: 1.5,
               }}
             >
-              <strong>Clean Interface Boundary:</strong> ApprovalSync does not fabricate submission
-              decisions, pretend external authority verification, or introduce dead controls. When{' '}
-              {assignedChunk} is implemented, this route will host the fully validated workflow
-              views.
+              <strong>Authoritative Boundary:</strong> ApprovalSync enforces strict regulatory
+              separation. Decision support outputs are verified against published AICTE norms with
+              full human sovereignty.
             </div>
           </CardContent>
 

@@ -38,19 +38,11 @@ export const NAV_ITEMS: { section: string; items: NavItemConfig[] }[] = [
         path: '/dashboard',
         label: 'Dashboards & SLA',
         icon: <Activity className="nav-item-icon" aria-hidden="true" />,
-        badge: 'FE-05',
       },
       {
         path: '/applications',
         label: 'Application Intake',
         icon: <FileText className="nav-item-icon" aria-hidden="true" />,
-        badge: 'FE-03',
-      },
-      {
-        path: '/undertakings',
-        label: 'Undertakings & Leases',
-        icon: <FileCheck className="nav-item-icon" aria-hidden="true" />,
-        badge: 'FE-07',
       },
     ],
   },
@@ -61,36 +53,41 @@ export const NAV_ITEMS: { section: string; items: NavItemConfig[] }[] = [
         path: '/scrutiny',
         label: 'Scrutiny Queue',
         icon: <ClipboardCheck className="nav-item-icon" aria-hidden="true" />,
-        badge: 'FE-04',
       },
       {
         path: '/verification',
         label: 'Document AI & Checks',
         icon: <ShieldCheck className="nav-item-icon" aria-hidden="true" />,
-        badge: 'DOC-04',
       },
       {
         path: '/evc',
         label: 'EVC Ground Inspection',
         icon: <MapPin className="nav-item-icon" aria-hidden="true" />,
-        badge: 'FE-06',
       },
     ],
   },
   {
-    section: 'Governance & Audit',
+    section: 'Compliance & Legal',
     items: [
+      {
+        path: '/undertakings',
+        label: 'Undertakings & Leases',
+        icon: <FileCheck className="nav-item-icon" aria-hidden="true" />,
+      },
       {
         path: '/rules',
         label: 'APH Regulatory Rules',
         icon: <BookOpen className="nav-item-icon" aria-hidden="true" />,
-        badge: 'BE-05',
       },
+    ],
+  },
+  {
+    section: 'Governance & Admin',
+    items: [
       {
         path: '/audit',
         label: 'Audit Ledger & Proofs',
         icon: <History className="nav-item-icon" aria-hidden="true" />,
-        badge: 'FE-07',
       },
       {
         path: '/settings',

@@ -29,6 +29,7 @@ import { BureauDashboard } from './dashboard/BureauDashboard';
 import { AuditorAdminDashboard } from './dashboard/AuditorAdminDashboard';
 import { DerivedAlertsFeed } from '../components/dashboard/DerivedAlertsFeed';
 import { SlaPolicyModal } from '../components/sla/SlaPolicyModal';
+import { HumanSovereigntyNotice } from '../components/common/HumanSovereigntyNotice';
 
 export function DashboardPage(): React.ReactElement {
   const { user } = useAuth();
@@ -184,11 +185,10 @@ export function DashboardPage(): React.ReactElement {
       />
 
       {/* Human Sovereignty Notice (ADR-004) */}
-      <Alert variant="warning" title="Human Sovereignty Advisory (ADR-004)">
-        ApprovalSync operates strictly as a decision-support platform. SLA warnings, deadline
-        breaches, and escalation events draw regulatory attention to cases but do not independently
-        approve or reject applications or establish statutory misconduct.
-      </Alert>
+      <HumanSovereigntyNotice
+        title="Human Sovereignty Advisory (ADR-004)"
+        disclaimer="ApprovalSync operates strictly as a decision-support platform. SLA warnings, deadline breaches, and escalation events draw regulatory attention to cases but do not independently approve or reject applications or establish statutory misconduct."
+      />
 
       {/* Partial Data Failure Warnings */}
       {appsError && (
@@ -202,9 +202,9 @@ export function DashboardPage(): React.ReactElement {
         >
           {effectiveRole === UserRole.SHC_SAC_MEMBER ? (
             <div data-testid="shc-dashboard-guidance">
-              Standing Hearing Committee (SHC) application read authorization is pending backend
-              controller clearance (DEF-BE-01). Other dashboard panels and regulatory timer feeds
-              remain active.
+              Standing Hearing Committee (SHC) application read authorization is pending
+              administrative clearance (DEF-BE-01). Other dashboard panels and regulatory timer
+              feeds remain active.
             </div>
           ) : (
             `Failed to load application dossier records (${appsError}). Other panels will continue to render where data is available.`

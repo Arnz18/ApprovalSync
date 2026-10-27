@@ -7,7 +7,6 @@ import {
   Building,
   CheckCircle2,
   FileCheck2,
-  Info,
   ShieldCheck,
 } from 'lucide-react';
 import { Alert } from '../components/ui/Alert';
@@ -26,6 +25,7 @@ import {
   MerkleProofModal,
 } from '../components/audit';
 import { UndertakingTable, UndertakingDetailModal } from '../components/undertakings';
+import { HumanSovereigntyNotice } from '../components/common/HumanSovereigntyNotice';
 import { scrutinyService } from '../api/services/scrutinyService';
 import { workflowService } from '../api/services/workflowService';
 import { dossierService } from '../api/services/dossierService';
@@ -303,18 +303,13 @@ export const CaseDetailPage: React.FC = () => {
       {/* Case Header */}
       <CaseHeader application={application} onRefresh={fetchCaseData} isLoading={isLoading} />
 
-      {/* ADR-004 Human Sovereignty Legal Disclaimer */}
-      <div style={{ marginBottom: 'var(--space-4)' }}>
-        <Alert variant="info" title="ADR-004 Human Sovereignty Advisory Boundary">
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--space-2)' }}>
-            <Info size={16} aria-hidden="true" style={{ flexShrink: 0, marginTop: '2px' }} />
-            <span>
-              {dossierReport?.disclaimer ||
-                'This automated dossier verification report provides advisory decision support for AICTE scrutiny officers and EVC committee members. It does not constitute statutory approval, endorsement, or rejection of any application. All findings, discrepancies, and anomaly indicators must be reviewed, corroborated, and decided by authorized human evaluators in accordance with the AICTE Approval Process Handbook.'}
-            </span>
-          </div>
-        </Alert>
-      </div>
+      {/* Human Sovereignty Regulatory Advisory Notice (ADR-004) */}
+      <HumanSovereigntyNotice
+        disclaimer={
+          dossierReport?.disclaimer ||
+          'This automated dossier verification report provides advisory decision support for AICTE scrutiny officers and committee members. It does not constitute statutory approval, endorsement, or rejection of any application. All findings, discrepancies, and anomaly indicators must be reviewed, corroborated, and decided by authorized human evaluators in accordance with the AICTE Approval Process Handbook.'
+        }
+      />
 
       {/* Transition Success Banner */}
       {transitionSuccessMessage && (
@@ -414,25 +409,32 @@ export const CaseDetailPage: React.FC = () => {
         aria-label="Case inspection sections"
         style={{
           display: 'flex',
-          gap: 'var(--space-2)',
+          flexWrap: 'wrap',
+          gap: 'var(--space-1)',
           borderBottom: '1px solid var(--color-border)',
           marginBottom: 'var(--space-4)',
-          overflowX: 'auto',
+          paddingBottom: '2px',
         }}
       >
         <button
           type="button"
           role="tab"
+          id="tab-dossier"
+          aria-controls="panel-dossier"
           aria-selected={activeTab === 'dossier'}
           onClick={() => setActiveTab('dossier')}
           className={`btn btn-ghost ${activeTab === 'dossier' ? 'btn-primary' : ''}`}
           style={{
             borderRadius: 'var(--radius-md) var(--radius-md) 0 0',
-            borderBottom: activeTab === 'dossier' ? '2px solid var(--color-primary)' : 'none',
+            borderBottom:
+              activeTab === 'dossier' ? '2px solid var(--color-primary)' : '2px solid transparent',
+            padding: 'var(--space-2) var(--space-3)',
+            fontSize: 'var(--font-size-sm)',
+            fontWeight: activeTab === 'dossier' ? 600 : 500,
           }}
         >
           <CheckCircle2 size={15} aria-hidden="true" />
-          <span>Dossier Findings & AI Synthesis</span>
+          <span>Dossier Findings</span>
           {dossierReport?.summary?.criticalDeficienciesCount ? (
             <span
               style={{
@@ -453,12 +455,18 @@ export const CaseDetailPage: React.FC = () => {
         <button
           type="button"
           role="tab"
+          id="tab-matrix"
+          aria-controls="panel-matrix"
           aria-selected={activeTab === 'matrix'}
           onClick={() => setActiveTab('matrix')}
           className={`btn btn-ghost ${activeTab === 'matrix' ? 'btn-primary' : ''}`}
           style={{
             borderRadius: 'var(--radius-md) var(--radius-md) 0 0',
-            borderBottom: activeTab === 'matrix' ? '2px solid var(--color-primary)' : 'none',
+            borderBottom:
+              activeTab === 'matrix' ? '2px solid var(--color-primary)' : '2px solid transparent',
+            padding: 'var(--space-2) var(--space-3)',
+            fontSize: 'var(--font-size-sm)',
+            fontWeight: activeTab === 'matrix' ? 600 : 500,
           }}
         >
           <FileCheck2 size={15} aria-hidden="true" />
@@ -483,27 +491,41 @@ export const CaseDetailPage: React.FC = () => {
         <button
           type="button"
           role="tab"
+          id="tab-application"
+          aria-controls="panel-application"
           aria-selected={activeTab === 'application'}
           onClick={() => setActiveTab('application')}
           className={`btn btn-ghost ${activeTab === 'application' ? 'btn-primary' : ''}`}
           style={{
             borderRadius: 'var(--radius-md) var(--radius-md) 0 0',
-            borderBottom: activeTab === 'application' ? '2px solid var(--color-primary)' : 'none',
+            borderBottom:
+              activeTab === 'application'
+                ? '2px solid var(--color-primary)'
+                : '2px solid transparent',
+            padding: 'var(--space-2) var(--space-3)',
+            fontSize: 'var(--font-size-sm)',
+            fontWeight: activeTab === 'application' ? 600 : 500,
           }}
         >
           <Building size={15} aria-hidden="true" />
-          <span>Application Metrics & Facilities</span>
+          <span>Facilities & Metrics</span>
         </button>
 
         <button
           type="button"
           role="tab"
+          id="tab-timeline"
+          aria-controls="panel-timeline"
           aria-selected={activeTab === 'timeline'}
           onClick={() => setActiveTab('timeline')}
           className={`btn btn-ghost ${activeTab === 'timeline' ? 'btn-primary' : ''}`}
           style={{
             borderRadius: 'var(--radius-md) var(--radius-md) 0 0',
-            borderBottom: activeTab === 'timeline' ? '2px solid var(--color-primary)' : 'none',
+            borderBottom:
+              activeTab === 'timeline' ? '2px solid var(--color-primary)' : '2px solid transparent',
+            padding: 'var(--space-2) var(--space-3)',
+            fontSize: 'var(--font-size-sm)',
+            fontWeight: activeTab === 'timeline' ? 600 : 500,
           }}
         >
           <Clock size={15} aria-hidden="true" />
@@ -526,16 +548,24 @@ export const CaseDetailPage: React.FC = () => {
         <button
           type="button"
           role="tab"
+          id="tab-undertakings"
+          aria-controls="panel-undertakings"
           aria-selected={activeTab === 'undertakings'}
           onClick={() => setActiveTab('undertakings')}
           className={`btn btn-ghost ${activeTab === 'undertakings' ? 'btn-primary' : ''}`}
           style={{
             borderRadius: 'var(--radius-md) var(--radius-md) 0 0',
-            borderBottom: activeTab === 'undertakings' ? '2px solid var(--color-primary)' : 'none',
+            borderBottom:
+              activeTab === 'undertakings'
+                ? '2px solid var(--color-primary)'
+                : '2px solid transparent',
+            padding: 'var(--space-2) var(--space-3)',
+            fontSize: 'var(--font-size-sm)',
+            fontWeight: activeTab === 'undertakings' ? 600 : 500,
           }}
         >
           <FileText size={15} aria-hidden="true" />
-          <span>Undertakings & Leases</span>
+          <span>Undertakings</span>
           {caseUndertakings.length > 0 && (
             <span
               style={{
@@ -556,16 +586,22 @@ export const CaseDetailPage: React.FC = () => {
         <button
           type="button"
           role="tab"
+          id="tab-audit"
+          aria-controls="panel-audit"
           aria-selected={activeTab === 'audit'}
           onClick={() => setActiveTab('audit')}
           className={`btn btn-ghost ${activeTab === 'audit' ? 'btn-primary' : ''}`}
           style={{
             borderRadius: 'var(--radius-md) var(--radius-md) 0 0',
-            borderBottom: activeTab === 'audit' ? '2px solid var(--color-primary)' : 'none',
+            borderBottom:
+              activeTab === 'audit' ? '2px solid var(--color-primary)' : '2px solid transparent',
+            padding: 'var(--space-2) var(--space-3)',
+            fontSize: 'var(--font-size-sm)',
+            fontWeight: activeTab === 'audit' ? 600 : 500,
           }}
         >
           <ShieldCheck size={15} aria-hidden="true" />
-          <span>Cryptographic Audit Chain</span>
+          <span>Audit Ledger</span>
         </button>
       </div>
 
