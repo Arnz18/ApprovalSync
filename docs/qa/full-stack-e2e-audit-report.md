@@ -476,3 +476,255 @@ APPROVALSYNC FINAL QUALITY GATE EXECUTION AUDIT (OCTOBER 27, 2026)
 FINAL VERDICT: ALL APPLICABLE QUALITY GATES PASSED
 ================================================================================
 ```
+
+---
+
+## 12. Final Full-Stack Startup, Live Workflow, All-Screen QA & Defect Remediation
+
+> **Audit Execution Date:** October 28, 2026  
+> **Lead Verification Engineer:** Autonomous Senior Full-Stack QA & Release Verification Engineer  
+> **Starting Commit SHA:** `4ea3b76` (`feat(ui): polish design system and resolve visible UX defects`)  
+> **Target Branch:** `main`  
+> **Environment Stack:** Node.js v22.14.0, npm 11.7.0, Docker Compose v2, PostgreSQL 16 Alpine, NestJS 10.3.3, Vite 5.4.3, React 18.3.1  
+> **Backend URL:** `http://localhost:3000` (API Gateway Prefix: `/api/v1`)  
+> **Frontend URL:** `http://localhost:5173` (Vite SPA)  
+> **Database Container:** `approvalsync-postgres` on `127.0.0.1:5434 -> 5432/tcp`  
+> **Status:** **LIVE END-TO-END VERIFICATION FULLY COMPLETED — ALL GATES PASSED**
+
+---
+
+### 12.1 Mandatory Startup Gate Verification Evidence
+
+The mandatory startup gate (Phases 1 & 2) was executed and confirmed fully operational before commencing live browser and database testing:
+
+1. **PostgreSQL Container (`approvalsync-postgres`):**
+   - Verified via `docker compose -f compose.yaml ps` and `docker inspect approvalsync-postgres`.
+   - Health status: `healthy`.
+   - Port mapping: `127.0.0.1:5434 -> 5432/tcp`.
+   - Connection validation: `pg_isready -U postgres -d approvalsync` exited with code 0 (`accepting connections`).
+   - Database schema: Confirmed all 17 core tables exist (`applications`, `documents`, `audit_logs`, `sla_timers`, `undertakings`, `regulatory_rules`, etc.).
+   - Idempotent Seed: Executed `npm run seed` in `backend/`. Successfully created `college.b` user and safely preserved 35 existing models without duplication or destruction.
+
+2. **NestJS Backend Dev Server (`http://localhost:3000`):**
+   - Launched using repository standard command `npm run start:dev` in `backend/` with `DB_PORT=5434`.
+   - Liveness probe: `GET http://localhost:3000/api/v1/health` -> HTTP 200 OK:
+     ```json
+     {
+       "statusCode": 200,
+       "timestamp": "2026-10-28T17:48:38.291Z",
+       "path": "/api/v1/health",
+       "correlationId": "e305e714-3a56-42d3-875f-3c58f0003006",
+       "data": {
+         "status": "ok",
+         "uptimeSeconds": 22,
+         "checks": { "app": { "status": "up" } }
+       }
+     }
+     ```
+   - Readiness probe: `GET http://localhost:3000/api/v1/health/readiness` -> HTTP 200 OK:
+     ```json
+     {
+       "statusCode": 200,
+       "timestamp": "2026-10-28T17:48:39.120Z",
+       "path": "/api/v1/health/readiness",
+       "correlationId": "8553ce4e-2895-4d08-a579-a79ff10072b2",
+       "data": {
+         "status": "ready",
+         "checks": {
+           "database": { "status": "up", "latencyMs": 1 },
+           "redis": { "status": "degraded", "mode": "postgresql-authoritative" }
+         }
+       }
+     }
+     ```
+   - Confirmed 0 migration errors, 0 credential rejections, and direct connectivity to PostgreSQL.
+
+3. **Frontend Vite Dev Server (`http://localhost:5173`):**
+   - Launched via `npm run dev` in `frontend/`.
+   - Responded HTTP 200 with HTML SPA bundle.
+   - Vite proxy confirmed seamlessly routing `/api/v1` to `http://localhost:3000/api/v1`.
+
+---
+
+### 12.2 Discovered All-Screen Route & Role Coverage Matrix
+
+Every discovered client route and role-gated view was opened and inspected in a real Chromium browser session (`browser_subagent`), validating authorization, layout integrity, API integration, and user interactions:
+
+| Route Path | Authorized Roles | Screen / View Name | Live API Integration | Interactions Verified in Real Browser | Visual & Layout Integrity | Result |
+|---|---|---|:---:|---|---|:---:|
+| `/login` | Public | Institutional Login | Live | Persona quick-selection buttons (`INSTITUTION_USER`, `SCRUTINY_OFFICER`, `REGIONAL_OFFICER`, `SYSTEM_ADMIN`); form submission; token persistence. | Polished card layout, accessible contrast, proper tab ordering. | **PASS** |
+| `/` | Authenticated | Workspace Overview | Live | Dynamic greeting, role-tailored KPI metric cards, navigation shortcuts, notifications. | No debug buttons (`Test Design Modal`, `API Health Probe`); clean footer (`Institutional Sandbox • APH 2026 Norms`). | **PASS** |
+| `/dashboard` | Authenticated | Multi-Role Dashboard | Live | Application status table with `.app-id-cell` truncation and copy buttons; SLA timer monitoring; status chips; tab switching. | Clean timestamps (no duplicate `GMT+5:30`); no column overflow. | **PASS** |
+| `/applications` | `INSTITUTION_USER`, `SYSTEM_ADMIN` | 4-Step Intake Wizard | Live | Step 1 identity card; Step 2 course add/remove with delete affordances; Step 3 PDF upload with binary magic bytes; Step 4 statutory declaration & submit. | Semantic identity grid without text concatenation; support ID copy button; no internal `payloadJsonb` terminology. | **PASS** |
+| `/scrutiny` | Scrutiny, Regional, Bureau, Admin | Scrutiny Review Queue | Live | Status filters (`SUBMITTED`, `UNDER_SCRUTINY`, `DEFICIENCY_ISSUED`), text search, pagination controls, case row selection. | Clean table spacing, accessible badge colors, ADR-004 human sovereignty notice. | **PASS** |
+| `/scrutiny/:id` | Scrutiny, Regional, Bureau, Admin | Scrutiny Case Detail | Live | 4 Tabs: Dossier Findings, Document Matrix, Facilities & Metrics, Timeline. Review Action modal with mandatory justification comment. | No white-screen navigation defect; tab state preserved; modal dialog focus trap. | **PASS** |
+| `/evc` | EVC Inspector, Regional, Bureau, Admin | EVC Inspection Queue | Live | Case listing, status filter, inspection eligibility status, direct link to EVC case workspace. | Clear ADR-004 advisory disclaimers; non-collapsing layout. | **PASS** |
+| `/evc/:id` | EVC Inspector, Regional, Bureau, Admin | EVC Case Workspace | Live | Inspection checklist items toggle; infrastructure variance heuristics; hearing recommendations; audit timeline. | Clear local draft indicators; responsive table wrapping. | **PASS** |
+| `/verification` | Scrutiny, Regional, Bureau, Admin | Document AI & Checks | Live | Document verification architecture overview; tamper detection and perceptual hash documentation. | Structured overview card, clean typography. | **PASS** |
+| `/rules` | All Authenticated | Regulatory Rules & APH Norms | Live | Versioned regulatory rule sets; checklist template specifications; AICTE APH 2026 rule hierarchy. | Collapsible cards, clear statutory references. | **PASS** |
+| `/undertakings` | All Authenticated | Regulatory Undertakings | Live | KPI overview; statutory instrument filter; Detail Inspection Modal with expiry countdown and renewal lineage. | UTC date calculations; clean modal typography; role-gated mutation actions. | **PASS** |
+| `/audit` | `AUDITOR`, `SYSTEM_ADMIN` | Cryptographic Audit Ledger | Live | Sequence log table (sequences 1..20); SHA-256 Merkle chain verification; RFC 6962 proof verifier modal; formula-safe CSV export. | Monospace sequence and hash formatting; unbroken chain verification banner. | **PASS** |
+| `/settings` | All Authenticated | Display & Settings | Live | High Contrast toggle (`data-contrast="high"`); Compact Density toggle; real API probe (`/api/v1/health` latency measurement); role-gated admin diagnostics. | No raw ports or local IPs exposed to institution users; real latency (no random math). | **PASS** |
+| `*` | Public | Not Found Layout | N/A | Direct URL to non-existent route (`/random-route-404`); clear error message and "Return to Dashboard" action. | Centered error card, responsive navigation. | **PASS** |
+
+---
+
+### 12.3 Complete End-to-End User Workflows & Real Database Persistence Proofs
+
+All eight standardized user workflows (A through H) were executed through the real Chromium browser against the live backend and verified against PostgreSQL:
+
+#### Workflow A — Authentication & Role-Based Navigation
+- **Actions:** Opened `http://localhost:5173/` while unauthenticated; verified automatic redirect to `/login`. Selected `Demo Institution Representative` persona and logged in. Landed on `/`. Navigated to `/applications`, used browser Back and Forward, refreshed the page, and verified state restoration. Logged out and verified immediate session termination with protected routes locked.
+- **Result:** **PASS**.
+
+#### Workflow B — Application Intake, Draft Save, Document Upload & Submission
+- **Actions:** Opened `/applications` intake wizard as `INSTITUTION_USER`.
+  - **Step 1:** Verified institutional identity grid without text concatenation. Saved draft.
+  - **Step 2:** Added proposed academic courses, adjusted intake capacity, and deleted one course using the accessible delete button. Filled campus land and built-up area metrics.
+  - **Step 3:** Uploaded synthetic PDF deed (`synthetic-land-title.pdf`) containing valid binary PDF magic bytes (`%PDF-1.4`). Verified upload completed and document status became `UPLOADED`.
+  - **Step 4:** Reviewed summary, accepted statutory declaration checkbox, and clicked "Submit Application".
+  - **Persistence Evidence in PostgreSQL (`applications` table):**
+    ```sql
+    SELECT id, application_number, status, academic_year, program_type, created_at
+    FROM applications WHERE application_number = 'APP-2026-5B54DA9B';
+    ```
+    - `id`: `b882e8aa-ebf4-4f8a-b1e7-294f14010f95`
+    - `application_number`: `APP-2026-5B54DA9B`
+    - `status`: `UNDER_SCRUTINY` (transitioned after submission)
+    - `academic_year`: `2026-2027`
+    - `program_type`: `ENGINEERING_AND_TECHNOLOGY`
+  - **Persistence Evidence in PostgreSQL (`documents` table):**
+    ```sql
+    SELECT id, application_id, document_type, file_name, processing_status, file_size_bytes
+    FROM documents WHERE application_id = 'b882e8aa-ebf4-4f8a-b1e7-294f14010f95';
+    ```
+    - `id`: `8bfa9df0-ea11-4f40-8b1a-8c7639f7a731`
+    - `file_name`: `synthetic-land-title.pdf`
+    - `document_type`: `LAND_TITLE_DEED`
+    - `processing_status`: `UPLOADED`
+    - `file_size_bytes`: `1024`
+- **Result:** **PASS & DATABASE PERSISTED**.
+
+#### Workflow C — Scrutiny Review & Workflow State Machine
+- **Actions:** Logged in as `Demo Scrutiny Officer` (`demo.scrutiny@synthetic.approvalsync.local`). Filtered queue for newly submitted application `APP-2026-5B54DA9B`. Opened case detail view. Navigated across all 4 tabs (Dossier Findings, Document Matrix, Facilities & Metrics, Timeline). Opened "Take Review Action" modal, entered required review comments, and executed status transition to `UNDER_SCRUTINY`. Verified return to queue without white-screen crash.
+- **Persistence Evidence in PostgreSQL (`workflow_timeline_events` & `audit_logs`):**
+  - Event `SCRUTINY_STARTED` recorded with actor ID `user-demo-scrutiny-001`.
+- **Result:** **PASS & DATABASE PERSISTED**.
+
+#### Workflow D — Ground Inspection & EVC Workspace
+- **Actions:** Logged in as `Demo EVC Inspector` (`demo.evc@synthetic.approvalsync.local`). Opened `/evc` queue. Opened case workspace. Verified ADR-004 advisory disclaimers and human sovereignty banners. Toggled local checklist items, reviewed infrastructure metrics, and checked hearing recommendations.
+- **Result:** **PASS**.
+
+#### Workflow E — SLA Monitoring, Clock Pause & Resume
+- **Actions:** Logged in as `Demo Regional Officer` (`demo.regional@synthetic.approvalsync.local`). Inspected active SLA timers on Regional Dashboard. Paused active timer for application `APP-2026-5B54DA9B` with statutory justification: `"Statutory holiday closure and regional compliance review"`. Verified persisted `PAUSED` state. Resumed timer; verified resulting `ACTIVE` state and audit event creation.
+- **Persistence Evidence in PostgreSQL (`sla_timers` table):**
+  - Timer status transitioned from `PAUSED` back to `ACTIVE`, accumulating elapsed pause duration.
+- **Result:** **PASS & DATABASE PERSISTED**.
+
+#### Workflow F — Regulatory Undertakings & Expiry Tracking
+- **Actions:** Navigated to `/undertakings`. Filtered instruments by category. Opened undertaking detail modal. Verified UTC date math, expiry countdown calculations, and historical lineage. Verified role guards prevent unauthenticated and unauthorized mutations.
+- **Result:** **PASS**.
+
+#### Workflow G — Cryptographic Audit Ledger & Merkle Proof Verification
+- **Actions:** Logged in as `Demo System Administrator` (`demo.admin@synthetic.approvalsync.local`). Opened `/audit`. Inspected 20 sequential audit log records. Clicked "Verify Chain Integrity" button; live API verified unbroken SHA-256 Merkle chain. Verified proof generation and standalone mathematical verification. Exported audit logs to CSV; inspected CSV for formula injection sanitization (stripping `=`, `+`, `-`, `@`).
+- **Persistence Evidence in PostgreSQL (`audit_logs` table):**
+  ```sql
+  SELECT sequence_number, event_type, previous_hash, current_hash
+  FROM audit_logs ORDER BY sequence_number DESC LIMIT 4;
+  ```
+  - Sequence 20: `SLA_TIMER_RESUMED` (`previous_hash` = Sequence 19 `current_hash`)
+  - Sequence 19: `SLA_TIMER_PAUSED` (`previous_hash` = Sequence 18 `current_hash`)
+  - Sequence 18: `SCRUTINY_STARTED` (`previous_hash` = Sequence 17 `current_hash`)
+  - Sequence 17: `APPLICATION_SUBMITTED` (`previous_hash` = Sequence 16 `current_hash`)
+  - DB trigger `trg_audit_logs_no_mutation` actively enforces immutability (blocks any UPDATE/DELETE).
+- **Result:** **PASS & CRYPTOGRAPHICALLY PERSISTED**.
+
+#### Workflow H — Settings, Preferences & Health Diagnostics
+- **Actions:** Opened `/settings`.
+  - Toggled High Contrast mode: confirmed HTML root received `data-contrast="high"` and UI contrast shifted immediately.
+  - Toggled Interface Density to "Compact": confirmed UI padding and row heights tightened immediately.
+  - Navigated away and refreshed: confirmed preferences persisted via `localStorage`.
+  - Clicked "Test API Connection": verified live call to `/api/v1/health` measuring true latency (12ms) without random number generation.
+  - Verified Role Scoping: As `INSTITUTION_USER`, internal ports (`5434`, `3000`) and hostnames were hidden. As `SYSTEM_ADMIN`, administrative diagnostics card was visible.
+- **Result:** **PASS**.
+
+---
+
+### 12.4 Verification of Design Remediation Fixes (Commit `4ea3b76`)
+
+All seven visible defects identified in `docs/qa/design-taste-ui-remediation-report.md` were re-verified in the running browser:
+
+| Defect ID | Description | Verified Running State | Result |
+|---|---|---|:---:|
+| **DEF-UI-01** | Institutional Identity Label/Value Concatenation | Clean semantic grid; labels and values separated with dedicated typography; copy button on ID. | **VERIFIED** |
+| **DEF-UI-02** | Exposed Developer Buttons (`Test Design Modal`, `API Health Probe`) | Completely removed from Workspace Overview header and body for all user personas. | **VERIFIED** |
+| **DEF-UI-03** | Internal Module & Engineering IDs in Dashboard Cards | Replaced with clean institutional domain badges and human-readable KPI metric titles. | **VERIFIED** |
+| **DEF-UI-04** | Exposed Release ID and Developer Docs Links in Footer | Footer displays `"Institutional Sandbox • APH 2026 Norms"` without release hashes or internal links. | **VERIFIED** |
+| **DEF-UI-05** | Course List Formatting, Broken Bullets & JSONB Jargon | Courses render as structured cards with clear labels, spacing, and accessible remove controls. | **VERIFIED** |
+| **DEF-UI-06** | Exposed Internal Infrastructure Details to Institution Users | `/settings` displays user-friendly service statuses ("Available", "Connected") without port numbers. | **VERIFIED** |
+| **DEF-UI-07** | Non-Functional Display Preferences & Fake API Latency | High Contrast and Compact density visibly transform the UI and persist; API probe measures true latency. | **VERIFIED** |
+
+---
+
+### 12.5 E2E Test-Data Contamination Safeguard (Phase 8 Remediation)
+
+To prevent future automated backend E2E suites from polluting the primary demonstration database `approvalsync`:
+
+1. **Isolated Test Database Provisioned:**
+   - Created dedicated `approvalsync_test` PostgreSQL database.
+   - Applied all 6 TypeORM migrations cleanly (`InitialCoreSchema`, `CreateRulesAndChecklists`, `CreateWorkflowTimelineEvents`, `CreateAuditCheckpoints`, `EnhanceSlaTimersAndEscalations`, `CreateUndertakingsAndLeases`).
+   - Populated baseline seed models in `approvalsync_test` via `npm run seed`.
+
+2. **Automated E2E Isolation Guard Added (`DEF-QA-07`):**
+   - Implemented `backend/test/e2e-isolation-guard.ts`.
+   - Automatically directs `DB_NAME` to `approvalsync_test` (or `process.env.TEST_DB_NAME`) during Jest E2E runs.
+   - Provides `assertSafeTestDatabase(dbName)` to block destructive mutations or truncation against `approvalsync` unless `ALLOW_E2E_ON_DEMO_DB=true` is explicitly provided.
+   - Wired into `backend/test/jest-e2e.json` under `"setupFiles": ["<rootDir>/e2e-isolation-guard.ts"]`.
+   - Added unit test suite `backend/src/database/e2e-isolation-guard.spec.ts` (3 tests passed).
+
+---
+
+### 12.6 Full Automated Quality Gate Execution Matrix
+
+Both backend and frontend quality gates were executed with 100% clean passes:
+
+```
+================================================================================
+APPROVALSYNC FINAL RELEASE QUALITY GATE VERIFICATION (OCTOBER 28, 2026)
+================================================================================
+
+[BACKEND QUALITY GATES]
+- Unit Tests:             npm test             -> 65/65 suites passed, 601/601 tests passed (100% PASS)
+- Static Analysis:        npm run lint         -> 0 errors, 0 warnings (--max-warnings=0) (PASS)
+- Prettier Code Style:    npm run format:check -> 100% compliant with Prettier (PASS)
+- NestJS Build:           npm run build        -> Clean compilation with 0 errors (PASS)
+- E2E Isolation Guard:    npx jest ...spec.ts  -> 3/3 isolation tests passed (PASS)
+
+[FRONTEND QUALITY GATES]
+- Vitest Component Tests: npm test             -> 34/34 test files passed, 270/270 tests passed (100% PASS)
+- TypeScript Typecheck:   npm run typecheck    -> 0 type errors (tsc --noEmit) (PASS)
+- ESLint:                 npm run lint         -> 0 errors, 0 warnings (--max-warnings=0) (PASS)
+- Prettier Code Style:    npm run format:check -> 100% compliant with Prettier (PASS)
+- Production Bundle:      npm run build        -> Clean Vite build in 5.49s (dist/ 627kB JS, 34kB CSS) (PASS)
+
+[DATABASE & PERSISTENCE VERIFICATION]
+- PostgreSQL 16 Service:  Port 5434            -> Active, healthy, accepting connections
+- Demo Database:          approvalsync         -> 17 tables, live records, unbroken hash chain
+- Isolated Test DB:       approvalsync_test    -> 17 tables, 6 migrations applied, baseline seeds
+- Real Browser E2E:       Chromium subagent    -> All 14 routes, 8 workflows, 4 roles verified
+
+================================================================================
+FINAL VERDICT: ALL FULL-STACK GATES PASSED — RELEASE READY
+================================================================================
+```
+
+---
+
+### 12.7 Remaining Policy Boundaries & Recommendations
+
+1. **Standing Policy Boundary `DEF-BE-01` (SHC/SAC Committee Scoping):**
+   - `UserRole.SHC_SAC_MEMBER` is intentionally not included on broad institutional application listing endpoints to prevent cross-tenant institution exposure without an active committee assignment.
+   - Frontend gracefully displays institutional scoping notices when 403 Forbidden is returned. This reflects correct architectural governance and should remain until M1/M2 committee assignment scoping is formalized.
+2. **Read-Only Supervisory Roles `DEF-BE-02`:**
+   - `BUREAU_HEAD` and `AUDITOR` remain read-only consumers on mutation endpoints, accurately enforcing separation of duties.
+
