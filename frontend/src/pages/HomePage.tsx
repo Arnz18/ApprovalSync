@@ -4,10 +4,6 @@ import {
   ClipboardCheck,
   ShieldAlert,
   History,
-  CheckCircle2,
-  ExternalLink,
-  Sliders,
-  Sparkles,
   ArrowRight,
   Activity,
   FileCheck,
@@ -21,12 +17,8 @@ import {
   CardDescription,
   CardContent,
   CardFooter,
-  Button,
   Badge,
   Alert,
-  Modal,
-  FormField,
-  Input,
   ApplicationStatusBadge,
   VerificationStatusBadge,
   ComplianceSeverityBadge,
@@ -34,21 +26,7 @@ import {
 } from '../components/ui';
 
 export function HomePage(): React.ReactElement {
-  const [isTestModalOpen, setIsTestModalOpen] = useState(false);
-  const [demoInputVal, setDemoInputVal] = useState('AICTE-2026-ENGG-0042');
-  const [demoInputError, setDemoInputError] = useState('');
   const [alertDismissed, setAlertDismissed] = useState(false);
-
-  function handleValidateDemoInput() {
-    if (!demoInputVal.trim()) {
-      setDemoInputError('Application identifier is required.');
-    } else if (!demoInputVal.startsWith('AICTE-')) {
-      setDemoInputError('Must start with prefix "AICTE-"');
-    } else {
-      setDemoInputError('');
-      setIsTestModalOpen(true);
-    }
-  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
@@ -59,6 +37,10 @@ export function HomePage(): React.ReactElement {
         breadcrumbs={[{ label: 'Home' }]}
         actions={
           <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
+            <Link to="/applications" className="btn btn-primary btn-sm">
+              <FileText size={14} aria-hidden="true" />
+              <span>Application Intake</span>
+            </Link>
             <Link to="/dashboard" className="btn btn-outline btn-sm">
               <Activity size={14} aria-hidden="true" />
               <span>Dashboards &amp; SLA</span>
@@ -67,22 +49,6 @@ export function HomePage(): React.ReactElement {
               <FileCheck size={14} aria-hidden="true" />
               <span>Undertakings &amp; Leases</span>
             </Link>
-            <Button
-              variant="outline"
-              size="sm"
-              leftIcon={<Sliders size={14} />}
-              onClick={() => setIsTestModalOpen(true)}
-            >
-              Test Design Modal
-            </Button>
-            <Button
-              variant="primary"
-              size="sm"
-              leftIcon={<ExternalLink size={14} />}
-              onClick={() => window.open('/api/v1/health', '_blank')}
-            >
-              API Health Probe
-            </Button>
           </div>
         }
       />
@@ -151,7 +117,7 @@ export function HomePage(): React.ReactElement {
             <CardFooter
               style={{ fontSize: 'var(--font-size-xs)', justifyContent: 'space-between' }}
             >
-              <span style={{ color: 'var(--color-muted-foreground)' }}>Module BE-04 / FE-03</span>
+              <span style={{ color: 'var(--color-muted-foreground)' }}>Institutional Dossier</span>
               <Link to="/applications" style={{ fontWeight: 600 }}>
                 View Details &rarr;
               </Link>
@@ -183,14 +149,13 @@ export function HomePage(): React.ReactElement {
               <p
                 style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-muted-foreground)' }}
               >
-                FSM transition workflow (BE-06) with pessimistic row locks and human-in-the-loop
-                disposition.
+                Authoritative review queue with human-in-the-loop regulatory compliance disposition.
               </p>
             </CardContent>
             <CardFooter
               style={{ fontSize: 'var(--font-size-xs)', justifyContent: 'space-between' }}
             >
-              <span style={{ color: 'var(--color-muted-foreground)' }}>Module BE-06 / FE-04</span>
+              <span style={{ color: 'var(--color-muted-foreground)' }}>Regulatory Scrutiny</span>
               <Link to="/scrutiny" style={{ fontWeight: 600 }}>
                 Open Queue &rarr;
               </Link>
@@ -236,7 +201,7 @@ export function HomePage(): React.ReactElement {
             <CardFooter
               style={{ fontSize: 'var(--font-size-xs)', justifyContent: 'space-between' }}
             >
-              <span style={{ color: 'var(--color-muted-foreground)' }}>Module DOC-04</span>
+              <span style={{ color: 'var(--color-muted-foreground)' }}>Integrity Verification</span>
               <Link to="/verification" style={{ fontWeight: 600 }}>
                 Inspect Findings &rarr;
               </Link>
@@ -274,7 +239,7 @@ export function HomePage(): React.ReactElement {
             <CardFooter
               style={{ fontSize: 'var(--font-size-xs)', justifyContent: 'space-between' }}
             >
-              <span style={{ color: 'var(--color-muted-foreground)' }}>Module BE-02 / BE-07</span>
+              <span style={{ color: 'var(--color-muted-foreground)' }}>Cryptographic Ledger</span>
               <Link to="/audit" style={{ fontWeight: 600 }}>
                 Verify Proofs &rarr;
               </Link>
@@ -318,7 +283,7 @@ export function HomePage(): React.ReactElement {
               <div
                 style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
               >
-                <Badge variant="primary">Module FE-03 / BE-04</Badge>
+                <Badge variant="primary">Intake &amp; Eligibility</Badge>
                 <span
                   style={{
                     fontSize: 'var(--font-size-xs)',
@@ -363,7 +328,7 @@ export function HomePage(): React.ReactElement {
               <div
                 style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
               >
-                <Badge variant="primary">Module FE-04 / BE-06</Badge>
+                <Badge variant="primary">Documentary Scrutiny</Badge>
                 <span
                   style={{
                     fontSize: 'var(--font-size-xs)',
@@ -408,7 +373,7 @@ export function HomePage(): React.ReactElement {
               <div
                 style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
               >
-                <Badge variant="primary">Module DOC-01..04</Badge>
+                <Badge variant="primary">Integrity &amp; Anomalies</Badge>
                 <span
                   style={{
                     fontSize: 'var(--font-size-xs)',
@@ -455,7 +420,7 @@ export function HomePage(): React.ReactElement {
               <div
                 style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
               >
-                <Badge variant="primary">Module BE-05</Badge>
+                <Badge variant="primary">APH Handbook Norms</Badge>
                 <span
                   style={{
                     fontSize: 'var(--font-size-xs)',
@@ -500,7 +465,7 @@ export function HomePage(): React.ReactElement {
               <div
                 style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
               >
-                <Badge variant="default">Module FE-06</Badge>
+                <Badge variant="default">Expert Visit Committee</Badge>
                 <span
                   style={{
                     fontSize: 'var(--font-size-xs)',
@@ -545,7 +510,7 @@ export function HomePage(): React.ReactElement {
               <div
                 style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
               >
-                <Badge variant="default">Module BE-07 / FE-07</Badge>
+                <Badge variant="default">Audit Ledger &amp; Proofs</Badge>
                 <span
                   style={{
                     fontSize: 'var(--font-size-xs)',
@@ -590,7 +555,7 @@ export function HomePage(): React.ReactElement {
               <div
                 style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
               >
-                <Badge variant="primary">Module FE-05 / BE-08</Badge>
+                <Badge variant="primary">SLA &amp; Operations</Badge>
                 <span
                   style={{
                     fontSize: 'var(--font-size-xs)',
@@ -636,132 +601,6 @@ export function HomePage(): React.ReactElement {
           </Card>
         </div>
       </section>
-
-      {/* Interactive Design System Sandbox */}
-      <section aria-labelledby="design-sandbox-title">
-        <Card
-          style={{
-            backgroundColor: 'var(--color-surface)',
-            border: '1px solid var(--color-border)',
-          }}
-        >
-          <CardHeader>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Sparkles size={18} style={{ color: 'var(--color-primary)' }} aria-hidden="true" />
-              <CardTitle id="design-sandbox-title" style={{ fontSize: 'var(--font-size-base)' }}>
-                Design System Interactive Validation
-              </CardTitle>
-            </div>
-            <CardDescription>
-              Test accessible components, live validation, status badges, and dialogs built for
-              FE-01.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
-              {/* Form Input Test */}
-              <div style={{ maxWidth: '28rem' }}>
-                <FormField
-                  id="test-application-input"
-                  label="Application Reference Number"
-                  required
-                  helperText="Format: AICTE-YYYY-XXXX-NNNN"
-                  error={demoInputError}
-                >
-                  <Input
-                    value={demoInputVal}
-                    onChange={(e) => {
-                      setDemoInputVal(e.target.value);
-                      if (demoInputError) setDemoInputError('');
-                    }}
-                    placeholder="e.g. AICTE-2026-ENGG-0042"
-                  />
-                </FormField>
-                <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
-                  <Button size="sm" variant="primary" onClick={handleValidateDemoInput}>
-                    Validate &amp; Open Inspector
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => {
-                      setDemoInputVal('INVALID-FORMAT');
-                      setDemoInputError('Must start with prefix "AICTE-"');
-                    }}
-                  >
-                    Simulate Error
-                  </Button>
-                </div>
-              </div>
-
-              {/* Status Badges Showcase */}
-              <div>
-                <p
-                  style={{
-                    fontSize: 'var(--font-size-xs)',
-                    fontWeight: 600,
-                    color: 'var(--color-muted-foreground)',
-                    marginBottom: 'var(--space-2)',
-                  }}
-                >
-                  Semantic Status Tokens (Color + Icon + Text):
-                </p>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-2)' }}>
-                  <ApplicationStatusBadge status="DRAFT" />
-                  <ApplicationStatusBadge status="SUBMITTED" />
-                  <ApplicationStatusBadge status="UNDER_SCRUTINY" />
-                  <ApplicationStatusBadge status="DEFICIENCY_ISSUED" />
-                  <ApplicationStatusBadge status="RECOMMENDED_FOR_EVC" />
-                  <ApplicationStatusBadge status="APPROVED" />
-                  <ApplicationStatusBadge status="REJECTED" />
-                  <VerificationStatusBadge status="VERIFIED_MOCK" />
-                  <VerificationStatusBadge status="INVALID_SIGNATURE" />
-                  <ComplianceSeverityBadge severity="CRITICAL_DEFICIENCY" />
-                  <ComplianceSeverityBadge severity="ADVISORY_FLAG" />
-                  <SimulatedDataBadge />
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </section>
-
-      {/* Interactive Modal Dialog */}
-      <Modal
-        isOpen={isTestModalOpen}
-        onClose={() => setIsTestModalOpen(false)}
-        title="Application Inspector (Design Primitive)"
-        description="This modal demonstrates the accessible dialog component with backdrop click, Esc key listener, and focus management."
-        footer={
-          <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
-            <Button variant="outline" size="sm" onClick={() => setIsTestModalOpen(false)}>
-              Close
-            </Button>
-            <Button
-              variant="primary"
-              size="sm"
-              leftIcon={<CheckCircle2 size={14} />}
-              onClick={() => setIsTestModalOpen(false)}
-            >
-              Confirm Inspection
-            </Button>
-          </div>
-        }
-      >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
-          <Alert variant="info" title="Inspect Mode Active">
-            Showing component parameters for identifier <code>{demoInputVal}</code>.
-          </Alert>
-          <div style={{ display: 'flex', gap: 'var(--space-2)', alignItems: 'center' }}>
-            <span style={{ fontSize: 'var(--font-size-sm)', fontWeight: 600 }}>Status:</span>
-            <ApplicationStatusBadge status="UNDER_SCRUTINY" />
-          </div>
-          <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-muted-foreground)' }}>
-            This modal is powered by the FE-01 design system. It handles keyboard Escape listeners,
-            body scroll lock, focus isolation, and ARIA modal conventions.
-          </p>
-        </div>
-      </Modal>
     </div>
   );
 }

@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { Layers, Plus, Trash2, HelpCircle } from 'lucide-react';
+import { Layers, Plus, Trash2, HelpCircle, GraduationCap } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../ui/Card';
 import { FormField, Input } from '../ui/FormField';
 import { Button } from '../ui/Button';
@@ -192,7 +192,8 @@ export function FacilitiesStep({
               </span>
             </label>
             <p className="form-helper mb-3">
-              List the degree or diploma programs with their requested annual student intake.
+              List the degree or diploma programs with their requested annual student intake
+              capacity.
             </p>
 
             {errors.coursesProposed && (
@@ -201,10 +202,10 @@ export function FacilitiesStep({
               </p>
             )}
 
-            <div className="flex gap-2 mb-4">
+            <div className="flex flex-col sm:flex-row gap-2 mb-4">
               <Input
                 id="newCourseInput"
-                placeholder="e.g. Artificial Intelligence & Machine Learning (Intake: 60)"
+                placeholder="e.g. Computer Science & Engineering (Intake: 120)"
                 value={newCourseInput}
                 onChange={(e) => setNewCourseInput(e.target.value)}
                 onKeyDown={(e) => {
@@ -229,24 +230,29 @@ export function FacilitiesStep({
 
             {state.coursesProposed.length === 0 ? (
               <div className="p-4 rounded border border-dashed border-border text-center text-muted-foreground text-sm">
-                No courses added yet. Please add at least one program.
+                No courses added yet. Please specify at least one proposed program with intake
+                capacity.
               </div>
             ) : (
-              <ul className="space-y-2 list-none p-0 m-0">
+              <ul className="course-list">
                 {state.coursesProposed.map((course, idx) => (
-                  <li
-                    key={idx}
-                    className="flex items-center justify-between p-3 rounded bg-muted border border-border-subtle text-sm"
-                  >
-                    <span className="font-medium text-foreground">{course}</span>
+                  <li key={idx} className="course-item-card">
+                    <div className="course-item-info">
+                      <GraduationCap
+                        size={18}
+                        className="text-primary flex-shrink-0"
+                        aria-hidden="true"
+                      />
+                      <span className="course-item-title">{course}</span>
+                    </div>
                     <button
                       type="button"
                       onClick={() => handleRemoveCourse(idx)}
-                      className="text-error hover:text-on-error p-1 rounded hover:bg-error-bg transition-colors"
-                      title="Remove course"
+                      className="course-remove-btn"
+                      title={`Remove course: ${course}`}
                       aria-label={`Remove course: ${course}`}
                     >
-                      <Trash2 size={16} />
+                      <Trash2 size={16} aria-hidden="true" />
                     </button>
                   </li>
                 ))}
@@ -254,21 +260,25 @@ export function FacilitiesStep({
             )}
           </div>
 
-          <div className="p-3 bg-muted rounded border border-border-subtle flex items-center gap-2 text-xs text-muted-foreground">
-            <HelpCircle size={16} className="text-secondary flex-shrink-0" />
+          <div className="mt-4 p-3 bg-muted rounded border border-border-subtle flex items-start gap-2.5 text-xs text-muted-foreground">
+            <HelpCircle
+              size={16}
+              className="text-secondary flex-shrink-0 mt-0.5"
+              aria-hidden="true"
+            />
             <span>
-              All infrastructure metrics will be converted into the standardized{' '}
-              <code>payloadJsonb</code> format verified by the AICTE Scrutiny & EVC Inspection
-              modules.
+              All declared infrastructure parameters and proposed course intake capacities are
+              evaluated during statutory review against current AICTE Approval Process Handbook
+              (APH) norms.
             </span>
           </div>
         </CardContent>
       </Card>
 
       {/* Action Bar */}
-      <div className="flex items-center justify-between pt-4 border-t border-border-subtle">
+      <div className="wizard-nav-footer">
         <Button type="button" variant="outline" onClick={onBack} disabled={isSaving}>
-          ← Back to Institution
+          &larr; Back to Institution
         </Button>
         <Button
           type="submit"
@@ -277,7 +287,7 @@ export function FacilitiesStep({
           disabled={isSaving}
           className="min-w-[160px]"
         >
-          {isSaving ? 'Saving Draft...' : 'Continue to Documents →'}
+          {isSaving ? 'Saving Draft...' : 'Continue to Documents \u2192'}
         </Button>
       </div>
     </form>

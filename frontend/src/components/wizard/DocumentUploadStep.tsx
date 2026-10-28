@@ -523,7 +523,7 @@ export function DocumentUploadStep({
       </div>
 
       {/* Action Bar */}
-      <div className="flex items-center justify-between pt-4 border-t border-border-subtle">
+      <div className="wizard-nav-footer">
         <Button type="button" variant="outline" onClick={onBack} disabled={isSaving}>
           ← Back to Infrastructure
         </Button>

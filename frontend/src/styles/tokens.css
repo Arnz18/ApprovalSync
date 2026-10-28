@@ -125,7 +125,99 @@
   --header-height: 4rem;
   --sidebar-width: 16rem;
   --sidebar-collapsed-width: 4.5rem;
-  --max-content-width: 80rem;
+  /* Default table and card density metrics */
+  --table-cell-padding: 0.625rem 0.875rem;
+  --card-padding: 1.25rem;
+  --row-height: 2.75rem;
+}
+
+/* ==========================================================================
+   High Contrast Theme Overrides (WCAG 2.2 AAA 7:1+)
+   ========================================================================== */
+[data-contrast='high'],
+.high-contrast {
+  --color-foreground: #000000;
+  --color-text-main: #000000;
+  --color-card-foreground: #000000;
+  --color-muted-foreground: #0f172a;
+  --color-border: #000000;
+  --color-border-subtle: #1e293b;
+  --color-background: #ffffff;
+  --color-surface: #ffffff;
+  --color-card: #ffffff;
+  --color-muted: #f8fafc;
+  --color-muted-hover: #e2e8f0;
+  --color-ring: #000000;
+
+  --color-primary: #001433;
+  --color-primary-hover: #000000;
+  --color-secondary: #003da5;
+  --color-secondary-hover: #002870;
+
+  --color-success: #0b5e28;
+  --color-success-bg: #e6f9ed;
+  --color-success-border: #0b5e28;
+  --color-on-success: #022e11;
+
+  --color-warning: #92400e;
+  --color-warning-bg: #fef3c7;
+  --color-warning-border: #92400e;
+  --color-on-warning: #451a03;
+
+  --color-error: #991b1b;
+  --color-error-bg: #fee2e2;
+  --color-error-border: #991b1b;
+  --color-on-error: #450a0a;
+
+  --color-info: #075985;
+  --color-info-bg: #e0f2fe;
+  --color-info-border: #075985;
+  --color-on-info: #082f49;
+}
+
+[data-contrast='high'] input,
+[data-contrast='high'] select,
+[data-contrast='high'] textarea,
+.high-contrast input,
+.high-contrast select,
+.high-contrast textarea {
+  border-color: #000000 !important;
+  color: #000000 !important;
+}
+
+[data-contrast='high'] .card,
+.high-contrast .card {
+  border: 1px solid #000000 !important;
+  box-shadow: none !important;
+}
+
+/* ==========================================================================
+   Interface Density Overrides
+   ========================================================================== */
+[data-density='compact'],
+.density-compact {
+  --space-1: 0.125rem; /* 2px */
+  --space-2: 0.25rem; /* 4px */
+  --space-3: 0.5rem; /* 8px */
+  --space-4: 0.75rem; /* 12px */
+  --space-5: 0.875rem; /* 14px */
+  --space-6: 1rem; /* 16px */
+  --space-8: 1.25rem; /* 20px */
+  --space-10: 1.75rem; /* 28px */
+  --space-12: 2.25rem; /* 36px */
+
+  --table-cell-padding: 0.3125rem 0.5rem;
+  --card-padding: 0.875rem;
+  --row-height: 2.125rem;
+  --header-height: 3.25rem;
+}
+
+[data-density='comfortable'],
+.density-comfortable {
+  --table-cell-padding: 0.625rem 0.875rem;
+  --card-padding: 1.25rem;
+  --row-height: 2.75rem;
+  --header-height: 4rem;
 }
 
 /* Reduced motion preference */

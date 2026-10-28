@@ -9,7 +9,16 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FileText, Clock, AlertTriangle, CheckCircle2, PlusCircle, FileCheck } from 'lucide-react';
+import {
+  FileText,
+  Clock,
+  AlertTriangle,
+  CheckCircle2,
+  PlusCircle,
+  FileCheck,
+  Copy,
+  Check,
+} from 'lucide-react';
 import {
   Card,
   CardHeader,
@@ -65,6 +74,16 @@ export function InstitutionDashboard({
   const actionRequiredApps = applications.filter(
     (a) => a.status === ApplicationStatus.DEFICIENCY_ISSUED,
   );
+
+  const [copiedId, setCopiedId] = React.useState<string | null>(null);
+
+  const handleCopyId = (id: string) => {
+    if (navigator?.clipboard?.writeText) {
+      navigator.clipboard.writeText(id).catch(() => {});
+    }
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
 
   const kpiMetrics = [
     {
@@ -183,7 +202,7 @@ export function InstitutionDashboard({
                   />
                 </div>
               ) : (
-                <div className="table-container" style={{ overflowX: 'auto' }}>
+                <div className="table-container table-responsive-wrapper">
                   <table
                     className="table"
                     style={{
@@ -199,23 +218,57 @@ export function InstitutionDashboard({
                           backgroundColor: 'var(--color-muted)',
                         }}
                       >
-                        <th style={{ textAlign: 'left', padding: 'var(--space-2) var(--space-3)' }}>
+                        <th
+                          style={{
+                            textAlign: 'left',
+                            padding: 'var(--space-2) var(--space-3)',
+                            width: '28%',
+                          }}
+                        >
                           Application No.
                         </th>
-                        <th style={{ textAlign: 'left', padding: 'var(--space-2) var(--space-3)' }}>
+                        <th
+                          style={{
+                            textAlign: 'left',
+                            padding: 'var(--space-2) var(--space-3)',
+                            width: '22%',
+                          }}
+                        >
                           Program &amp; Year
                         </th>
-                        <th style={{ textAlign: 'left', padding: 'var(--space-2) var(--space-3)' }}>
+                        <th
+                          style={{
+                            textAlign: 'left',
+                            padding: 'var(--space-2) var(--space-3)',
+                            width: '15%',
+                          }}
+                        >
                           Status
                         </th>
-                        <th style={{ textAlign: 'left', padding: 'var(--space-2) var(--space-3)' }}>
+                        <th
+                          style={{
+                            textAlign: 'left',
+                            padding: 'var(--space-2) var(--space-3)',
+                            width: '15%',
+                          }}
+                        >
                           Stage SLA
                         </th>
-                        <th style={{ textAlign: 'left', padding: 'var(--space-2) var(--space-3)' }}>
+                        <th
+                          style={{
+                            textAlign: 'left',
+                            padding: 'var(--space-2) var(--space-3)',
+                            width: '10%',
+                          }}
+                        >
                           Created
                         </th>
                         <th
-                          style={{ textAlign: 'right', padding: 'var(--space-2) var(--space-3)' }}
+                          style={{
+                            textAlign: 'right',
+                            padding: 'var(--space-2) var(--space-3)',
+                            width: '10%',
+                          }}
                         >
                           Action
                         </th>
@@ -225,6 +278,7 @@ export function InstitutionDashboard({
                       {applications.map((app) => {
                         const timer = activeTimers[app.id];
                         const remaining = timer ? formatRemainingTime(timer.targetDeadline) : null;
+                        const isCopied = copiedId === app.applicationNumber;
 
                         return (
                           <tr
@@ -237,10 +291,44 @@ export function InstitutionDashboard({
                                   : 'transparent',
                             }}
                           >
-                            <td
-                              style={{ padding: 'var(--space-2) var(--space-3)', fontWeight: 600 }}
-                            >
-                              {app.applicationNumber}
+                            <td style={{ padding: 'var(--space-2) var(--space-3)' }}>
+                              <div
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: 'var(--space-1)',
+                                  maxWidth: '100%',
+                                }}
+                              >
+                                <span className="app-id-cell" title={app.applicationNumber}>
+                                  {app.applicationNumber}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => handleCopyId(app.applicationNumber)}
+                                  title={isCopied ? 'Copied!' : 'Copy Application Number'}
+                                  aria-label={`Copy Application Number ${app.applicationNumber}`}
+                                  style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    padding: '2px',
+                                    cursor: 'pointer',
+                                    color: isCopied
+                                      ? 'var(--color-success)'
+                                      : 'var(--color-muted-foreground)',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    borderRadius: 'var(--radius-sm)',
+                                    flexShrink: 0,
+                                  }}
+                                >
+                                  {isCopied ? (
+                                    <Check size={12} aria-hidden="true" />
+                                  ) : (
+                                    <Copy size={12} aria-hidden="true" />
+                                  )}
+                                </button>
+                              </div>
                             </td>
 
                             <td style={{ padding: 'var(--space-2) var(--space-3)' }}>
@@ -284,13 +372,10 @@ export function InstitutionDashboard({
                               )}
                             </td>
 
-                            <td
-                              style={{
-                                padding: 'var(--space-2) var(--space-3)',
-                                whiteSpace: 'nowrap',
-                              }}
-                            >
-                              {formatIsoDateTime(app.createdAt)}
+                            <td style={{ padding: 'var(--space-2) var(--space-3)' }}>
+                              <span className="app-timestamp-cell">
+                                {formatIsoDateTime(app.createdAt)}
+                              </span>
                             </td>
 
                             <td

@@ -3,9 +3,10 @@
  * Milestone: FE-03
  */
 
-import React from 'react';
-import { Building2, ShieldCheck, Info } from 'lucide-react';
+import React, { useState } from 'react';
+import { Building2, ShieldCheck, Info, Copy, Check } from 'lucide-react';
 import { useAuth } from '../../auth/useAuth';
+import { formatRoleName } from '../../auth/roleRoutes';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../ui/Card';
 import { FormField, Input, Select } from '../ui/FormField';
 import { Button } from '../ui/Button';
@@ -33,6 +34,7 @@ export function InstitutionStep({
   isSaving = false,
 }: InstitutionStepProps): React.ReactElement {
   const { user } = useAuth();
+  const [copiedId, setCopiedId] = useState(false);
 
   const categoryKey = resolveCategoryKey(state.programType);
   const requiredDocs =
@@ -41,6 +43,14 @@ export function InstitutionStep({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onNext();
+  };
+
+  const handleCopyId = (id: string) => {
+    if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(id);
+      setCopiedId(true);
+      setTimeout(() => setCopiedId(false), 2000);
+    }
   };
 
   return (
@@ -66,36 +76,60 @@ export function InstitutionStep({
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm bg-muted p-4 rounded border border-border-subtle">
-            <div>
-              <span className="text-muted-foreground block text-xs uppercase font-semibold">
-                Authorized Representative
-              </span>
-              <span className="font-medium text-foreground">
-                {user?.email || 'Authenticated User'}
-              </span>
-            </div>
-            <div>
-              <span className="text-muted-foreground block text-xs uppercase font-semibold">
-                Assigned Role
-              </span>
-              <span className="font-medium text-foreground">
-                {user?.role === 'INSTITUTION_USER'
-                  ? 'Institution Representative'
-                  : user?.role || 'Applicant'}
-              </span>
-            </div>
-            <div>
-              <span className="text-muted-foreground block text-xs uppercase font-semibold">
-                Institution Identifier
-              </span>
-              <span className="font-mono text-xs font-medium text-foreground">
-                {user?.institutionId
-                  ? `${user.institutionId.slice(0, 18)}...`
-                  : 'Assigned in Session'}
-              </span>
-            </div>
+          <div className="identity-summary-card">
+            <dl className="identity-summary-grid">
+              <div className="identity-summary-item">
+                <dt className="identity-summary-label">Authorized Representative</dt>
+                <dd className="identity-summary-value">{user?.name || 'Demo Representative'}</dd>
+              </div>
+
+              <div className="identity-summary-item">
+                <dt className="identity-summary-label">Institutional Email</dt>
+                <dd className="identity-summary-value">
+                  {user?.email || 'representative@institution.ac.in'}
+                </dd>
+              </div>
+
+              <div className="identity-summary-item">
+                <dt className="identity-summary-label">Account Role</dt>
+                <dd className="identity-summary-value">{formatRoleName(user?.role)}</dd>
+              </div>
+            </dl>
+
+            {user?.institutionId && (
+              <div className="identity-uuid-row mt-3 pt-3 border-t border-border-subtle flex items-center justify-between flex-wrap gap-2">
+                <div className="flex items-center gap-2">
+                  <span className="identity-summary-label" style={{ marginBottom: 0 }}>
+                    Support Identifier:
+                  </span>
+                  <span className="identity-uuid-text" title={user.institutionId}>
+                    {user.institutionId.slice(0, 8)}...{user.institutionId.slice(-4)}
+                  </span>
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleCopyId(user.institutionId!)}
+                  aria-label="Copy institutional identifier to clipboard"
+                  style={{ height: '1.625rem', padding: '0 0.5rem', fontSize: '0.6875rem' }}
+                >
+                  {copiedId ? (
+                    <>
+                      <Check size={12} className="text-success" aria-hidden="true" />
+                      <span className="text-success">Copied</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy size={12} aria-hidden="true" />
+                      <span>Copy ID</span>
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
           </div>
+
           {!user?.institutionId && (
             <div className="mt-3 p-2.5 rounded bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-center gap-2">
               <Info size={14} className="text-amber-700 flex-shrink-0" />
@@ -182,7 +216,7 @@ export function InstitutionStep({
       </Card>
 
       {/* Action Bar */}
-      <div className="flex items-center justify-between pt-4 border-t border-border-subtle">
+      <div className="wizard-nav-footer">
         <div className="text-xs text-muted-foreground">
           Step 1 of 4 • Institution details and regulatory stream
         </div>

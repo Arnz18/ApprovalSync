@@ -2,37 +2,23 @@ import React from 'react';
 
 export function Footer(): React.ReactElement {
   return (
-    <footer className="app-footer">
+    <footer className="app-footer" role="contentinfo">
       <div className="footer-inner">
         <div className="footer-disclaimer">
           <p style={{ margin: 0 }}>
-            <strong>Institutional Decision-Support Prototype:</strong> ApprovalSync is developed for
-            the Smart India Hackathon (SIH) under the AICTE Approval Automation domain. Automated
-            document validation, OCR extraction, and anomaly flags are advisory and decision-support
-            only. Final statutory approval, deficiency issuance, and rejection determinations
-            require authorized human regulatory roles.
+            <span style={{ fontWeight: 600, color: 'var(--color-foreground)' }}>ApprovalSync</span>{' '}
+            — Institutional Decision-Support Platform under AICTE Approval Process Handbook (APH)
+            guidelines. Automated evaluations are advisory; final statutory determinations require
+            authorized human review.
           </p>
         </div>
-        <div className="footer-links">
-          <span>Release: FE-01 Baseline</span>
+        <div
+          className="footer-links"
+          style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-muted-foreground)' }}
+        >
+          <span>Institutional Sandbox</span>
           <span style={{ color: 'var(--color-border)' }}>•</span>
-          <a
-            href="/api/v1/health"
-            target="_blank"
-            rel="noopener noreferrer"
-            title="Inspect backend health endpoint"
-          >
-            System Health (API)
-          </a>
-          <span style={{ color: 'var(--color-border)' }}>•</span>
-          <a
-            href="/api/docs"
-            target="_blank"
-            rel="noopener noreferrer"
-            title="OpenAPI Specification"
-          >
-            OpenAPI Docs
-          </a>
+          <span>APH 2026 Norms</span>
         </div>
       </div>
     </footer>

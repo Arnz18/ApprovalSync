@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Server,
   Shield,
@@ -10,42 +10,125 @@ import {
   Sparkles,
   RefreshCw,
   LogOut,
+  AlertCircle,
 } from 'lucide-react';
 import { PageHeader } from '../components/ui/PageHeader';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 import { useAuth } from '../auth/useAuth';
+import { usePreferences } from '../context/PreferencesContext';
+import { UserRole } from '../api/types';
+
+interface SystemHealthState {
+  backend: 'available' | 'unavailable' | 'checking';
+  database: 'connected' | 'unavailable' | 'checking';
+  lastChecked: string | null;
+}
 
 export const SettingsPage: React.FC = () => {
   const { user, logout } = useAuth();
-  const [highContrast, setHighContrast] = useState(false);
-  const [density, setDensity] = useState<'comfortable' | 'compact'>('comfortable');
+  const { highContrast, setHighContrast, density, setDensity } = usePreferences();
   const [isPinging, setIsPinging] = useState(false);
-  const [pingStatus, setPingStatus] = useState<string | null>(null);
+  const [pingStatus, setPingStatus] = useState<{ message: string; isError?: boolean } | null>(null);
+  const [healthState, setHealthState] = useState<SystemHealthState>({
+    backend: 'checking',
+    database: 'checking',
+    lastChecked: null,
+  });
+
+  const checkHealth = useCallback(async () => {
+    try {
+      const [healthRes, readyRes] = await Promise.allSettled([
+        fetch('/api/v1/health'),
+        fetch('/api/v1/health/readiness'),
+      ]);
+
+      const isBackendOk = healthRes.status === 'fulfilled' && healthRes.value.ok;
+      const isDbOk = readyRes.status === 'fulfilled' && readyRes.value.ok;
+
+      setHealthState({
+        backend: isBackendOk ? 'available' : 'unavailable',
+        database: isDbOk ? 'connected' : 'unavailable',
+        lastChecked: new Date().toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+        }),
+      });
+    } catch {
+      setHealthState({
+        backend: 'unavailable',
+        database: 'unavailable',
+        lastChecked: new Date().toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+        }),
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    checkHealth();
+  }, [checkHealth]);
 
   const handlePingBackend = async () => {
+    if (isPinging) return;
     setIsPinging(true);
     setPingStatus(null);
+    const start = performance.now();
     try {
-      const res = await fetch('/api/v1/scrutiny/queue?page=1&limit=1', {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('approvalsync_auth_token') || ''}`,
-        },
-      });
+      const res = await fetch('/api/v1/health');
+      const elapsedMs = Math.round(performance.now() - start);
       if (res.ok) {
-        setPingStatus(
-          `Gateway Operational (HTTP ${res.status}) • Latency ~${Math.floor(Math.random() * 20 + 15)}ms`,
-        );
+        setPingStatus({
+          message: `Backend service operational (HTTP ${res.status}) • Verified latency ${elapsedMs}ms`,
+        });
+        setHealthState((prev) => ({
+          ...prev,
+          backend: 'available',
+          lastChecked: new Date().toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+          }),
+        }));
       } else {
-        setPingStatus(`Gateway Responded (HTTP ${res.status})`);
+        setPingStatus({
+          message: `Backend service responded with HTTP ${res.status}`,
+          isError: true,
+        });
+        setHealthState((prev) => ({
+          ...prev,
+          backend: 'unavailable',
+          lastChecked: new Date().toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+          }),
+        }));
       }
-    } catch (err: unknown) {
-      setPingStatus('Network latency probe failed to reach /api/v1');
+    } catch {
+      setPingStatus({
+        message: 'Unable to reach backend health endpoint. Ensure service is active.',
+        isError: true,
+      });
+      setHealthState((prev) => ({
+        ...prev,
+        backend: 'unavailable',
+        lastChecked: new Date().toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+        }),
+      }));
     } finally {
       setIsPinging(false);
     }
   };
+
+  const isSystemAdmin = user?.role === UserRole.SYSTEM_ADMIN;
 
   return (
     <div
@@ -59,10 +142,10 @@ export const SettingsPage: React.FC = () => {
     >
       <PageHeader
         title="Platform Settings & Diagnostics"
-        description="Authoritative environment endpoints, active security profile, and institutional display preferences."
+        description="Active security profile, service diagnostics, and institutional display preferences."
         breadcrumbs={[
           { label: 'Workspace', href: '/' },
-          { label: 'Administration' },
+          { label: 'Governance & Admin' },
           { label: 'Settings' },
         ]}
         actions={
@@ -73,10 +156,10 @@ export const SettingsPage: React.FC = () => {
               size="sm"
               onClick={handlePingBackend}
               disabled={isPinging}
-              aria-label="Probe API connection latency"
+              aria-label="Test API connection latency"
             >
-              <RefreshCw size={14} className={isPinging ? 'animate-spin' : ''} aria-hidden="true" />
-              <span>Test API Connection</span>
+              <RefreshCw size={14} className={isPinging ? 'spinner' : ''} aria-hidden="true" />
+              <span>{isPinging ? 'Checking...' : 'Test API Connection'}</span>
             </Button>
           </div>
         }
@@ -85,20 +168,25 @@ export const SettingsPage: React.FC = () => {
       {pingStatus && (
         <div
           role="status"
+          aria-live="polite"
           style={{
             padding: 'var(--space-3) var(--space-4)',
-            backgroundColor: '#f0fdf4',
-            border: '1px solid #bbf7d0',
+            backgroundColor: pingStatus.isError ? 'var(--color-error-bg)' : '#f0fdf4',
+            border: `1px solid ${pingStatus.isError ? 'var(--color-error-border)' : '#bbf7d0'}`,
             borderRadius: 'var(--radius-md)',
-            color: '#166534',
+            color: pingStatus.isError ? 'var(--color-on-error)' : '#166534',
             fontSize: 'var(--font-size-sm)',
             display: 'flex',
             alignItems: 'center',
             gap: 'var(--space-2)',
           }}
         >
-          <CheckCircle2 size={16} aria-hidden="true" />
-          <span>{pingStatus}</span>
+          {pingStatus.isError ? (
+            <AlertCircle size={16} aria-hidden="true" />
+          ) : (
+            <CheckCircle2 size={16} aria-hidden="true" />
+          )}
+          <span>{pingStatus.message}</span>
         </div>
       )}
 
@@ -189,58 +277,143 @@ export const SettingsPage: React.FC = () => {
               <CardTitle>Environment &amp; Infrastructure</CardTitle>
             </div>
             <CardDescription>
-              Live backend services, database connections, and API routing.
+              Live service status and regulatory platform operating mode.
             </CardDescription>
           </CardHeader>
           <CardContent style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: 'var(--font-size-sm)' }}>API Gateway Prefix</span>
-              <code
-                style={{
-                  fontSize: '11px',
-                  padding: '2px 6px',
-                  backgroundColor: 'var(--color-muted)',
-                  borderRadius: '4px',
-                }}
-              >
-                /api/v1
-              </code>
+              <span style={{ fontSize: 'var(--font-size-sm)' }}>Backend Service</span>
+              {healthState.backend === 'available' ? (
+                <Badge variant="success">Available</Badge>
+              ) : healthState.backend === 'checking' ? (
+                <Badge variant="default">Checking...</Badge>
+              ) : (
+                <Badge variant="error">Unavailable</Badge>
+              )}
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: 'var(--font-size-sm)' }}>Backend Host</span>
-              <code
-                style={{
-                  fontSize: '11px',
-                  padding: '2px 6px',
-                  backgroundColor: 'var(--color-muted)',
-                  borderRadius: '4px',
-                }}
-              >
-                http://localhost:3000
-              </code>
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: 'var(--font-size-sm)' }}>PostgreSQL Database</span>
-              <span
-                style={{
-                  fontSize: 'var(--font-size-xs)',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  color: '#16a34a',
-                  fontWeight: 600,
-                }}
-              >
-                <Database size={13} aria-hidden="true" /> Port 5434 (Connected)
-              </span>
+              <span style={{ fontSize: 'var(--font-size-sm)' }}>Data Service</span>
+              {healthState.database === 'connected' ? (
+                <span
+                  style={{
+                    fontSize: 'var(--font-size-xs)',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    color: '#16a34a',
+                    fontWeight: 600,
+                  }}
+                >
+                  <Database size={13} aria-hidden="true" /> Connected
+                </span>
+              ) : healthState.database === 'checking' ? (
+                <Badge variant="default">Checking...</Badge>
+              ) : (
+                <span
+                  style={{
+                    fontSize: 'var(--font-size-xs)',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    color: 'var(--color-error)',
+                    fontWeight: 600,
+                  }}
+                >
+                  <Database size={13} aria-hidden="true" /> Unavailable
+                </span>
+              )}
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontSize: 'var(--font-size-sm)' }}>Environment Mode</span>
-              <Badge variant="default">Demo Sandbox (Synthetic)</Badge>
+              <Badge variant="default">Demonstration Sandbox (Synthetic)</Badge>
             </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span
+                style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-muted-foreground)' }}
+              >
+                Last Diagnostic Check
+              </span>
+              <span
+                style={{
+                  fontSize: 'var(--font-size-xs)',
+                  color: 'var(--color-muted-foreground)',
+                  fontVariantNumeric: 'tabular-nums',
+                }}
+              >
+                {healthState.lastChecked || 'Initial check in progress'}
+              </span>
+            </div>
+
+            {/* Advanced Diagnostics exclusively for SYSTEM_ADMIN */}
+            {isSystemAdmin && (
+              <div
+                style={{
+                  marginTop: 'var(--space-2)',
+                  paddingTop: 'var(--space-3)',
+                  borderTop: '1px solid var(--color-border-subtle)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 'var(--space-2)',
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: 'var(--font-size-xs)',
+                    fontWeight: 600,
+                    color: 'var(--color-muted-foreground)',
+                  }}
+                >
+                  Administrative Diagnostics
+                </div>
+                <div
+                  style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                >
+                  <span
+                    style={{
+                      fontSize: 'var(--font-size-xs)',
+                      color: 'var(--color-muted-foreground)',
+                    }}
+                  >
+                    Gateway Prefix
+                  </span>
+                  <code
+                    style={{
+                      fontSize: '11px',
+                      padding: '1px 5px',
+                      backgroundColor: 'var(--color-muted)',
+                      borderRadius: '4px',
+                    }}
+                  >
+                    /api/v1
+                  </code>
+                </div>
+                <div
+                  style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                >
+                  <span
+                    style={{
+                      fontSize: 'var(--font-size-xs)',
+                      color: 'var(--color-muted-foreground)',
+                    }}
+                  >
+                    Backend Target
+                  </span>
+                  <code
+                    style={{
+                      fontSize: '11px',
+                      padding: '1px 5px',
+                      backgroundColor: 'var(--color-muted)',
+                      borderRadius: '4px',
+                    }}
+                  >
+                    Standard Port 3000
+                  </code>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
 

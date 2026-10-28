@@ -50,10 +50,10 @@ describe('Application Shell Layout (FE-01)', () => {
     expect(screen.getByText('Audit Ledger & Proofs')).toBeInTheDocument();
   });
 
-  it('Footer renders decision-support disclaimer and health API link', () => {
+  it('Footer renders decision-support disclaimer and regulatory environment notice', () => {
     render(<Footer />);
 
-    expect(screen.getByText(/Institutional Decision-Support Prototype/i)).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /System Health \(API\)/i })).toBeInTheDocument();
+    expect(screen.getByText(/Institutional Decision-Support Platform/i)).toBeInTheDocument();
+    expect(screen.getByText(/Institutional Sandbox/i)).toBeInTheDocument();
   });
 });
