@@ -82,6 +82,7 @@ services:
       dockerfile: Dockerfile
       args:
         VITE_API_BASE_URL: /api/v1
+        VITE_ENABLE_DEMO_PANEL: ${VITE_ENABLE_DEMO_PANEL:-true}
     restart: unless-stopped
     depends_on:
       backend:

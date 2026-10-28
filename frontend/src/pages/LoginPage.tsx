@@ -353,8 +353,8 @@ export function LoginPage(): React.ReactElement {
               </div>
             </form>
 
-            {/* Development-Only Demo Credentials Helper */}
-            {import.meta.env.DEV && (
+            {/* Demo Credentials Helper — enabled in DEV or when VITE_ENABLE_DEMO_PANEL is 'true' */}
+            {(import.meta.env.DEV || import.meta.env.VITE_ENABLE_DEMO_PANEL === 'true') && (
               <div
                 style={{
                   marginTop: '1.5rem',

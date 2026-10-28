@@ -14,6 +14,9 @@ WORKDIR /app
 ARG VITE_API_BASE_URL=/api/v1
 ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
 
+ARG VITE_ENABLE_DEMO_PANEL=true
+ENV VITE_ENABLE_DEMO_PANEL=${VITE_ENABLE_DEMO_PANEL}
+
 # Copy package definitions and lockfile
 COPY package.json package-lock.json ./
 
