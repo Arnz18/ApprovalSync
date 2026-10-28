@@ -1,0 +1,116 @@
+# ==============================================================================
+# ApprovalSync — Production Docker Compose Configuration
+# Milestone: DEP-01 (Production Container Hardening & EC2 Isolation)
+#
+# Isolation Policy:
+# - Project name 'approvalsync' isolates all containers, networks, and volumes.
+# - Safe co-existence with existing EC2 applications (e.g. RakshakGIS).
+# - Only the frontend reverse-proxy publishes a configurable host port (${APPROVALSYNC_PORT:-8080}).
+# - Database (PostgreSQL 16) and backend (NestJS) ports are internal-only.
+# ==============================================================================
+
+name: approvalsync
+
+services:
+  # ----------------------------------------------------------------------------
+  # 1. PostgreSQL 16 Relational Database Engine
+  # ----------------------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-approvalsync}
+      POSTGRES_USER: ${DB_USER:-approvalsync_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required in production environment}
+    volumes:
+      - approvalsync_postgres_data:/var/lib/postgresql/data
+    networks:
+      - approvalsync_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-approvalsync_user} -d ${DB_NAME:-approvalsync}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    # SECURITY: Port 5432 is strictly unexposed to the host to protect institutional data
+
+  # ----------------------------------------------------------------------------
+  # 2. ApprovalSync Backend — NestJS Modular Monolith API
+  # ----------------------------------------------------------------------------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      API_PREFIX: api/v1
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-approvalsync}
+      DB_USER: ${DB_USER:-approvalsync_user}
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required in production environment}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET (min 32 characters) is required in production environment}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-3600s}
+      CORS_ORIGINS: ${CORS_ORIGINS:-*}
+      STORAGE_ROOT: /app/storage/documents
+      LOG_LEVEL: ${LOG_LEVEL:-warn}
+      DEBUG_LOGGING: "false"
+      ENABLE_SWAGGER: ${ENABLE_SWAGGER:-false}
+    volumes:
+      - approvalsync_storage_data:/app/storage/documents
+    networks:
+      - approvalsync_net
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/api/v1/health/liveness || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 25s
+    # SECURITY: Port 3000 is internal-only; public requests route through the frontend reverse proxy
+
+  # ----------------------------------------------------------------------------
+  # 3. ApprovalSync Frontend — React + Vite SPA & Nginx Reverse Proxy
+  # ----------------------------------------------------------------------------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: /api/v1
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      # Configurable host port to prevent port collisions with RakshakGIS on ports 80/443
+      - "${APPROVALSYNC_PORT:-8080}:80"
+    networks:
+      - approvalsync_net
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1/healthz || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+# ------------------------------------------------------------------------------
+# Isolated Internal Network
+# ------------------------------------------------------------------------------
+networks:
+  approvalsync_net:
+    name: approvalsync_internal_network
+    driver: bridge
+
+# ------------------------------------------------------------------------------
+# Named Persistent Volumes
+# ------------------------------------------------------------------------------
+volumes:
+  approvalsync_postgres_data:
+    name: approvalsync_postgres_data
+  approvalsync_storage_data:
+    name: approvalsync_storage_data
