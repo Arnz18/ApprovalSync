@@ -272,8 +272,8 @@
   font-size: var(--font-size-sm);
   line-height: var(--line-height-normal);
   color: var(--color-foreground);
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
+  background-color: var(--color-input-bg, var(--color-surface));
+  border: 1px solid var(--color-input-border, var(--color-border));
   border-radius: var(--radius-md);
   transition:
     border-color var(--transition-fast),

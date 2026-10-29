@@ -43,7 +43,7 @@
    ========================================================================== */
 .app-header {
   height: var(--header-height);
-  background-color: var(--color-surface);
+  background-color: var(--color-header-bg, var(--color-surface));
   border-bottom: 1px solid var(--color-border);
   position: sticky;
   top: 0;
@@ -182,7 +182,7 @@
 .app-sidebar {
   display: none;
   width: var(--sidebar-width);
-  background-color: var(--color-surface);
+  background-color: var(--color-sidebar-bg, var(--color-surface));
   border-right: 1px solid var(--color-border);
   flex-direction: column;
   flex-shrink: 0;
@@ -348,7 +348,7 @@
    Footer Styles
    ========================================================================== */
 .app-footer {
-  background-color: var(--color-surface);
+  background-color: var(--color-header-bg, var(--color-surface));
   border-top: 1px solid var(--color-border);
   padding: var(--space-4) var(--space-4);
   font-size: var(--font-size-xs);
