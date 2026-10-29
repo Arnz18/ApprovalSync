@@ -6,6 +6,7 @@ import { useAuth } from '../../auth/useAuth';
 import { formatRoleName } from '../../auth/roleRoutes';
 import { NotificationBell } from '../notifications/NotificationBell';
 import { NiyamSetuLogo } from './NiyamSetuLogo';
+import { ThemeToggle } from './ThemeToggle';
 
 export interface HeaderProps {
   onToggleMobileNav: () => void;
@@ -124,6 +125,9 @@ export function Header({ onToggleMobileNav, isMobileNavOpen }: HeaderProps): Rea
         >
           Regulation Bureau
         </span>
+
+        {/* Animated Dark Mode Switch */}
+        <ThemeToggle />
 
         {/* Live In-App Notification Center */}
         {isAuthenticated && <NotificationBell />}

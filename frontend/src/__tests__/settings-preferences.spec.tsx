@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { PreferencesProvider, usePreferences } from '../context/PreferencesContext';
+import { ThemeToggle } from '../components/layout/ThemeToggle';
 import { SettingsPage } from '../pages/SettingsPage';
 import { AuthContext } from '../auth/AuthContext';
 import { AuthContextValue } from '../auth/types';
@@ -187,5 +188,31 @@ describe('Display Preferences & Settings Diagnostics (DEF-UI-06 & DEF-UI-07)', (
     fireEvent.change(densitySelect, { target: { value: 'compact' } });
     expect(densitySelect).toHaveValue('compact');
     expect(document.documentElement.getAttribute('data-density')).toBe('compact');
+  });
+
+  it('ThemeToggle switches between light and dark themes, sets attributes, and persists to localStorage', () => {
+    render(
+      <PreferencesProvider>
+        <ThemeToggle />
+      </PreferencesProvider>,
+    );
+
+    const toggleBtn = screen.getByRole('switch');
+    expect(toggleBtn).toHaveAttribute('aria-checked', 'false');
+    expect(document.documentElement.getAttribute('data-theme')).toBe('light');
+
+    // Click to toggle to dark
+    fireEvent.click(toggleBtn);
+    expect(toggleBtn).toHaveAttribute('aria-checked', 'true');
+    expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
+    expect(document.documentElement.classList.contains('dark')).toBe(true);
+    expect(localStorage.getItem('niyamsetu_theme')).toBe('dark');
+
+    // Toggle back via keyboard Enter
+    fireEvent.keyDown(toggleBtn, { key: 'Enter' });
+    expect(toggleBtn).toHaveAttribute('aria-checked', 'false');
+    expect(document.documentElement.getAttribute('data-theme')).toBe('light');
+    expect(document.documentElement.classList.contains('dark')).toBe(false);
+    expect(localStorage.getItem('niyamsetu_theme')).toBe('light');
   });
 });
