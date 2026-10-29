@@ -11,7 +11,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { ApplicationWizardPage } from '../pages/ApplicationWizardPage';
 import { applicationsService } from '../api/services/applicationsService';
 import { documentsService } from '../api/services/documentsService';
-import { ApplicationStatus, DocumentProcessingStatus } from '../applications/types';
+import { ApplicationStatus, DocumentProcessingStatus, WizardStep } from '../applications/types';
 import { ApiClientError } from '../api/client';
 
 describe('Application Wizard & Intake (FE-03)', () => {
@@ -489,6 +489,50 @@ describe('Application Wizard & Intake (FE-03)', () => {
       expect(
         screen.getByRole('button', { name: /Continue to Infrastructure/i }),
       ).toBeInTheDocument();
+    });
+  });
+
+  it('restores draft progress and fields from draftId query param and payloadJsonb', async () => {
+    vi.spyOn(applicationsService, 'getApplication').mockResolvedValueOnce({
+      id: 'app-draft-step2',
+      applicationNumber: 'APP-2026-DRAFT-STEP2',
+      institutionId: 'inst-test-01',
+      academicYear: '2026-2027',
+      status: ApplicationStatus.DRAFT,
+      programType: 'Undergraduate Engineering & Technology',
+      payloadJsonb: {
+        facultyCount: 55,
+        landAreaAcres: 12.5,
+        builtUpAreaSqMeters: 8500,
+        coursesProposed: ['B.Tech Computer Engineering', 'B.Tech AI & Data Science'],
+        currentStep: WizardStep.PROGRAM_FACILITIES,
+        highestVisitedStep: WizardStep.PROGRAM_FACILITIES,
+      },
+      submittedAt: null,
+      createdAt: '2026-10-25T00:00:00.000Z',
+      updatedAt: '2026-10-25T00:30:00.000Z',
+    });
+
+    vi.spyOn(applicationsService, 'getApplicationDocuments').mockResolvedValueOnce([]);
+
+    render(
+      <MemoryRouter initialEntries={['/applications?draftId=app-draft-step2']}>
+        <ApplicationWizardPage />
+      </MemoryRouter>,
+    );
+
+    // Should restore directly to Step 2 (Physical Infrastructure & Norms)
+    await waitFor(() => {
+      expect(
+        screen.getByRole('heading', {
+          name: /Physical Infrastructure & Regulatory Norms/i,
+        }),
+      ).toBeInTheDocument();
+      expect(screen.getByDisplayValue('55')).toBeInTheDocument();
+      expect(screen.getByDisplayValue('12.5')).toBeInTheDocument();
+      expect(screen.getByDisplayValue('8500')).toBeInTheDocument();
+      expect(screen.getByText('B.Tech Computer Engineering')).toBeInTheDocument();
+      expect(screen.getByText('B.Tech AI & Data Science')).toBeInTheDocument();
     });
   });
 });

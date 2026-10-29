@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { AlertCircle, CheckCircle2, Save } from 'lucide-react';
 import { PageHeader } from '../components/ui/PageHeader';
 import { Button } from '../components/ui/Button';
@@ -43,6 +44,9 @@ function safeScrollToTop() {
 }
 
 export function ApplicationWizardPage(): React.ReactElement {
+  const [searchParams] = useSearchParams();
+  const requestedDraftId = searchParams.get('draftId');
+
   const [state, setState] = useState<ApplicationWizardState>(INITIAL_WIZARD_STATE);
   const [initialLoading, setInitialLoading] = useState(true);
   const [activeErrors, setActiveErrors] = useState<Record<string, string>>({});
@@ -57,27 +61,42 @@ export function ApplicationWizardPage(): React.ReactElement {
       try {
         setInitialLoading(true);
 
-        // 1. First look for an existing editable draft
-        const draftRes = await applicationsService.listApplications({
-          status: 'DRAFT',
-          limit: 1,
-        });
-
         let targetApplication: ApplicationProjection | null = null;
         let isSubmittedView = false;
 
-        if (draftRes.items && draftRes.items.length > 0) {
-          targetApplication = draftRes.items[0];
-        } else {
-          // 2. If no draft exists, check if there is an existing submitted application
-          const allRes = await applicationsService.listApplications({
+        // 1. If explicit draftId is requested via query param, load it directly
+        if (requestedDraftId) {
+          try {
+            const specificApp = await applicationsService.getApplication(requestedDraftId);
+            if (specificApp) {
+              targetApplication = specificApp;
+              isSubmittedView = specificApp.status !== 'DRAFT';
+            }
+          } catch {
+            targetApplication = null;
+          }
+        }
+
+        // 2. Otherwise look for an existing editable draft
+        if (!targetApplication) {
+          const draftRes = await applicationsService.listApplications({
+            status: 'DRAFT',
             limit: 1,
-            sortBy: 'createdAt',
-            sortOrder: 'DESC',
           });
-          if (allRes.items && allRes.items.length > 0 && allRes.items[0].status !== 'DRAFT') {
-            targetApplication = allRes.items[0];
-            isSubmittedView = true;
+
+          if (draftRes.items && draftRes.items.length > 0) {
+            targetApplication = draftRes.items[0];
+          } else {
+            // 3. If no draft exists, check if there is an existing submitted application
+            const allRes = await applicationsService.listApplications({
+              limit: 1,
+              sortBy: 'createdAt',
+              sortOrder: 'DESC',
+            });
+            if (allRes.items && allRes.items.length > 0 && allRes.items[0].status !== 'DRAFT') {
+              targetApplication = allRes.items[0];
+              isSubmittedView = true;
+            }
           }
         }
 
@@ -93,7 +112,16 @@ export function ApplicationWizardPage(): React.ReactElement {
           }
 
           if (isMounted) {
-            const payload = app.payloadJsonb || {};
+            const payload = (app.payloadJsonb || {}) as Record<string, unknown>;
+            const savedStep =
+              !isSubmittedView && typeof payload.currentStep === 'number'
+                ? (payload.currentStep as WizardStep)
+                : WizardStep.INSTITUTION_INFO;
+            const savedHighest =
+              !isSubmittedView && typeof payload.highestVisitedStep === 'number'
+                ? (payload.highestVisitedStep as WizardStep)
+                : savedStep;
+
             setState((prev) => ({
               ...prev,
               applicationId: app.id,
@@ -124,10 +152,8 @@ export function ApplicationWizardPage(): React.ReactElement {
                 ? (payload.coursesProposed as string[])
                 : prev.coursesProposed,
               uploadedDocuments: docs,
-              currentStep: isSubmittedView ? WizardStep.CONFIRMATION : WizardStep.INSTITUTION_INFO,
-              highestVisitedStep: isSubmittedView
-                ? WizardStep.CONFIRMATION
-                : WizardStep.INSTITUTION_INFO,
+              currentStep: isSubmittedView ? WizardStep.CONFIRMATION : savedStep,
+              highestVisitedStep: isSubmittedView ? WizardStep.CONFIRMATION : savedHighest,
               saveStatus: 'saved',
               lastSavedAt: app.updatedAt,
             }));
@@ -148,7 +174,7 @@ export function ApplicationWizardPage(): React.ReactElement {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [requestedDraftId]);
 
   const updateFields = (fields: Partial<ApplicationWizardState>) => {
     setState((prev) => ({
@@ -168,8 +194,11 @@ export function ApplicationWizardPage(): React.ReactElement {
   /**
    * Save or update draft on backend
    */
-  const ensureDraftSaved = async (): Promise<string> => {
+  const ensureDraftSaved = async (targetStep?: WizardStep): Promise<string> => {
     setState((prev) => ({ ...prev, saveStatus: 'saving' }));
+
+    const stepToSave = targetStep !== undefined ? targetStep : state.currentStep;
+    const highestToSave = Math.max(state.highestVisitedStep, stepToSave) as WizardStep;
 
     const payloadJsonb: Record<string, unknown> = {
       facultyCount: state.facultyCount !== '' ? Number(state.facultyCount) : 0,
@@ -178,6 +207,8 @@ export function ApplicationWizardPage(): React.ReactElement {
       libraryBooksCount: state.libraryBooksCount !== '' ? Number(state.libraryBooksCount) : 0,
       laboratoryCount: state.laboratoryCount !== '' ? Number(state.laboratoryCount) : 0,
       coursesProposed: state.coursesProposed,
+      currentStep: stepToSave,
+      highestVisitedStep: highestToSave,
     };
 
     try {
@@ -286,8 +317,8 @@ export function ApplicationWizardPage(): React.ReactElement {
     setTopErrorList([]);
 
     try {
-      await ensureDraftSaved();
       const nextStep = (state.currentStep + 1) as WizardStep;
+      await ensureDraftSaved(nextStep);
       setState((prev) => ({
         ...prev,
         currentStep: nextStep,
