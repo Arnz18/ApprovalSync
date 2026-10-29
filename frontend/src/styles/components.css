@@ -220,6 +220,14 @@
 .card-content {
   padding: var(--space-5);
   flex: 1 1 auto;
+  box-sizing: border-box;
+}
+
+/* Fallback padding guard ensuring text never touches card borders directly */
+.card > div:not(.card-header):not(.card-content):not(.card-footer):not([class*='table']),
+.card > p {
+  padding: var(--space-4) var(--space-5);
+  box-sizing: border-box;
 }
 
 .card-footer {
@@ -810,6 +818,12 @@
   font-size: var(--font-size-sm);
   text-align: left;
   min-width: 620px;
+}
+
+table th,
+table td {
+  padding: var(--space-3) var(--space-4);
+  box-sizing: border-box;
 }
 
 .data-table th,
