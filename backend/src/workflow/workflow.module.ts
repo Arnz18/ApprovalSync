@@ -17,11 +17,7 @@ import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([
-      Application,
-      WorkflowTimelineEvent,
-      EvcSchedule,
-    ]),
+    TypeOrmModule.forFeature([Application, WorkflowTimelineEvent, EvcSchedule]),
     UsersModule,
     AuditModule,
     SlaModule,

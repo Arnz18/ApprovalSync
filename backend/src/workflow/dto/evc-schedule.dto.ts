@@ -34,10 +34,21 @@ export class CommitteeExpertDto {
 
   @ApiProperty({
     example: 'CHAIRMAN',
-    enum: ['CHAIRMAN', 'EXPERT_MEMBER', 'ARCHITECT_EXPERT', 'AICTE_REPRESENTATIVE'],
+    enum: [
+      'CHAIRMAN',
+      'EXPERT_MEMBER',
+      'ARCHITECT_EXPERT',
+      'AICTE_REPRESENTATIVE',
+    ],
   })
-  @IsEnum(['CHAIRMAN', 'EXPERT_MEMBER', 'ARCHITECT_EXPERT', 'AICTE_REPRESENTATIVE'])
-  role: 'CHAIRMAN' | 'EXPERT_MEMBER' | 'ARCHITECT_EXPERT' | 'AICTE_REPRESENTATIVE';
+  @IsEnum([
+    'CHAIRMAN',
+    'EXPERT_MEMBER',
+    'ARCHITECT_EXPERT',
+    'AICTE_REPRESENTATIVE',
+  ])
+  role:
+    'CHAIRMAN' | 'EXPERT_MEMBER' | 'ARCHITECT_EXPERT' | 'AICTE_REPRESENTATIVE';
 
   @ApiPropertyOptional({ example: 'ramesh.sharma@iitb.ac.in' })
   @IsOptional()
@@ -77,7 +88,8 @@ export class CreateEvcScheduleDto {
   })
   @IsOptional()
   @IsEnum(['SCHEDULED', 'CONFIRMED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'])
-  status?: 'SCHEDULED' | 'CONFIRMED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+  status?:
+    'SCHEDULED' | 'CONFIRMED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
 
   @ApiProperty({ type: [CommitteeExpertDto] })
   @IsArray()
@@ -85,22 +97,37 @@ export class CreateEvcScheduleDto {
   @Type(() => CommitteeExpertDto)
   committeeMembers: CommitteeExpertDto[];
 
-  @ApiPropertyOptional({ example: 'Physical inspection of mechanical workshops and library facilities.' })
+  @ApiPropertyOptional({
+    example:
+      'Physical inspection of mechanical workshops and library facilities.',
+  })
   @IsOptional()
   @IsString()
   visitNotes?: string;
 
-  @ApiPropertyOptional({ example: 'All norms verified in accordance with APH Chapter I Clause 1.4.' })
+  @ApiPropertyOptional({
+    example: 'All norms verified in accordance with APH Chapter I Clause 1.4.',
+  })
   @IsOptional()
   @IsString()
   outcomeSummary?: string;
 
   @ApiPropertyOptional({
     example: 'RECOMMEND_APPROVAL',
-    enum: ['PENDING', 'RECOMMEND_APPROVAL', 'DEFICIENCY_OBSERVED', 'ESCALATE_TO_SHC'],
+    enum: [
+      'PENDING',
+      'RECOMMEND_APPROVAL',
+      'DEFICIENCY_OBSERVED',
+      'ESCALATE_TO_SHC',
+    ],
   })
   @IsOptional()
-  @IsEnum(['PENDING', 'RECOMMEND_APPROVAL', 'DEFICIENCY_OBSERVED', 'ESCALATE_TO_SHC'])
+  @IsEnum([
+    'PENDING',
+    'RECOMMEND_APPROVAL',
+    'DEFICIENCY_OBSERVED',
+    'ESCALATE_TO_SHC',
+  ])
   recommendation?:
     | 'PENDING'
     | 'RECOMMEND_APPROVAL'
@@ -151,4 +178,3 @@ export class EvcScheduleResponseDto {
   @ApiProperty({ example: '2026-10-29T12:00:00.000Z' })
   updatedAt: string;
 }
-

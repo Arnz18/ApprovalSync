@@ -64,7 +64,8 @@ export class NotificationsController {
   @Patch(':id/read')
   @ApiOperation({
     summary: 'Mark a notification as read',
-    description: 'Sets notification isRead to true and records readAt timestamp.',
+    description:
+      'Sets notification isRead to true and records readAt timestamp.',
   })
   @ApiParam({ name: 'id', description: 'Notification UUID' })
   @SwaggerResponse({
@@ -115,4 +116,3 @@ export class NotificationsController {
     return this.notificationsService.sweepDeadlines();
   }
 }
-

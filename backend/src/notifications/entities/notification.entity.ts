@@ -99,4 +99,3 @@ export class Notification {
   @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
   updatedAt: Date;
 }
-

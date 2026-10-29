@@ -3,7 +3,14 @@
  * Milestone: AICTE-26262
  */
 
-import { IsOptional, IsBoolean, IsEnum, IsInt, Min, Max } from 'class-validator';
+import {
+  IsOptional,
+  IsBoolean,
+  IsEnum,
+  IsInt,
+  Min,
+  Max,
+} from 'class-validator';
 import { Type, Transform } from 'class-transformer';
 import { ApiPropertyOptional, ApiProperty } from '@nestjs/swagger';
 import { NotificationType } from '../enums/notification-type.enum';
@@ -16,7 +23,10 @@ export class NotificationQueryDto {
   @IsBoolean()
   unreadOnly?: boolean;
 
-  @ApiPropertyOptional({ enum: NotificationType, description: 'Filter by notification type' })
+  @ApiPropertyOptional({
+    enum: NotificationType,
+    description: 'Filter by notification type',
+  })
   @IsOptional()
   @IsEnum(NotificationType)
   type?: NotificationType;
@@ -56,16 +66,25 @@ export class NotificationResponseDto {
   @ApiPropertyOptional({ example: 'undertaking-uuid' })
   undertakingId?: string | null;
 
-  @ApiProperty({ enum: NotificationType, example: NotificationType.DEADLINE_REMINDER })
+  @ApiProperty({
+    enum: NotificationType,
+    example: NotificationType.DEADLINE_REMINDER,
+  })
   type: NotificationType;
 
-  @ApiProperty({ enum: NotificationSeverity, example: NotificationSeverity.WARNING })
+  @ApiProperty({
+    enum: NotificationSeverity,
+    example: NotificationSeverity.WARNING,
+  })
   severity: NotificationSeverity;
 
   @ApiProperty({ example: 'Application Scrutiny SLA Warning' })
   title: string;
 
-  @ApiProperty({ example: 'Application APP-2026-DEMO-001 has reached 80% of Scrutiny review window.' })
+  @ApiProperty({
+    example:
+      'Application APP-2026-DEMO-001 has reached 80% of Scrutiny review window.',
+  })
   message: string;
 
   @ApiPropertyOptional({ example: '/scrutiny/APP-2026-DEMO-001' })
@@ -94,4 +113,3 @@ export class NotificationListResponseDto {
   @ApiProperty({ example: 10 })
   totalItems: number;
 }
-

@@ -517,19 +517,22 @@ export class WorkflowService {
   /**
    * Stage-wise Pendency Metrics: Computes real database-backed metrics for each approval stage.
    */
-  async getStagePendencyMetrics(): Promise<{
-    stage: ApplicationStatus;
-    label: string;
-    count: number;
-    avgHoursInStage: number;
-    breachedCount: number;
-  }[]> {
+  async getStagePendencyMetrics(): Promise<
+    {
+      stage: ApplicationStatus;
+      label: string;
+      count: number;
+      avgHoursInStage: number;
+      breachedCount: number;
+    }[]
+  > {
     const apps = await this.applicationRepository.find();
     const stageLabels: Record<ApplicationStatus, string> = {
       [ApplicationStatus.DRAFT]: 'Draft & Preparation',
       [ApplicationStatus.SUBMITTED]: 'Awaiting Scrutiny Assignment',
       [ApplicationStatus.UNDER_SCRUTINY]: 'Documentary Scrutiny Desk',
-      [ApplicationStatus.DEFICIENCY_ISSUED]: 'Clarification / Deficiency Issued',
+      [ApplicationStatus.DEFICIENCY_ISSUED]:
+        'Clarification / Deficiency Issued',
       [ApplicationStatus.RESUBMITTED]: 'Awaiting Re-Scrutiny',
       [ApplicationStatus.RECOMMENDED_FOR_EVC]: 'EVC Scheduling Queue',
       [ApplicationStatus.EVC_IN_PROGRESS]: 'EVC Ground Inspection Active',

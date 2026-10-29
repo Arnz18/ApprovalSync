@@ -8,7 +8,7 @@
 
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, LessThanOrEqual } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Notification } from './entities/notification.entity';
 import { NotificationType } from './enums/notification-type.enum';
 import { NotificationSeverity } from './enums/notification-severity.enum';
@@ -50,7 +50,10 @@ export class NotificationsService {
     // Tenant / Role routing:
     // User sees notifications specifically for their userId, OR for their role
     // For INSTITUTION_USER, only see notifications for their institutionId
-    if (currentUser.role === UserRole.SYSTEM_ADMIN || currentUser.role === UserRole.AUDITOR) {
+    if (
+      currentUser.role === UserRole.SYSTEM_ADMIN ||
+      currentUser.role === UserRole.AUDITOR
+    ) {
       // System administrators and auditors have oversight across all alerts
     } else if (currentUser.role === UserRole.INSTITUTION_USER) {
       if (currentUser.institutionId) {
@@ -87,7 +90,10 @@ export class NotificationsService {
     // Calculate unread count with same access rules
     const unreadQb = this.notificationRepo.createQueryBuilder('n');
     unreadQb.where('n.is_read = FALSE');
-    if (currentUser.role === UserRole.SYSTEM_ADMIN || currentUser.role === UserRole.AUDITOR) {
+    if (
+      currentUser.role === UserRole.SYSTEM_ADMIN ||
+      currentUser.role === UserRole.AUDITOR
+    ) {
       // System administrators and auditors have global unread count
     } else if (currentUser.role === UserRole.INSTITUTION_USER) {
       if (currentUser.institutionId) {
@@ -143,6 +149,14 @@ export class NotificationsService {
       throw new NotFoundException('Notification not found.');
     }
 
+    if (
+      currentUser.role === UserRole.INSTITUTION_USER &&
+      notification.institutionId &&
+      notification.institutionId !== currentUser.institutionId
+    ) {
+      throw new NotFoundException('Notification not found.');
+    }
+
     notification.isRead = true;
     notification.readAt = new Date();
     const saved = await this.notificationRepo.save(notification);
@@ -152,7 +166,9 @@ export class NotificationsService {
   /**
    * Marks all notifications for the current user as read.
    */
-  async markAllAsRead(currentUser: AuthUserPrincipal): Promise<{ count: number }> {
+  async markAllAsRead(
+    currentUser: AuthUserPrincipal,
+  ): Promise<{ count: number }> {
     const qb = this.notificationRepo
       .createQueryBuilder()
       .update(Notification)
@@ -173,10 +189,13 @@ export class NotificationsService {
         qb.andWhere('user_id = :userId', { userId: currentUser.id });
       }
     } else {
-      qb.andWhere('(user_id = :userId OR target_role = :role OR target_role IS NULL)', {
-        userId: currentUser.id,
-        role: currentUser.role,
-      });
+      qb.andWhere(
+        '(user_id = :userId OR target_role = :role OR target_role IS NULL)',
+        {
+          userId: currentUser.id,
+          role: currentUser.role,
+        },
+      );
     }
 
     const result = await qb.execute();
@@ -227,7 +246,9 @@ export class NotificationsService {
     try {
       return await this.notificationRepo.save(notification);
     } catch (err: unknown) {
-      this.logger.warn(`Notification creation failed or duplicate key skipped: ${(err as Error).message}`);
+      this.logger.warn(
+        `Notification creation failed or duplicate key skipped: ${(err as Error).message}`,
+      );
       return null;
     }
   }
@@ -253,7 +274,8 @@ export class NotificationsService {
     });
 
     for (const timer of activeTimers) {
-      const appNumber = timer.application?.applicationNumber || timer.applicationId;
+      const appNumber =
+        timer.application?.applicationNumber || timer.applicationId;
       const targetDeadline = new Date(timer.targetDeadline);
       const isBreached = now > targetDeadline;
 
@@ -269,12 +291,17 @@ export class NotificationsService {
           message: `Application ${appNumber} in stage ${timer.stage} has breached its regulatory turnaround deadline of ${targetDeadline.toLocaleDateString()}. Escalation alert raised.`,
           link: `/scrutiny/${timer.applicationId}`,
           idempotencyKey,
-          metadata: { timerId: timer.id, stage: timer.stage, deadline: targetDeadline },
+          metadata: {
+            timerId: timer.id,
+            stage: timer.stage,
+            deadline: targetDeadline,
+          },
         });
         if (created) slaBreaches++;
       } else {
         // Check if within 24 hours of deadline
-        const hoursRemaining = (targetDeadline.getTime() - now.getTime()) / (1000 * 60 * 60);
+        const hoursRemaining =
+          (targetDeadline.getTime() - now.getTime()) / (1000 * 60 * 60);
         if (hoursRemaining <= 24 && hoursRemaining > 0) {
           const idempotencyKey = `sla_warning_${timer.id}_${Math.floor(hoursRemaining / 12)}`;
           const created = await this.createNotification({
@@ -323,7 +350,8 @@ export class NotificationsService {
         if (created) undertakingAlerts++;
       } else {
         // Check if renewal is due within 30 days
-        const daysToRenewal = (renewalDue.getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
+        const daysToRenewal =
+          (renewalDue.getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
         if (daysToRenewal <= 30 && daysToRenewal >= -7) {
           const idempotencyKey = `undertaking_renewal_${u.id}_${Math.max(0, Math.floor(daysToRenewal / 7))}`;
           const created = await this.createNotification({
@@ -344,7 +372,9 @@ export class NotificationsService {
     }
 
     const total = slaWarnings + slaBreaches + undertakingAlerts;
-    this.logger.log(`Deadline sweep completed: ${slaWarnings} SLA warnings, ${slaBreaches} SLA breaches, ${undertakingAlerts} compliance alerts emitted.`);
+    this.logger.log(
+      `Deadline sweep completed: ${slaWarnings} SLA warnings, ${slaBreaches} SLA breaches, ${undertakingAlerts} compliance alerts emitted.`,
+    );
 
     return {
       slaWarningsEmitted: slaWarnings,

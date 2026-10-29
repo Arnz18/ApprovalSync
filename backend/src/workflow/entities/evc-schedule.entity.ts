@@ -23,7 +23,8 @@ export interface CommitteeExpert {
   name: string;
   designation: string;
   affiliation: string;
-  role: 'CHAIRMAN' | 'EXPERT_MEMBER' | 'ARCHITECT_EXPERT' | 'AICTE_REPRESENTATIVE';
+  role:
+    'CHAIRMAN' | 'EXPERT_MEMBER' | 'ARCHITECT_EXPERT' | 'AICTE_REPRESENTATIVE';
   email?: string;
   phone?: string;
   conflictOfInterestDeclared: boolean;
@@ -93,7 +94,12 @@ export class EvcSchedule {
     | 'DEFICIENCY_OBSERVED'
     | 'ESCALATE_TO_SHC';
 
-  @Column({ name: 'scheduled_by', type: 'varchar', length: 150, nullable: true })
+  @Column({
+    name: 'scheduled_by',
+    type: 'varchar',
+    length: 150,
+    nullable: true,
+  })
   scheduledBy?: string | null;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
@@ -102,4 +108,3 @@ export class EvcSchedule {
   @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
   updatedAt: Date;
 }
-

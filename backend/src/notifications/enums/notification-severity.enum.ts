@@ -9,4 +9,3 @@ export enum NotificationSeverity {
   CRITICAL = 'CRITICAL',
   URGENT = 'URGENT',
 }
-

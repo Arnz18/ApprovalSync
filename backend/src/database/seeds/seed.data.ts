@@ -173,14 +173,22 @@ export interface SeedEvcSchedule {
     name: string;
     designation: string;
     affiliation: string;
-    role: 'CHAIRMAN' | 'EXPERT_MEMBER' | 'ARCHITECT_EXPERT' | 'AICTE_REPRESENTATIVE';
+    role:
+      | 'CHAIRMAN'
+      | 'EXPERT_MEMBER'
+      | 'ARCHITECT_EXPERT'
+      | 'AICTE_REPRESENTATIVE';
     email?: string;
     phone?: string;
     conflictOfInterestDeclared: boolean;
   }[];
   visitNotes?: string;
   outcomeSummary?: string;
-  recommendation: 'PENDING' | 'RECOMMEND_APPROVAL' | 'DEFICIENCY_OBSERVED' | 'ESCALATE_TO_SHC';
+  recommendation:
+    | 'PENDING'
+    | 'RECOMMEND_APPROVAL'
+    | 'DEFICIENCY_OBSERVED'
+    | 'ESCALATE_TO_SHC';
   scheduledBy?: string;
 }
 
@@ -297,7 +305,8 @@ export const SEED_APPLICATIONS: SeedApplication[] = [
       landAreaAcres: 12.5,
       builtUpAreaSqMeters: 8500,
       scenario: 'Scenario 1: Newly submitted application awaiting scrutiny',
-      demoNote: 'Submitted recently by Apex Institute; pending Scrutiny Officer assignment.',
+      demoNote:
+        'Submitted recently by Apex Institute; pending Scrutiny Officer assignment.',
     },
     submittedAt: new Date('2026-10-27T10:00:00.000Z'),
     assignedOfficerName: 'Awaiting Officer Assignment',
@@ -314,7 +323,8 @@ export const SEED_APPLICATIONS: SeedApplication[] = [
       landAreaAcres: 6.0,
       builtUpAreaSqMeters: 4200,
       scenario: 'Scenario 2: Application with a missing or expired document',
-      missingDocumentNote: 'Annual Fire Safety No-Objection Certificate expired; Building Plan pending verification.',
+      missingDocumentNote:
+        'Annual Fire Safety No-Objection Certificate expired; Building Plan pending verification.',
     },
     submittedAt: new Date('2026-10-01T10:00:00.000Z'),
     assignedOfficerId: 'scrutiny-officer-01',
@@ -332,7 +342,8 @@ export const SEED_APPLICATIONS: SeedApplication[] = [
       landAreaAcres: 8.5,
       builtUpAreaSqMeters: 6200,
       scenario: 'Scenario 3: Application awaiting clarification or re-scrutiny',
-      deficiencyResolutionNote: 'Rectified Format 1 Affidavit and updated laboratory rosters submitted.',
+      deficiencyResolutionNote:
+        'Rectified Format 1 Affidavit and updated laboratory rosters submitted.',
     },
     submittedAt: new Date('2026-09-20T11:00:00.000Z'),
     assignedOfficerId: 'scrutiny-officer-01',
@@ -350,7 +361,8 @@ export const SEED_APPLICATIONS: SeedApplication[] = [
       landAreaAcres: 10.0,
       builtUpAreaSqMeters: 7500,
       scenario: 'Scenario 4: Application with an upcoming compliance deadline',
-      complianceNotice: 'Prescribed Compliance Undertaking renewal due within 15 days.',
+      complianceNotice:
+        'Prescribed Compliance Undertaking renewal due within 15 days.',
     },
     submittedAt: new Date('2026-10-10T14:30:00.000Z'),
     assignedOfficerId: 'scrutiny-officer-02',
@@ -368,7 +380,8 @@ export const SEED_APPLICATIONS: SeedApplication[] = [
       landAreaAcres: 5.5,
       builtUpAreaSqMeters: 3900,
       scenario: 'Scenario 5: Overdue compliance item requiring escalation',
-      escalationNote: 'Campus temporary annex lease deed expired 30+ days ago. Tier 2 escalation raised.',
+      escalationNote:
+        'Campus temporary annex lease deed expired 30+ days ago. Tier 2 escalation raised.',
     },
     submittedAt: new Date('2026-08-20T09:00:00.000Z'),
     assignedOfficerId: 'regional-officer-01',
@@ -386,7 +399,8 @@ export const SEED_APPLICATIONS: SeedApplication[] = [
       landAreaAcres: 16.0,
       builtUpAreaSqMeters: 13500,
       scenario: 'Scenario 6: Application with an EVC visit scheduled',
-      evcDetails: 'Documentary scrutiny completed. On-site Expert Visit Committee assigned for 2026-11-15.',
+      evcDetails:
+        'Documentary scrutiny completed. On-site Expert Visit Committee assigned for 2026-11-15.',
     },
     submittedAt: new Date('2026-09-01T12:00:00.000Z'),
     assignedOfficerId: 'evc-team-wro',
@@ -582,7 +596,8 @@ export const SEED_RULE_VERSIONS: SeedRuleVersion[] = [
     effectiveTo: null,
     sourceTitle: 'AICTE Approval Process Handbook 2027-28 (Proposed)',
     sourceReference: 'AICTE/AB/APH/2027-28/Draft',
-    sourceClassification: RuleSourceClassification.UNVERIFIED_HUMAN_REVIEW_REQUIRED,
+    sourceClassification:
+      RuleSourceClassification.UNVERIFIED_HUMAN_REVIEW_REQUIRED,
     changeSummary: 'Proposed updates for virtual lab simulations.',
   },
   {
@@ -722,13 +737,15 @@ export const SEED_CHECKLIST_ITEMS: SeedChecklistItem[] = [
   {
     templateCode: 'CHK-ENGG-UG-INTAKE',
     itemCode: 'CHK-ITEM-LAND-CONVERSION',
-    description: 'Government Land Use Conversion Certificate for Educational Purposes',
+    description:
+      'Government Land Use Conversion Certificate for Educational Purposes',
     itemType: ChecklistItemType.DOCUMENT_UPLOAD,
     required: true,
     evidenceDocumentType: 'LAND_USE_CERTIFICATE',
     displayOrder: 20,
     ruleCode: 'RULE-LAND-02',
-    guidanceNotes: 'Non-Agricultural (NA) permission from Competent Revenue Authority.',
+    guidanceNotes:
+      'Non-Agricultural (NA) permission from Competent Revenue Authority.',
   },
   {
     templateCode: 'CHK-ENGG-UG-INTAKE',
@@ -910,9 +927,11 @@ export const SEED_EVC_SCHEDULES: SeedEvcSchedule[] = [
     ],
     visitNotes:
       'Physical inspection of engineering laboratories, barrier-free access ramps, fire safety systems, and library holdings.',
-    outcomeSummary: 'Preliminary documentary inspection complete; awaiting on-site visit.',
+    outcomeSummary:
+      'Preliminary documentary inspection complete; awaiting on-site visit.',
     recommendation: 'PENDING',
-    scheduledBy: 'REGIONAL_OFFICER (demo.regional@synthetic.approvalsync.local)',
+    scheduledBy:
+      'REGIONAL_OFFICER (demo.regional@synthetic.approvalsync.local)',
   },
 ];
 
@@ -926,10 +945,14 @@ export const SEED_NOTIFICATIONS: SeedNotification[] = [
     type: NotificationType.DEADLINE_REMINDER,
     severity: NotificationSeverity.INFO,
     title: 'New Application Submitted: APP-2026-DEMO-001',
-    message: 'Apex Institute has submitted application APP-2026-DEMO-001 for B.Tech Intake. Scrutiny assignment required.',
+    message:
+      'Apex Institute has submitted application APP-2026-DEMO-001 for B.Tech Intake. Scrutiny assignment required.',
     link: '/scrutiny/APP-2026-DEMO-001',
     idempotencyKey: 'seed_notif_app1_submitted',
-    metadata: { applicationNumber: 'APP-2026-DEMO-001', scenario: 'Scenario 1' },
+    metadata: {
+      applicationNumber: 'APP-2026-DEMO-001',
+      scenario: 'Scenario 1',
+    },
   },
   {
     targetRole: UserRole.SCRUTINY_OFFICER,
@@ -937,10 +960,14 @@ export const SEED_NOTIFICATIONS: SeedNotification[] = [
     type: NotificationType.SLA_WARNING,
     severity: NotificationSeverity.WARNING,
     title: 'SLA Warning: APP-2026-DEMO-002 Near Deadline',
-    message: 'Application APP-2026-DEMO-002 has reached 80% of Scrutiny review window (24h remaining). Document discrepancy noted.',
+    message:
+      'Application APP-2026-DEMO-002 has reached 80% of Scrutiny review window (24h remaining). Document discrepancy noted.',
     link: '/scrutiny/APP-2026-DEMO-002',
     idempotencyKey: 'seed_notif_app2_sla_warning',
-    metadata: { applicationNumber: 'APP-2026-DEMO-002', scenario: 'Scenario 2' },
+    metadata: {
+      applicationNumber: 'APP-2026-DEMO-002',
+      scenario: 'Scenario 2',
+    },
   },
   {
     targetRole: UserRole.SCRUTINY_OFFICER,
@@ -948,10 +975,14 @@ export const SEED_NOTIFICATIONS: SeedNotification[] = [
     type: NotificationType.DEFICIENCY_NOTICE,
     severity: NotificationSeverity.INFO,
     title: 'Clarification Resubmitted: APP-2026-DEMO-003',
-    message: 'Apex Institute has uploaded rectified compliance evidence. Ready for Re-Scrutiny evaluation.',
+    message:
+      'Apex Institute has uploaded rectified compliance evidence. Ready for Re-Scrutiny evaluation.',
     link: '/scrutiny/APP-2026-DEMO-003',
     idempotencyKey: 'seed_notif_app3_resubmitted',
-    metadata: { applicationNumber: 'APP-2026-DEMO-003', scenario: 'Scenario 3' },
+    metadata: {
+      applicationNumber: 'APP-2026-DEMO-003',
+      scenario: 'Scenario 3',
+    },
   },
   {
     targetRole: UserRole.INSTITUTION_USER,
@@ -960,7 +991,8 @@ export const SEED_NOTIFICATIONS: SeedNotification[] = [
     type: NotificationType.DEADLINE_REMINDER,
     severity: NotificationSeverity.WARNING,
     title: 'Upcoming Compliance Deadline: Fire Safety Clearance',
-    message: 'Annual Fire Safety No-Objection Certificate renewal is due in 15 days. Please ensure timely submission.',
+    message:
+      'Annual Fire Safety No-Objection Certificate renewal is due in 15 days. Please ensure timely submission.',
     link: '/undertakings',
     idempotencyKey: 'seed_notif_app4_renewal_reminder',
     metadata: { scenario: 'Scenario 4' },
@@ -972,7 +1004,8 @@ export const SEED_NOTIFICATIONS: SeedNotification[] = [
     type: NotificationType.COMPLIANCE_OVERDUE,
     severity: NotificationSeverity.CRITICAL,
     title: 'Overdue Compliance Escalation: Workshop Annex Lease',
-    message: 'Statutory lease agreement for National Polytechnic Annex has expired. Tier 2 escalation logged.',
+    message:
+      'Statutory lease agreement for National Polytechnic Annex has expired. Tier 2 escalation logged.',
     link: '/undertakings',
     idempotencyKey: 'seed_notif_app5_compliance_overdue',
     metadata: { scenario: 'Scenario 5' },
@@ -983,7 +1016,8 @@ export const SEED_NOTIFICATIONS: SeedNotification[] = [
     type: NotificationType.EVC_SCHEDULED,
     severity: NotificationSeverity.INFO,
     title: 'EVC Inspection Scheduled: APP-2026-DEMO-006',
-    message: 'Expert Visit Committee on-site inspection confirmed for 15-Nov-2026. 3 committee members notified.',
+    message:
+      'Expert Visit Committee on-site inspection confirmed for 15-Nov-2026. 3 committee members notified.',
     link: '/evc/APP-2026-DEMO-006',
     idempotencyKey: 'seed_notif_app6_evc_scheduled',
     metadata: { scenario: 'Scenario 6' },

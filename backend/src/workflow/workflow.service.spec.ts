@@ -14,6 +14,7 @@ import {
 import { WorkflowService } from './workflow.service';
 import { Application } from '../database/entities/application.entity';
 import { WorkflowTimelineEvent } from './entities/workflow-timeline-event.entity';
+import { EvcSchedule } from './entities/evc-schedule.entity';
 import { ApplicationStatus, UserRole } from '../shared/contracts';
 import { AuthUserPrincipal } from '../auth/interfaces/auth-user.interface';
 
@@ -110,6 +111,14 @@ describe('WorkflowService', () => {
             findAndCount: jest.fn(),
             save: jest.fn(),
             create: jest.fn(),
+          },
+        },
+        {
+          provide: getRepositoryToken(EvcSchedule),
+          useValue: {
+            findOne: jest.fn(),
+            save: jest.fn(),
+            create: jest.fn((plain) => ({ ...plain, id: 'evc-uuid-1' })),
           },
         },
         {

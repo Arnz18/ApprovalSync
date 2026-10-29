@@ -8,9 +8,7 @@
 
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class CreateNotificationsAndEvcSchedules1730120000000
-  implements MigrationInterface
-{
+export class CreateNotificationsAndEvcSchedules1730120000000 implements MigrationInterface {
   name = 'CreateNotificationsAndEvcSchedules1730120000000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -111,4 +109,3 @@ export class CreateNotificationsAndEvcSchedules1730120000000
     `);
   }
 }
-

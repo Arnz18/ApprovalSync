@@ -14,4 +14,3 @@ export enum NotificationType {
   DOCUMENT_EXPIRY = 'DOCUMENT_EXPIRY',
   GENERAL = 'GENERAL',
 }
-
