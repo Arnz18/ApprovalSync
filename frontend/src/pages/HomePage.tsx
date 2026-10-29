@@ -9,6 +9,8 @@ import {
   FileCheck,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../auth/useAuth';
+import { UserRole } from '../api/types';
 import {
   PageHeader,
   Card,
@@ -26,7 +28,12 @@ import {
 } from '../components/ui';
 
 export function HomePage(): React.ReactElement {
+  const { user } = useAuth();
   const [alertDismissed, setAlertDismissed] = useState(false);
+  const isInstitution = user?.role === UserRole.INSTITUTION_USER;
+  const isScrutiny = user?.role === UserRole.SCRUTINY_OFFICER;
+  const isRegional = user?.role === UserRole.REGIONAL_OFFICER;
+  const isAdmin = user?.role === UserRole.SYSTEM_ADMIN;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
@@ -36,19 +43,46 @@ export function HomePage(): React.ReactElement {
         description="AI-powered application validation, documentary authentication, and regulatory compliance decision support for AICTE."
         breadcrumbs={[{ label: 'Home' }]}
         actions={
-          <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
-            <Link to="/applications" className="btn btn-primary btn-sm">
-              <FileText size={14} aria-hidden="true" />
-              <span>Application Intake</span>
-            </Link>
+          <div style={{ display: 'flex', gap: 'var(--space-2)', flexWrap: 'wrap' }}>
+            {isInstitution && (
+              <Link to="/applications" className="btn btn-primary btn-sm">
+                <FileText size={14} aria-hidden="true" />
+                <span>Application Intake Wizard</span>
+              </Link>
+            )}
+            {isScrutiny && (
+              <Link to="/scrutiny" className="btn btn-primary btn-sm">
+                <ClipboardCheck size={14} aria-hidden="true" />
+                <span>Scrutiny Desk</span>
+              </Link>
+            )}
+            {isRegional && (
+              <Link to="/evc" className="btn btn-primary btn-sm">
+                <Activity size={14} aria-hidden="true" />
+                <span>EVC Inspection Workspace</span>
+              </Link>
+            )}
+            {isAdmin && (
+              <Link to="/dashboard" className="btn btn-primary btn-sm">
+                <Activity size={14} aria-hidden="true" />
+                <span>Administrative Console</span>
+              </Link>
+            )}
             <Link to="/dashboard" className="btn btn-outline btn-sm">
               <Activity size={14} aria-hidden="true" />
               <span>Dashboards &amp; SLA</span>
             </Link>
-            <Link to="/undertakings" className="btn btn-outline btn-sm">
-              <FileCheck size={14} aria-hidden="true" />
-              <span>Undertakings &amp; Leases</span>
-            </Link>
+            {isAdmin ? (
+              <Link to="/audit" className="btn btn-outline btn-sm">
+                <History size={14} aria-hidden="true" />
+                <span>Audit Ledger</span>
+              </Link>
+            ) : (
+              <Link to="/undertakings" className="btn btn-outline btn-sm">
+                <FileCheck size={14} aria-hidden="true" />
+                <span>Undertakings &amp; Leases</span>
+              </Link>
+            )}
           </div>
         }
       />
@@ -60,7 +94,7 @@ export function HomePage(): React.ReactElement {
           title="Human Sovereignty & Regulatory Advisory Notice (ADR-004)"
           onClose={() => setAlertDismissed(true)}
         >
-          ApprovalSync operates as a decision-support platform. Automated OCR extraction,
+          The AICTE Portal operates as a decision-support platform. Automated OCR extraction,
           cross-document matching, and anomaly flags are purely advisory and never constitute
           official Council determinations. Final statutory approvals, deficiency issuances, and
           rejection orders require authorized human review roles.
@@ -118,7 +152,7 @@ export function HomePage(): React.ReactElement {
               style={{ fontSize: 'var(--font-size-xs)', justifyContent: 'space-between' }}
             >
               <span style={{ color: 'var(--color-muted-foreground)' }}>Institutional Dossier</span>
-              <Link to="/applications" style={{ fontWeight: 600 }}>
+              <Link to={isInstitution ? "/applications" : "/dashboard"} style={{ fontWeight: 600 }}>
                 View Details &rarr;
               </Link>
             </CardFooter>
@@ -263,7 +297,7 @@ export function HomePage(): React.ReactElement {
               Core Regulatory Modules
             </h2>
             <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-muted-foreground)' }}>
-              ApprovalSync architecture maps statutory AICTE review stages into specialized
+              The portal architecture maps statutory AICTE review stages into specialized
               decision-support modules.
             </p>
           </div>
@@ -316,9 +350,15 @@ export function HomePage(): React.ReactElement {
               </ul>
             </CardContent>
             <CardFooter>
-              <Link to="/applications" className="btn btn-outline btn-sm">
-                View Intake Portal <ArrowRight size={14} />
-              </Link>
+              {isInstitution ? (
+                <Link to="/applications" className="btn btn-outline btn-sm">
+                  View Intake Portal <ArrowRight size={14} />
+                </Link>
+              ) : (
+                <Link to="/dashboard" className="btn btn-outline btn-sm">
+                  View Application Overview <ArrowRight size={14} />
+                </Link>
+              )}
             </CardFooter>
           </Card>
 

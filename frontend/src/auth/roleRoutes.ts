@@ -56,7 +56,7 @@ export const ROUTE_PERMISSIONS: Record<string, RoutePermissionConfig> = {
   '/applications': {
     path: '/applications',
     label: 'Application Intake',
-    allowedRoles: [UserRole.INSTITUTION_USER, UserRole.SYSTEM_ADMIN],
+    allowedRoles: [UserRole.INSTITUTION_USER],
     description: 'Application drafting, category checklists, and submission wizard.',
   },
   '/scrutiny': {
@@ -174,22 +174,24 @@ export function formatRoleName(role?: UserRole | string | null): string {
  * Returns the default designated landing route for a given user role
  */
 export function getDefaultRouteForRole(role?: UserRole | null): string {
-  if (!role) return '/';
+  if (!role) return '/dashboard';
   switch (role) {
     case UserRole.INSTITUTION_USER:
-      return '/applications';
+      return '/dashboard';
     case UserRole.SCRUTINY_OFFICER:
-    case UserRole.REGIONAL_OFFICER:
       return '/scrutiny';
+    case UserRole.REGIONAL_OFFICER:
+      return '/dashboard';
+    case UserRole.SYSTEM_ADMIN:
+    case UserRole.BUREAU_HEAD:
+    case UserRole.SHC_SAC_MEMBER:
+      return '/dashboard';
     case UserRole.EVC_INSPECTOR:
       return '/evc';
     case UserRole.AUDITOR:
       return '/audit';
-    case UserRole.BUREAU_HEAD:
-    case UserRole.SYSTEM_ADMIN:
-    case UserRole.SHC_SAC_MEMBER:
     default:
-      return '/';
+      return '/dashboard';
   }
 }
 
