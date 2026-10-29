@@ -22,7 +22,8 @@ describe('Application Shell Layout (FE-01)', () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByText(/AICTE Workflow & Compliance Portal|NiyamSetu/i)).toBeInTheDocument();
+    expect(screen.getByText('NiyamSetu')).toBeInTheDocument();
+    expect(screen.getByText('Approval & Compliance Management System')).toBeInTheDocument();
     expect(screen.getAllByText(/Regulation Bureau/i).length).toBeGreaterThan(0);
 
     const toggleBtn = screen.getByRole('button', { name: /Open navigation menu/i });
@@ -52,7 +53,7 @@ describe('Application Shell Layout (FE-01)', () => {
   it('Footer renders decision-support disclaimer and regulatory environment notice', () => {
     render(<Footer />);
 
-    expect(screen.getByText(/Institutional Decision-Support Platform/i)).toBeInTheDocument();
+    expect(screen.getByText(/Approval & Compliance Management System/i)).toBeInTheDocument();
     expect(screen.getByText(/Institutional Sandbox/i)).toBeInTheDocument();
   });
 });

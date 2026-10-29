@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ShieldCheck, Menu, User, Sparkles, LogOut, LogIn } from 'lucide-react';
+import { Menu, User, LogOut, LogIn } from 'lucide-react';
 import { healthService } from '../../api';
 import { useAuth } from '../../auth/useAuth';
 import { formatRoleName } from '../../auth/roleRoutes';
 import { NotificationBell } from '../notifications/NotificationBell';
+import { NiyamSetuLogo } from './NiyamSetuLogo';
 
 export interface HeaderProps {
   onToggleMobileNav: () => void;
@@ -56,15 +57,11 @@ export function Header({ onToggleMobileNav, isMobileNavOpen }: HeaderProps): Rea
           <Menu size={20} aria-hidden="true" />
         </button>
 
-        <Link to="/" className="header-brand" aria-label="AICTE Workflow & Compliance Portal Home">
-          <div className="header-logo-icon" aria-hidden="true">
-            <ShieldCheck size={22} />
-          </div>
+        <Link to="/" className="header-brand" aria-label="NiyamSetu Home">
+          <NiyamSetuLogo size={24} />
           <div className="header-title-group">
-            <span className="header-title">AICTE Workflow &amp; Compliance Portal</span>
-            <span className="header-subtitle">
-              Regulation Bureau • Institutional Approval System
-            </span>
+            <span className="header-title">NiyamSetu</span>
+            <span className="header-subtitle">Approval &amp; Compliance Management System</span>
           </div>
         </Link>
       </div>
@@ -147,8 +144,8 @@ export function Header({ onToggleMobileNav, isMobileNavOpen }: HeaderProps): Rea
               type="button"
               onClick={handleLogout}
               className="btn-ghost"
-              aria-label="Sign out of AICTE Portal"
-              title="Sign out of AICTE Portal"
+              aria-label="Sign out of NiyamSetu"
+              title="Sign out of NiyamSetu"
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -157,7 +154,6 @@ export function Header({ onToggleMobileNav, isMobileNavOpen }: HeaderProps): Rea
                 fontSize: '0.75rem',
                 color: 'var(--color-text-muted)',
                 cursor: 'pointer',
-                border: 'none',
                 borderRadius: 'var(--radius-sm)',
                 background: 'transparent',
               }}
@@ -183,21 +179,6 @@ export function Header({ onToggleMobileNav, isMobileNavOpen }: HeaderProps): Rea
             <span>Sign In</span>
           </Link>
         )}
-
-        <div
-          title="Automated Regulatory Decision Support active (Advisory only)"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.25rem',
-            fontSize: '0.75rem',
-            color: 'var(--color-secondary)',
-            fontWeight: 500,
-          }}
-        >
-          <Sparkles size={14} aria-hidden="true" />
-          <span style={{ display: 'none' }}>Decision Support</span>
-        </div>
       </div>
     </header>
   );

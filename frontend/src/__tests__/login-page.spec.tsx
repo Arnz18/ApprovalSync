@@ -59,7 +59,7 @@ describe('LoginPage Component (FE-02)', () => {
     expect(screen.getByLabelText(/Official.*Email/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/^Password/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Sign In|Enter/i })).toBeInTheDocument();
-    expect(screen.getByText(/Regulation Bureau/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/Regulation Bureau/i).length).toBeGreaterThan(0);
   });
 
   it('validates required fields inline on empty submit', async () => {

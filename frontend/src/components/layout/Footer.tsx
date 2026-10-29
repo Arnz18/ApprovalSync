@@ -6,10 +6,8 @@ export function Footer(): React.ReactElement {
       <div className="footer-inner">
         <div className="footer-disclaimer">
           <p style={{ margin: 0 }}>
-            <span style={{ fontWeight: 600, color: 'var(--color-foreground)' }}>
-              AICTE Workflow &amp; Compliance Portal
-            </span>{' '}
-            — Institutional Decision-Support Platform under AICTE Approval Process Handbook (APH)
+            <span style={{ fontWeight: 600, color: 'var(--color-foreground)' }}>NiyamSetu</span> —
+            Approval &amp; Compliance Management System under AICTE Approval Process Handbook (APH)
             guidelines. Automated evaluations are advisory; final statutory determinations require
             authorized human review.
           </p>

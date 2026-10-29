@@ -9,7 +9,6 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate, Navigate } from 'react-router-dom';
 import {
-  ShieldCheck,
   Eye,
   EyeOff,
   Lock,
@@ -29,6 +28,7 @@ import { Card, CardHeader, CardContent } from '../components/ui/Card';
 import { FormField } from '../components/ui/FormField';
 import { Alert } from '../components/ui/Alert';
 import { UserRole } from '../api/types';
+import { NiyamSetuLogo } from '../components/layout/NiyamSetuLogo';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const DEMO_PASSWORD = 'DemoPass@123';
@@ -209,17 +209,11 @@ export function LoginPage(): React.ReactElement {
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
-              width: '52px',
-              height: '52px',
-              borderRadius: 'var(--radius-lg, 12px)',
-              backgroundColor: '#1e3a5f',
-              color: '#ffffff',
               marginBottom: '0.875rem',
-              boxShadow: 'var(--shadow-md, 0 4px 6px -1px rgba(0, 0, 0, 0.1))',
             }}
             aria-hidden="true"
           >
-            <ShieldCheck size={32} />
+            <NiyamSetuLogo size={44} />
           </div>
 
           <div
@@ -233,14 +227,14 @@ export function LoginPage(): React.ReactElement {
           >
             <h1
               style={{
-                fontSize: '1.625rem',
+                fontSize: '1.75rem',
                 fontWeight: 700,
                 color: 'var(--color-text-main, #0f172a)',
                 letterSpacing: '-0.025em',
                 margin: 0,
               }}
             >
-              AICTE Workflow &amp; Compliance Portal
+              NiyamSetu
             </h1>
             <span
               style={{
@@ -267,7 +261,7 @@ export function LoginPage(): React.ReactElement {
               marginBottom: 0,
             }}
           >
-            Select your regulatory stakeholder portal below to access your designated workspace.
+            Approval &amp; Compliance Management System • AICTE Regulation Bureau
           </p>
         </div>
 
