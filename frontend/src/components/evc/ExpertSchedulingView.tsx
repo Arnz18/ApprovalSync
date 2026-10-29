@@ -195,7 +195,7 @@ export const ExpertSchedulingView: React.FC<ExpertSchedulingViewProps> = ({
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--space-2)' }}>
             <Compass size={18} aria-hidden="true" style={{ flexShrink: 0, marginTop: '2px', color: '#0284c7' }} />
             <span>
-              <strong>Problem Statement 26262 Module:</strong> Synchronized physical and virtual inspection
+              <strong>Expert Visit Committee (EVC) Module:</strong> Synchronized physical and virtual inspection
               scheduling, expert roster conflict-of-interest declarations, and statutory committee recommendation logging.
               All assignments issue real-time notifications to the regional inspection cell and applicant institution.
             </span>

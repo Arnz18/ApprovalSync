@@ -225,7 +225,7 @@ export const NotificationBell: React.FC = () => {
               <ShieldAlert size={18} style={{ color: 'var(--color-primary)' }} />
               <div>
                 <div style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--color-text-main)' }}>
-                  AICTE PS 26262 Alert Feed
+                  Regulatory Alerts &amp; Escalations Feed
                 </div>
                 <div style={{ fontSize: '0.6875rem', color: 'var(--color-text-muted)' }}>
                   {unreadCount} unread action{unreadCount === 1 ? '' : 's'} / deadlines

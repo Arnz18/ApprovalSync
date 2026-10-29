@@ -1,9 +1,10 @@
 /**
  * ApprovalSync — Role-Specific Dashboards, SLA, Alerts & Analytics
- * Milestone: FE-05
+ * Milestone: FE-05 & AICTE-PS26262
  *
  * Primary coordinator page: dynamically resolves the authenticated user's role,
  * orchestrates resilient parallel data loading with partial failure isolation,
+ * displays AICTE Problem Statement 26262 stage-wise pendency metrics,
  * and delegates to the appropriate role-tailored dashboard view.
  */
 
@@ -28,6 +29,7 @@ import { RegionalDashboard } from './dashboard/RegionalDashboard';
 import { BureauDashboard } from './dashboard/BureauDashboard';
 import { AuditorAdminDashboard } from './dashboard/AuditorAdminDashboard';
 import { DerivedAlertsFeed } from '../components/dashboard/DerivedAlertsFeed';
+import { StagePendencyChart } from '../components/dashboard/StagePendencyChart';
 import { SlaPolicyModal } from '../components/sla/SlaPolicyModal';
 import { HumanSovereigntyNotice } from '../components/common/HumanSovereigntyNotice';
 
@@ -150,7 +152,6 @@ export function DashboardPage(): React.ReactElement {
   }
 
   function handleReconciliationCompleted(_result: SlaReconcileResult) {
-    // Refresh timers and escalations after successful reconciliation sweep
     fetchData();
   }
 
@@ -159,7 +160,7 @@ export function DashboardPage(): React.ReactElement {
       {/* Page Header with role badges and actions */}
       <PageHeader
         title={`${formatRoleName(effectiveRole)} Dashboard`}
-        description="Role-tailored regulatory decision support, real-time SLA monitors, derived operational alerts, and workflow analytics."
+        description="Integrated regulatory decision support, stage-wise pendency monitors, real-time SLA tracking, and alert management."
         breadcrumbs={[{ label: 'Home', href: '/' }, { label: 'Dashboard' }]}
         actions={
           <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
@@ -187,7 +188,7 @@ export function DashboardPage(): React.ReactElement {
       {/* Human Sovereignty Notice (ADR-004) */}
       <HumanSovereigntyNotice
         title="Human Sovereignty Advisory (ADR-004)"
-        disclaimer="ApprovalSync operates strictly as a decision-support platform. SLA warnings, deadline breaches, and escalation events draw regulatory attention to cases but do not independently approve or reject applications or establish statutory misconduct."
+        disclaimer="The AICTE Portal operates strictly as a decision-support platform. SLA warnings, deadline breaches, and escalation events draw regulatory attention to cases but do not independently approve or reject applications or establish statutory misconduct."
       />
 
       {/* Partial Data Failure Warnings */}
@@ -308,6 +309,9 @@ export function DashboardPage(): React.ReactElement {
       {/* Tab Content: Overview (Role-Specific Delegation) */}
       {!isLoading && activeTab === 'overview' && (
         <>
+          {/* AICTE Problem Statement 26262 Stage-Wise Pendency Monitor */}
+          <StagePendencyChart />
+
           {effectiveRole === UserRole.INSTITUTION_USER && (
             <InstitutionDashboard
               applications={applications}

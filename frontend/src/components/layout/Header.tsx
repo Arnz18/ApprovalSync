@@ -4,6 +4,7 @@ import { ShieldCheck, Menu, User, Sparkles, LogOut, LogIn } from 'lucide-react';
 import { healthService } from '../../api';
 import { useAuth } from '../../auth/useAuth';
 import { formatRoleName } from '../../auth/roleRoutes';
+import { NotificationBell } from '../notifications/NotificationBell';
 
 export interface HeaderProps {
   onToggleMobileNav: () => void;
@@ -55,14 +56,14 @@ export function Header({ onToggleMobileNav, isMobileNavOpen }: HeaderProps): Rea
           <Menu size={20} aria-hidden="true" />
         </button>
 
-        <Link to="/" className="header-brand" aria-label="ApprovalSync Home">
+        <Link to="/" className="header-brand" aria-label="AICTE Workflow & Compliance Portal Home">
           <div className="header-logo-icon" aria-hidden="true">
             <ShieldCheck size={22} />
           </div>
           <div className="header-title-group">
-            <span className="header-title">ApprovalSync</span>
+            <span className="header-title">AICTE Workflow &amp; Compliance Portal</span>
             <span className="header-subtitle">
-              AICTE Regulatory Compliance &amp; Institutional Approval Platform
+              Regulation Bureau • Institutional Approval System
             </span>
           </div>
         </Link>
@@ -75,12 +76,12 @@ export function Header({ onToggleMobileNav, isMobileNavOpen }: HeaderProps): Rea
           role="status"
           aria-label={
             apiStatus === 'online'
-              ? 'Connected to live backend API. Institutional demonstration sandbox active.'
+              ? 'Connected to live backend API. Regulation Bureau service active.'
               : 'Backend API is in standby mode.'
           }
           title={
             apiStatus === 'online'
-              ? 'Backend API: Live (localhost:3000) • Institutional Sandbox (Synthetic test data & simulated registry adapters active)'
+              ? 'Backend API: Live • Regulation Bureau'
               : 'Backend API: Standby mode'
           }
           style={{
@@ -106,7 +107,7 @@ export function Header({ onToggleMobileNav, isMobileNavOpen }: HeaderProps): Rea
             }}
             aria-hidden="true"
           />
-          <span>{apiStatus === 'online' ? 'API Online' : 'API Standby'}</span>
+          <span>{apiStatus === 'online' ? 'System Active' : 'System Standby'}</span>
         </div>
 
         <span
@@ -114,17 +115,21 @@ export function Header({ onToggleMobileNav, isMobileNavOpen }: HeaderProps): Rea
           style={{
             display: 'inline-flex',
             alignItems: 'center',
-            padding: '2px 6px',
+            padding: '2px 8px',
             borderRadius: 'var(--radius-sm)',
             fontSize: '0.625rem',
             fontWeight: 600,
-            backgroundColor: 'var(--color-muted)',
-            color: 'var(--color-muted-foreground)',
+            backgroundColor: '#eff6ff',
+            color: '#1d4ed8',
+            border: '1px solid #bfdbfe',
             letterSpacing: '0.02em',
           }}
         >
-          Prototype • Simulated / Mock Data
+          Regulation Bureau
         </span>
+
+        {/* Live In-App Notification Center */}
+        {isAuthenticated && <NotificationBell />}
 
         {/* Dynamic Authenticated User Info or Sign In Action */}
         {isAuthenticated && user ? (
@@ -142,8 +147,8 @@ export function Header({ onToggleMobileNav, isMobileNavOpen }: HeaderProps): Rea
               type="button"
               onClick={handleLogout}
               className="btn-ghost"
-              aria-label="Sign out of ApprovalSync"
-              title="Sign out of ApprovalSync"
+              aria-label="Sign out of AICTE Portal"
+              title="Sign out of AICTE Portal"
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -180,7 +185,7 @@ export function Header({ onToggleMobileNav, isMobileNavOpen }: HeaderProps): Rea
         )}
 
         <div
-          title="AI-Powered Decision Support active"
+          title="Automated Regulatory Decision Support active (Advisory only)"
           style={{
             display: 'inline-flex',
             alignItems: 'center',

@@ -46,7 +46,7 @@ export function FeaturePlaceholderPage({
                 color: 'var(--color-muted-foreground)',
               }}
             >
-              Chunk {assignedChunk} — {dependencyStatus}
+              Module Spec {assignedChunk} — {dependencyStatus}
             </span>
           </div>
         }
@@ -152,7 +152,7 @@ export function FeaturePlaceholderPage({
                 lineHeight: 1.5,
               }}
             >
-              <strong>Authoritative Boundary:</strong> ApprovalSync enforces strict regulatory
+              <strong>Authoritative Boundary:</strong> The AICTE Portal enforces strict regulatory
               separation. Decision support outputs are verified against published AICTE norms with
               full human sovereignty.
             </div>

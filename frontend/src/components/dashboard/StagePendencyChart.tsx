@@ -74,7 +74,7 @@ export const StagePendencyChart: React.FC = () => {
           <Layers size={20} style={{ color: 'var(--color-primary)' }} />
           <div>
             <h3 style={{ fontSize: 'var(--font-size-base)', fontWeight: 600, margin: 0 }}>
-              AICTE PS 26262: Stage-Wise Pendency &amp; Movement Monitor
+              Stage-Wise Pendency &amp; Application Movement Monitor
             </h3>
             <p style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-muted-foreground)', margin: 0 }}>
               Real-time distribution of applications across approval lifecycle stages
