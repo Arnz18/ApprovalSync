@@ -77,6 +77,9 @@ NiyamSetu adheres to high-contrast, accessible visual hierarchy standards design
 
 > **Synthetic Password Note:** All pre-seeded demonstration accounts share the synthetic password `DemoPass@123`.
 
+> 📘 **Evaluator Walkthrough & Troubleshooting Guide:**
+> For a complete role-by-role test script, pre-seeded scenarios, and troubleshooting steps, see [docs/EVALUATOR_DEMO_AND_TROUBLESHOOTING.md](docs/EVALUATOR_DEMO_AND_TROUBLESHOOTING.md).
+
 ---
 
 ## 4. End-to-End Approval Lifecycle Walkthrough
