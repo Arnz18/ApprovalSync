@@ -2,7 +2,7 @@
  * ApprovalSync — Root Application Module
  * Registers ConfigModule, CoreModule, and HealthModule.
  * Extension point for M2 and M3 domain modules.
- * Milestone: FND-02
+ * Milestone: FND-02 / AICTE-26262
  */
 
 import { Module } from '@nestjs/common';
@@ -27,6 +27,7 @@ import { ComplianceModule } from './compliance/compliance.module';
 import { AuditModule } from './audit/audit.module';
 import { SlaModule } from './sla/sla.module';
 import { UndertakingsModule } from './undertakings/undertakings.module';
+import { NotificationsModule } from './notifications/notifications.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RolesGuard } from './auth/guards/roles.guard';
 
@@ -54,6 +55,7 @@ import { RolesGuard } from './auth/guards/roles.guard';
     VerificationModule,
     ProvidersModule,
     ComplianceModule,
+    NotificationsModule,
   ],
 
   providers: [

@@ -1,8 +1,8 @@
 /**
  * ApprovalSync — Seed Service
- * Milestone: BE-02
+ * Milestone: BE-02 / AICTE-26262
  *
- * Provides idempotent insertion of synthetic development data.
+ * Provides idempotent insertion of synthetic development data for AICTE Problem Statement 26262.
  * Safe to execute repeatedly without generating duplicate records or failing on unique constraints.
  */
 
@@ -23,6 +23,8 @@ import {
   WorkflowTimelineEvent,
   Undertaking,
   UndertakingHistory,
+  EvcSchedule,
+  Notification,
 } from '../entities';
 import {
   SEED_INSTITUTIONS,
@@ -37,6 +39,8 @@ import {
   SEED_CHECKLIST_TEMPLATES,
   SEED_CHECKLIST_ITEMS,
   SEED_UNDERTAKINGS,
+  SEED_EVC_SCHEDULES,
+  SEED_NOTIFICATIONS,
 } from './seed.data';
 import { calculateRenewalDueDate } from '../../undertakings/utils/date-calculations';
 
@@ -54,6 +58,8 @@ export interface SeedReport {
   checklistItemsCreated: number;
   timelineEventsCreated: number;
   undertakingsCreated: number;
+  evcSchedulesCreated: number;
+  notificationsCreated: number;
   skippedExisting: number;
 }
 
@@ -73,6 +79,8 @@ export class SeedService {
       checklistItemsCreated: 0,
       timelineEventsCreated: 0,
       undertakingsCreated: 0,
+      evcSchedulesCreated: 0,
+      notificationsCreated: 0,
       skippedExisting: 0,
     };
 
@@ -127,7 +135,7 @@ export class SeedService {
       }
     }
 
-    // 3. Seed Applications
+    // 3. Seed Applications (Scenarios 1-6)
     const applicationMap = new Map<string, Application>();
     for (const data of SEED_APPLICATIONS) {
       let app = await applicationRepo.findOne({
@@ -150,10 +158,22 @@ export class SeedService {
           programType: data.programType,
           payloadJsonb: data.payloadJsonb,
           submittedAt: data.submittedAt,
+          assignedOfficerId: data.assignedOfficerId,
+          assignedOfficerName: data.assignedOfficerName,
         });
         await applicationRepo.save(app);
         report.applicationsCreated++;
       } else {
+        // Update application data to reflect scenario upgrades
+        app.status = data.status;
+        app.payloadJsonb = data.payloadJsonb;
+        if (data.assignedOfficerName) {
+          app.assignedOfficerName = data.assignedOfficerName;
+        }
+        if (data.assignedOfficerId) {
+          app.assignedOfficerId = data.assignedOfficerId;
+        }
+        await applicationRepo.save(app);
         report.skippedExisting++;
       }
       applicationMap.set(data.applicationNumber, app);
@@ -391,10 +411,15 @@ export class SeedService {
       }
     }
 
-    // 8. Seed Initial Workflow Timeline Events for Submitted Applications
+    // 12. Seed Initial Workflow Timeline Events for Submitted Applications
     const timelineRepo = dataSource.getRepository(WorkflowTimelineEvent);
     for (const app of applicationMap.values()) {
-      if (app.status === ApplicationStatus.SUBMITTED) {
+      if (
+        app.status === ApplicationStatus.SUBMITTED ||
+        app.status === ApplicationStatus.UNDER_SCRUTINY ||
+        app.status === ApplicationStatus.RESUBMITTED ||
+        app.status === ApplicationStatus.RECOMMENDED_FOR_EVC
+      ) {
         const existingEvent = await timelineRepo.findOne({
           where: {
             applicationId: app.id,
@@ -420,7 +445,7 @@ export class SeedService {
       }
     }
 
-    // 9. Seed Synthetic Undertakings & Leases
+    // 13. Seed Synthetic Undertakings & Leases
     const undertakingRepo = dataSource.getRepository(Undertaking);
     const historyRepo = dataSource.getRepository(UndertakingHistory);
     for (const seedU of SEED_UNDERTAKINGS) {
@@ -485,6 +510,81 @@ export class SeedService {
         });
         await historyRepo.save(history);
         report.undertakingsCreated++;
+      } else {
+        report.skippedExisting++;
+      }
+    }
+
+    // 14. Seed EVC Schedules (Scenario 6)
+    const evcRepo = dataSource.getRepository(EvcSchedule);
+    for (const seedEvc of SEED_EVC_SCHEDULES) {
+      const app = applicationMap.get(seedEvc.applicationNumber);
+      if (!app) continue;
+
+      const inst = institutionMap.get(seedEvc.institutionRegistrationNumber);
+      if (!inst) continue;
+
+      const existingSchedule = await evcRepo.findOne({
+        where: { applicationId: app.id },
+      });
+
+      if (!existingSchedule) {
+        const schedule = evcRepo.create({
+          applicationId: app.id,
+          institutionId: inst.id,
+          status: seedEvc.status,
+          visitType: seedEvc.visitType,
+          proposedVisitDate: new Date(seedEvc.proposedVisitDate),
+          scheduledVisitDate: seedEvc.scheduledVisitDate
+            ? new Date(seedEvc.scheduledVisitDate)
+            : new Date(seedEvc.proposedVisitDate),
+          committeeMembersJsonb: seedEvc.committeeMembers,
+          visitNotes: seedEvc.visitNotes || null,
+          outcomeSummary: seedEvc.outcomeSummary || null,
+          recommendation: seedEvc.recommendation,
+          scheduledBy: seedEvc.scheduledBy || null,
+        });
+        await evcRepo.save(schedule);
+        report.evcSchedulesCreated++;
+      } else {
+        report.skippedExisting++;
+      }
+    }
+
+    // 15. Seed In-App Notifications
+    const notifRepo = dataSource.getRepository(Notification);
+    for (const seedNotif of SEED_NOTIFICATIONS) {
+      let instId: string | null = null;
+      if (seedNotif.institutionRegistrationNumber) {
+        instId =
+          institutionMap.get(seedNotif.institutionRegistrationNumber)?.id ||
+          null;
+      }
+      let appId: string | null = null;
+      if (seedNotif.applicationNumber) {
+        appId = applicationMap.get(seedNotif.applicationNumber)?.id || null;
+      }
+
+      const existingNotif = await notifRepo.findOne({
+        where: { idempotencyKey: seedNotif.idempotencyKey },
+      });
+
+      if (!existingNotif) {
+        const notif = notifRepo.create({
+          targetRole: seedNotif.targetRole || null,
+          institutionId: instId,
+          applicationId: appId,
+          type: seedNotif.type,
+          severity: seedNotif.severity,
+          title: seedNotif.title,
+          message: seedNotif.message,
+          link: seedNotif.link || null,
+          idempotencyKey: seedNotif.idempotencyKey,
+          isRead: seedNotif.isRead || false,
+          metadataJsonb: seedNotif.metadata || {},
+        });
+        await notifRepo.save(notif);
+        report.notificationsCreated++;
       } else {
         report.skippedExisting++;
       }

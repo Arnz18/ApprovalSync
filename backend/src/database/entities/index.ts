@@ -1,6 +1,6 @@
 /**
  * ApprovalSync — Core Database Entities Barrel Export
- * Milestone: BE-02
+ * Milestone: BE-02 / AICTE-26262
  */
 
 export * from './institution.entity';
@@ -14,3 +14,4 @@ export * from '../../workflow/entities';
 export * from '../../audit/entities';
 export * from '../../sla/entities';
 export * from '../../undertakings/entities';
+export * from '../../notifications/entities/notification.entity';

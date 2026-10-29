@@ -1,6 +1,6 @@
 /**
  * ApprovalSync — Application Entity
- * Milestone: BE-02
+ * Milestone: BE-02 / AICTE-26262
  */
 
 import {
@@ -63,6 +63,22 @@ export class Application {
 
   @Column({ name: 'submitted_at', type: 'timestamptz', nullable: true })
   submittedAt?: Date | null;
+
+  @Column({
+    name: 'assigned_officer_id',
+    type: 'varchar',
+    length: 100,
+    nullable: true,
+  })
+  assignedOfficerId?: string | null;
+
+  @Column({
+    name: 'assigned_officer_name',
+    type: 'varchar',
+    length: 150,
+    nullable: true,
+  })
+  assignedOfficerName?: string | null;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;

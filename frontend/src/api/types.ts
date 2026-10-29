@@ -152,3 +152,82 @@ export interface ReadinessData {
     config: { status: string };
   };
 }
+
+// -----------------------------------------------------------------------------
+// AICTE Problem Statement 26262 — Notification & EVC Contracts
+// -----------------------------------------------------------------------------
+
+export enum NotificationType {
+  SLA_WARNING = 'SLA_WARNING',
+  SLA_BREACH = 'SLA_BREACH',
+  DEFICIENCY_COMMUNICATED = 'DEFICIENCY_COMMUNICATED',
+  RESCRUTINY_SUBMITTED = 'RESCRUTINY_SUBMITTED',
+  EVC_SCHEDULED = 'EVC_SCHEDULED',
+  EVC_OUTCOME_LOGGED = 'EVC_OUTCOME_LOGGED',
+  COMMITTEE_ESCALATION = 'COMMITTEE_ESCALATION',
+  UNDERTAKING_EXPIRING = 'UNDERTAKING_EXPIRING',
+  DOCUMENT_EXPIRING = 'DOCUMENT_EXPIRING',
+  APPROVAL_GRANTED = 'APPROVAL_GRANTED',
+  APPLICATION_REJECTED = 'APPLICATION_REJECTED',
+}
+
+export enum NotificationSeverity {
+  INFO = 'INFO',
+  WARNING = 'WARNING',
+  CRITICAL = 'CRITICAL',
+  ACTION_REQUIRED = 'ACTION_REQUIRED',
+}
+
+export interface AppNotification {
+  id: string;
+  tenantId: string;
+  recipientUserId: string | null;
+  targetRole: UserRole | null;
+  type: NotificationType;
+  severity: NotificationSeverity;
+  title: string;
+  message: string;
+  linkUrl: string | null;
+  applicationId: string | null;
+  isRead: boolean;
+  readAt: string | null;
+  createdAt: string;
+}
+
+export interface NotificationListResponse {
+  items: AppNotification[];
+  total: number;
+  unreadCount: number;
+}
+
+export interface CommitteeExpertMember {
+  name: string;
+  designation: string;
+  organization: string;
+  roleInCommittee: 'CHAIRMAN' | 'EXPERT_MEMBER' | 'CONVENER' | 'ARCHITECTURAL_EXPERT';
+  conflictOfInterestDeclared: boolean;
+}
+
+export interface EvcScheduleData {
+  id: string;
+  applicationId: string;
+  visitDate: string;
+  visitType: 'PHYSICAL_VISIT' | 'VIRTUAL_VISIT' | 'HYBRID';
+  committeeMembers: CommitteeExpertMember[];
+  visitNotes: string | null;
+  inspectionReportUrl: string | null;
+  outcomeRecommendation: 'PENDING' | 'RECOMMENDED' | 'DEFICIENCIES_NOTED' | 'REJECTED';
+  scheduledByUserId: string;
+  scheduledByName: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateEvcSchedulePayload {
+  visitDate: string;
+  visitType: 'PHYSICAL_VISIT' | 'VIRTUAL_VISIT' | 'HYBRID';
+  committeeMembers: CommitteeExpertMember[];
+  visitNotes?: string;
+  inspectionReportUrl?: string;
+  outcomeRecommendation?: 'PENDING' | 'RECOMMENDED' | 'DEFICIENCIES_NOTED' | 'REJECTED';
+}

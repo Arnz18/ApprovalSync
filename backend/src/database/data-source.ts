@@ -1,6 +1,6 @@
 /**
  * ApprovalSync — TypeORM DataSource Configuration
- * Milestone: BE-02
+ * Milestone: BE-02 / AICTE-26262
  *
  * Configures connection pool, entities, and migrations for PostgreSQL 16.
  */
@@ -24,6 +24,8 @@ import {
   SlaEscalation,
   Undertaking,
   UndertakingHistory,
+  Notification,
+  EvcSchedule,
 } from './entities';
 import { InitialCoreSchema1729640000000 } from './migrations/1729640000000-InitialCoreSchema';
 import { CreateRulesAndChecklists1729720000000 } from './migrations/1729720000000-CreateRulesAndChecklists';
@@ -31,6 +33,7 @@ import { CreateWorkflowTimelineEvents1729800000000 } from './migrations/17298000
 import { CreateAuditCheckpoints1729880000000 } from './migrations/1729880000000-CreateAuditCheckpoints';
 import { EnhanceSlaTimersAndEscalations1729960000000 } from './migrations/1729960000000-EnhanceSlaTimersAndEscalations';
 import { CreateUndertakingsAndLeases1730040000000 } from './migrations/1730040000000-CreateUndertakingsAndLeases';
+import { CreateNotificationsAndEvcSchedules1730120000000 } from './migrations/1730120000000-CreateNotificationsAndEvcSchedules';
 
 export const dataSourceOptions: DataSourceOptions = {
   type: 'postgres',
@@ -60,6 +63,8 @@ export const dataSourceOptions: DataSourceOptions = {
     SlaEscalation,
     Undertaking,
     UndertakingHistory,
+    Notification,
+    EvcSchedule,
   ],
   migrations: [
     InitialCoreSchema1729640000000,
@@ -68,6 +73,7 @@ export const dataSourceOptions: DataSourceOptions = {
     CreateAuditCheckpoints1729880000000,
     EnhanceSlaTimersAndEscalations1729960000000,
     CreateUndertakingsAndLeases1730040000000,
+    CreateNotificationsAndEvcSchedules1730120000000,
   ],
 
   synchronize: false,

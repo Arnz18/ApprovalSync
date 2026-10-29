@@ -1,9 +1,9 @@
 /**
  * ApprovalSync — Workflow Controller
- * Milestone: BE-06
+ * Milestone: BE-06 / AICTE-26262
  *
- * Exposes REST endpoints for application FSM state transitions, allowed transition queries,
- * and chronological workflow timeline inspection under /api/v1/applications/:id.
+ * REST endpoints for application FSM state transitions, timeline history,
+ * EVC inspection scheduling, and stage-wise pendency metrics.
  */
 
 import {
@@ -37,21 +37,23 @@ import {
   TransitionExecutionResultDto,
   AllowedTransitionResponseDto,
   WorkflowTimelineEventResponseDto,
+  CreateEvcScheduleDto,
+  EvcScheduleResponseDto,
 } from './dto';
 
-@ApiTags('Workflow & Transitions')
+@ApiTags('Workflow, Transitions & EVC')
 @ApiBearerAuth('JWT')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Controller('applications/:id')
+@Controller()
 export class WorkflowController {
   constructor(private readonly workflowService: WorkflowService) {}
 
-  @Post('transitions')
+  @Post('applications/:id/transitions')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Execute state transition on an application',
     description:
-      'Performs an atomic FSM state transition guarded by role permissions, pessimistic row locking, and mandatory justification rules. Concurrently safe.',
+      'Performs an atomic FSM state transition guarded by role permissions, pessimistic row locking, and mandatory justification rules.',
   })
   @ApiParam({ name: 'id', description: 'Application UUID' })
   @SwaggerResponse({
@@ -59,16 +61,6 @@ export class WorkflowController {
     description: 'Transition executed successfully',
     type: TransitionExecutionResultDto,
   })
-  @SwaggerResponse({
-    status: 400,
-    description:
-      'Invalid transition, terminal state, or missing required comment',
-  })
-  @SwaggerResponse({
-    status: 403,
-    description: 'Caller role not authorized or cross-tenant access denied',
-  })
-  @SwaggerResponse({ status: 404, description: 'Application not found' })
   async executeTransition(
     @Param('id', ParseUUIDPipe) id: string,
     @CurrentUser() currentUser: AuthUserPrincipal,
@@ -83,11 +75,11 @@ export class WorkflowController {
     );
   }
 
-  @Get('timeline')
+  @Get('applications/:id/timeline')
   @ApiOperation({
     summary: 'Retrieve workflow timeline history for an application',
     description:
-      'Returns the chronological audit trail of state transitions, actor roles, timestamps, and justifications for the specified application.',
+      'Returns the chronological audit trail of state transitions, actor roles, timestamps, and justifications.',
   })
   @ApiParam({ name: 'id', description: 'Application UUID' })
   @SwaggerResponse({
@@ -95,29 +87,19 @@ export class WorkflowController {
     description: 'Timeline retrieved successfully',
     type: [WorkflowTimelineEventResponseDto],
   })
-  @SwaggerResponse({
-    status: 403,
-    description: 'Cross-tenant access forbidden for institution user',
-  })
-  @SwaggerResponse({ status: 404, description: 'Application not found' })
   async getTimeline(
     @Param('id', ParseUUIDPipe) id: string,
     @CurrentUser() currentUser: AuthUserPrincipal,
     @Query() queryDto: TimelineQueryDto,
   ) {
-    const result = await this.workflowService.getTimeline(
-      id,
-      currentUser,
-      queryDto,
-    );
-    return result;
+    return this.workflowService.getTimeline(id, currentUser, queryDto);
   }
 
-  @Get('allowed-transitions')
+  @Get('applications/:id/allowed-transitions')
   @ApiOperation({
     summary: 'Get currently allowed next transitions for caller',
     description:
-      'Returns the list of permitted target states and transition requirements available to the caller for the application.',
+      'Returns the list of permitted target states and transition requirements available to the caller.',
   })
   @ApiParam({ name: 'id', description: 'Application UUID' })
   @SwaggerResponse({
@@ -125,15 +107,82 @@ export class WorkflowController {
     description: 'Allowed transitions returned successfully',
     type: [AllowedTransitionResponseDto],
   })
-  @SwaggerResponse({
-    status: 403,
-    description: 'Cross-tenant access forbidden for institution user',
-  })
-  @SwaggerResponse({ status: 404, description: 'Application not found' })
   async getAllowedTransitions(
     @Param('id', ParseUUIDPipe) id: string,
     @CurrentUser() currentUser: AuthUserPrincipal,
   ): Promise<AllowedTransitionResponseDto[]> {
     return this.workflowService.getAllowedTransitions(id, currentUser);
+  }
+
+  @Get('applications/:id/evc-schedule')
+  @ApiOperation({
+    summary: 'Get EVC visit schedule for an application',
+    description:
+      'Returns the scheduled inspection date, committee members, and visit outcome recommendations.',
+  })
+  @ApiParam({ name: 'id', description: 'Application UUID' })
+  @SwaggerResponse({
+    status: 200,
+    description: 'EVC schedule retrieved',
+    type: EvcScheduleResponseDto,
+  })
+  async getEvcSchedule(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() currentUser: AuthUserPrincipal,
+  ): Promise<EvcScheduleResponseDto | null> {
+    return this.workflowService.getEvcSchedule(id, currentUser);
+  }
+
+  @Post('applications/:id/evc-schedule')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Create or update EVC visit schedule and committee roster',
+    description:
+      'Allows Regional Officers and Administrators to schedule on-site/virtual inspections and assign committee experts.',
+  })
+  @ApiParam({ name: 'id', description: 'Application UUID' })
+  @SwaggerResponse({
+    status: 200,
+    description: 'EVC schedule saved successfully',
+    type: EvcScheduleResponseDto,
+  })
+  async saveEvcSchedule(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() currentUser: AuthUserPrincipal,
+    @Body() dto: CreateEvcScheduleDto,
+  ): Promise<EvcScheduleResponseDto> {
+    return this.workflowService.saveEvcSchedule(id, currentUser, dto);
+  }
+
+  @Get('evc/schedules')
+  @ApiOperation({
+    summary: 'List all EVC schedules across applications',
+    description:
+      'Returns inspection schedules filtered by status for regulatory planning.',
+  })
+  @SwaggerResponse({
+    status: 200,
+    description: 'List of EVC schedules',
+    type: [EvcScheduleResponseDto],
+  })
+  async listEvcSchedules(
+    @CurrentUser() currentUser: AuthUserPrincipal,
+    @Query('status') status?: string,
+  ): Promise<EvcScheduleResponseDto[]> {
+    return this.workflowService.listEvcSchedules(currentUser, status);
+  }
+
+  @Get('workflow/stage-pendency')
+  @ApiOperation({
+    summary: 'Get stage-wise pendency metrics',
+    description:
+      'Calculates real database-backed application counts, average turnaround hours, and SLA breach counts per workflow stage.',
+  })
+  @SwaggerResponse({
+    status: 200,
+    description: 'Stage-wise pendency metrics retrieved',
+  })
+  async getStagePendencyMetrics() {
+    return this.workflowService.getStagePendencyMetrics();
   }
 }

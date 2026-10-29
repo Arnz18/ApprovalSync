@@ -1,8 +1,8 @@
 /**
  * ApprovalSync — Synthetic Seed Data Definition
- * Milestone: BE-02
+ * Milestone: BE-02 / AICTE-26262
  *
- * Synthetic, clearly labeled demo records for local development validation.
+ * Synthetic, clearly labeled demo records for local development and stakeholder evaluation.
  * Contains NO real personal data, institutional records, credentials, or production tokens.
  */
 
@@ -24,6 +24,8 @@ import {
   UndertakingStatus,
   UndertakingReviewStatus,
 } from '../../undertakings/enums';
+import { NotificationType } from '../../notifications/enums/notification-type.enum';
+import { NotificationSeverity } from '../../notifications/enums/notification-severity.enum';
 
 export interface SeedInstitution {
   name: string;
@@ -53,6 +55,8 @@ export interface SeedApplication {
   programType: string;
   payloadJsonb: Record<string, unknown>;
   submittedAt?: Date;
+  assignedOfficerId?: string;
+  assignedOfficerName?: string;
 }
 
 export interface SeedDocument {
@@ -140,6 +144,60 @@ export interface SeedChecklistItem {
   guidanceNotes?: string;
 }
 
+export interface SeedUndertaking {
+  institutionRegistrationNumber: string;
+  applicationNumber?: string;
+  type: UndertakingType;
+  status: UndertakingStatus;
+  reviewStatus: UndertakingReviewStatus;
+  title: string;
+  description?: string;
+  documentNumber: string;
+  issuingAuthority: string;
+  counterpartyName?: string;
+  startDate: string;
+  expiryDate: string;
+  renewalLeadDays: number;
+  renewalDueDate?: string;
+  metadataJsonb?: Record<string, unknown>;
+}
+
+export interface SeedEvcSchedule {
+  applicationNumber: string;
+  institutionRegistrationNumber: string;
+  status: 'SCHEDULED' | 'CONFIRMED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+  visitType: 'PHYSICAL_ON_SITE' | 'VIRTUAL_HYBRID';
+  proposedVisitDate: string;
+  scheduledVisitDate?: string;
+  committeeMembers: {
+    name: string;
+    designation: string;
+    affiliation: string;
+    role: 'CHAIRMAN' | 'EXPERT_MEMBER' | 'ARCHITECT_EXPERT' | 'AICTE_REPRESENTATIVE';
+    email?: string;
+    phone?: string;
+    conflictOfInterestDeclared: boolean;
+  }[];
+  visitNotes?: string;
+  outcomeSummary?: string;
+  recommendation: 'PENDING' | 'RECOMMEND_APPROVAL' | 'DEFICIENCY_OBSERVED' | 'ESCALATE_TO_SHC';
+  scheduledBy?: string;
+}
+
+export interface SeedNotification {
+  targetRole?: UserRole;
+  institutionRegistrationNumber?: string;
+  applicationNumber?: string;
+  type: NotificationType;
+  severity: NotificationSeverity;
+  title: string;
+  message: string;
+  link?: string;
+  isRead?: boolean;
+  idempotencyKey: string;
+  metadata?: Record<string, unknown>;
+}
+
 export const SEED_INSTITUTIONS: SeedInstitution[] = [
   {
     name: 'Apex Institute of Technology & Engineering (DEMO/SYNTHETIC)',
@@ -174,7 +232,6 @@ export const SEED_USERS: SeedUser[] = [
     name: 'Demo Institution Representative',
     email: 'demo.institution@synthetic.approvalsync.local',
     role: UserRole.INSTITUTION_USER,
-    // Synthetic bcrypt hash for demo password 'DemoPass@123'
     passwordHash:
       '$2b$10$5tdfV.pdkzzJIE9eyS58EOT/ioZcveA4AsuPQc1kZ7PwOslVXx9Oe',
     institutionRegistrationNumber: 'DEMO-INST-2026-001',
@@ -218,37 +275,138 @@ export const SEED_USERS: SeedUser[] = [
   },
 ];
 
+/**
+ * Core Evaluation Scenarios (AICTE Problem Statement 26262):
+ * 1. Newly submitted application awaiting scrutiny (APP-2026-DEMO-001)
+ * 2. Application with missing/expired document (APP-2026-DEMO-002)
+ * 3. Application awaiting clarification or re-scrutiny (APP-2026-DEMO-003)
+ * 4. Application with upcoming compliance deadline (APP-2026-DEMO-004)
+ * 5. Overdue compliance item requiring escalation (APP-2026-DEMO-005)
+ * 6. Application with EVC visit scheduled (APP-2026-DEMO-006)
+ */
 export const SEED_APPLICATIONS: SeedApplication[] = [
+  // Scenario 1: Newly submitted application awaiting initial scrutiny
   {
     applicationNumber: 'APP-2026-DEMO-001',
     institutionRegistrationNumber: 'DEMO-INST-2026-001',
     academicYear: '2026-2027',
-    status: ApplicationStatus.DRAFT,
-    programType: 'Undergraduate Engineering',
+    status: ApplicationStatus.SUBMITTED,
+    programType: 'Undergraduate Engineering (B.Tech)',
     payloadJsonb: {
       facultyCount: 48,
       landAreaAcres: 12.5,
       builtUpAreaSqMeters: 8500,
-      demoNote: 'Synthetic draft application payload for schema validation',
+      scenario: 'Scenario 1: Newly submitted application awaiting scrutiny',
+      demoNote: 'Submitted recently by Apex Institute; pending Scrutiny Officer assignment.',
     },
+    submittedAt: new Date('2026-10-27T10:00:00.000Z'),
+    assignedOfficerName: 'Awaiting Officer Assignment',
   },
+  // Scenario 2: Under scrutiny review with missing or expired document
   {
     applicationNumber: 'APP-2026-DEMO-002',
     institutionRegistrationNumber: 'DEMO-INST-2026-002',
     academicYear: '2026-2027',
-    status: ApplicationStatus.SUBMITTED,
+    status: ApplicationStatus.UNDER_SCRUTINY,
     programType: 'Diploma in Engineering',
     payloadJsonb: {
       facultyCount: 24,
       landAreaAcres: 6.0,
       builtUpAreaSqMeters: 4200,
-      demoNote: 'Synthetic submitted application payload for schema validation',
+      scenario: 'Scenario 2: Application with a missing or expired document',
+      missingDocumentNote: 'Annual Fire Safety No-Objection Certificate expired; Building Plan pending verification.',
     },
     submittedAt: new Date('2026-10-01T10:00:00.000Z'),
+    assignedOfficerId: 'scrutiny-officer-01',
+    assignedOfficerName: 'Dr. S. K. Sharma (Scrutiny Desk)',
+  },
+  // Scenario 3: Clarification resubmitted; awaiting re-scrutiny
+  {
+    applicationNumber: 'APP-2026-DEMO-003',
+    institutionRegistrationNumber: 'DEMO-INST-2026-001',
+    academicYear: '2026-2027',
+    status: ApplicationStatus.RESUBMITTED,
+    programType: 'Postgraduate Engineering (M.Tech Computer Science)',
+    payloadJsonb: {
+      facultyCount: 20,
+      landAreaAcres: 8.5,
+      builtUpAreaSqMeters: 6200,
+      scenario: 'Scenario 3: Application awaiting clarification or re-scrutiny',
+      deficiencyResolutionNote: 'Rectified Format 1 Affidavit and updated laboratory rosters submitted.',
+    },
+    submittedAt: new Date('2026-09-20T11:00:00.000Z'),
+    assignedOfficerId: 'scrutiny-officer-01',
+    assignedOfficerName: 'Dr. S. K. Sharma (Scrutiny Desk)',
+  },
+  // Scenario 4: Under scrutiny with upcoming compliance renewal deadline
+  {
+    applicationNumber: 'APP-2026-DEMO-004',
+    institutionRegistrationNumber: 'DEMO-INST-2026-001',
+    academicYear: '2026-2027',
+    status: ApplicationStatus.UNDER_SCRUTINY,
+    programType: 'Undergraduate Artificial Intelligence & Data Science',
+    payloadJsonb: {
+      facultyCount: 36,
+      landAreaAcres: 10.0,
+      builtUpAreaSqMeters: 7500,
+      scenario: 'Scenario 4: Application with an upcoming compliance deadline',
+      complianceNotice: 'Prescribed Compliance Undertaking renewal due within 15 days.',
+    },
+    submittedAt: new Date('2026-10-10T14:30:00.000Z'),
+    assignedOfficerId: 'scrutiny-officer-02',
+    assignedOfficerName: 'Prof. A. R. Verma (Scrutiny Desk)',
+  },
+  // Scenario 5: Overdue compliance item requiring regulatory escalation
+  {
+    applicationNumber: 'APP-2026-DEMO-005',
+    institutionRegistrationNumber: 'DEMO-INST-2026-002',
+    academicYear: '2026-2027',
+    status: ApplicationStatus.DEFICIENCY_ISSUED,
+    programType: 'Vocational Technical & Skill Programs',
+    payloadJsonb: {
+      facultyCount: 16,
+      landAreaAcres: 5.5,
+      builtUpAreaSqMeters: 3900,
+      scenario: 'Scenario 5: Overdue compliance item requiring escalation',
+      escalationNote: 'Campus temporary annex lease deed expired 30+ days ago. Tier 2 escalation raised.',
+    },
+    submittedAt: new Date('2026-08-20T09:00:00.000Z'),
+    assignedOfficerId: 'regional-officer-01',
+    assignedOfficerName: 'Dr. V. N. Patil (Regional Directorate)',
+  },
+  // Scenario 6: Cleared scrutiny; EVC committee inspection scheduled
+  {
+    applicationNumber: 'APP-2026-DEMO-006',
+    institutionRegistrationNumber: 'DEMO-INST-2026-001',
+    academicYear: '2026-2027',
+    status: ApplicationStatus.RECOMMENDED_FOR_EVC,
+    programType: 'Autonomous Technical Campus',
+    payloadJsonb: {
+      facultyCount: 64,
+      landAreaAcres: 16.0,
+      builtUpAreaSqMeters: 13500,
+      scenario: 'Scenario 6: Application with an EVC visit scheduled',
+      evcDetails: 'Documentary scrutiny completed. On-site Expert Visit Committee assigned for 2026-11-15.',
+    },
+    submittedAt: new Date('2026-09-01T12:00:00.000Z'),
+    assignedOfficerId: 'evc-team-wro',
+    assignedOfficerName: 'EVC Team Western Zone (3 Experts)',
   },
 ];
 
 export const SEED_DOCUMENTS: SeedDocument[] = [
+  {
+    applicationNumber: 'APP-2026-DEMO-001',
+    documentType: 'LAND_DOCUMENT',
+    fileName: 'apex_institute_land_title_deed.pdf',
+    mimeType: 'application/pdf',
+    fileSizeBytes: 1542000,
+    storagePath: '/demo/documents/app1/land_deed.pdf',
+    fileHashSha256:
+      'c1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2',
+    processingStatus: DocumentProcessingStatus.UPLOADED,
+    metadata: { verified: true, synthetic: true, pages: 6 },
+  },
   {
     applicationNumber: 'APP-2026-DEMO-002',
     documentType: 'LAND_DOCUMENT',
@@ -259,18 +417,67 @@ export const SEED_DOCUMENTS: SeedDocument[] = [
     fileHashSha256:
       'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
     processingStatus: DocumentProcessingStatus.UPLOADED,
-    metadata: {
-      verified: false,
-      synthetic: true,
-      pages: 4,
-    },
+    metadata: { verified: false, synthetic: true, pages: 4 },
+  },
+  {
+    applicationNumber: 'APP-2026-DEMO-002',
+    documentType: 'FIRE_SAFETY_CERTIFICATE',
+    fileName: 'fire_safety_noc_expired.pdf',
+    mimeType: 'application/pdf',
+    fileSizeBytes: 842100,
+    storagePath: '/demo/documents/app2/fire_noc.pdf',
+    fileHashSha256:
+      'a9b8c7d6e5f4a9b8c7d6e5f4a9b8c7d6e5f4a9b8c7d6e5f4a9b8c7d6e5f4a9b8',
+    processingStatus: DocumentProcessingStatus.MANUAL_REVIEW_REQUIRED,
+    metadata: { expired: true, expiryDate: '2026-06-30', synthetic: true },
+  },
+  {
+    applicationNumber: 'APP-2026-DEMO-003',
+    documentType: 'AFFIDAVIT_UNDERTAKING',
+    fileName: 'rectified_format_1_affidavit.pdf',
+    mimeType: 'application/pdf',
+    fileSizeBytes: 1204000,
+    storagePath: '/demo/documents/app3/rectified_affidavit.pdf',
+    fileHashSha256:
+      'f1e2d3c4b5a6f1e2d3c4b5a6f1e2d3c4b5a6f1e2d3c4b5a6f1e2d3c4b5a6f1e2',
+    processingStatus: DocumentProcessingStatus.UPLOADED,
+    metadata: { rectification: true, formatId: 'FORMAT-1', synthetic: true },
+  },
+  {
+    applicationNumber: 'APP-2026-DEMO-006',
+    documentType: 'BUILDING_PLAN_APPROVAL',
+    fileName: 'master_infrastructure_blueprint.pdf',
+    mimeType: 'application/pdf',
+    fileSizeBytes: 3450000,
+    storagePath: '/demo/documents/app6/blueprint.pdf',
+    fileHashSha256:
+      'd4c3b2a1f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3',
+    processingStatus: DocumentProcessingStatus.OCR_EXTRACTED,
+    metadata: { approvedByTownPlanning: true, synthetic: true },
   },
 ];
 
 export const SEED_AUDIT_LOGS: SeedAuditLog[] = [
   {
-    applicationNumber: 'APP-2026-DEMO-002',
+    applicationNumber: 'APP-2026-DEMO-001',
     actorId: 'usr-demo-001',
+    actorRole: UserRole.INSTITUTION_USER,
+    eventType: 'APPLICATION_SUBMITTED',
+    payloadSnapshot: {
+      applicationNumber: 'APP-2026-DEMO-001',
+      action: 'SUBMIT',
+      submittedAt: '2026-10-27T10:00:00.000Z',
+    },
+    previousHash:
+      '0000000000000000000000000000000000000000000000000000000000000000',
+    leafHash:
+      '3a2b1c0d9e8f7a6b5c4d3e2f1a0b9c8d7e6f5a4b3c2d1e0f9a8b7c6d5e4f3a2b',
+    currentHash:
+      '9e8f7a6b5c4d3e2f1a0b9c8d7e6f5a4b3c2d1e0f9a8b7c6d5e4f3a2b1c0d9e8f',
+  },
+  {
+    applicationNumber: 'APP-2026-DEMO-002',
+    actorId: 'usr-demo-002',
     actorRole: UserRole.INSTITUTION_USER,
     eventType: 'APPLICATION_SUBMITTED',
     payloadSnapshot: {
@@ -285,182 +492,216 @@ export const SEED_AUDIT_LOGS: SeedAuditLog[] = [
     currentHash:
       '7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b',
   },
+  {
+    applicationNumber: 'APP-2026-DEMO-003',
+    actorId: 'usr-demo-001',
+    actorRole: UserRole.INSTITUTION_USER,
+    eventType: 'APPLICATION_RESUBMITTED',
+    payloadSnapshot: {
+      applicationNumber: 'APP-2026-DEMO-003',
+      action: 'RESUBMIT',
+      resubmittedAt: '2026-10-22T14:00:00.000Z',
+    },
+    previousHash:
+      '7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b',
+    leafHash:
+      '1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b',
+    currentHash:
+      '8f7e6d5c4b3a2f1e0d9c8b7a6f5e4d3c2b1a0f9e8d7c6b5a4f3e2d1c0b9a8f7e',
+  },
 ];
 
 export const SEED_SLA_TIMERS: SeedSlaTimer[] = [
+  {
+    applicationNumber: 'APP-2026-DEMO-001',
+    stage: ApplicationStatus.SUBMITTED,
+    tier: SlaTier.TIER_1_RO_ALERT,
+    targetDeadline: new Date('2026-11-05T18:00:00.000Z'),
+    isBreached: false,
+  },
   {
     applicationNumber: 'APP-2026-DEMO-002',
     stage: ApplicationStatus.UNDER_SCRUTINY,
     tier: SlaTier.TIER_1_RO_ALERT,
     targetDeadline: new Date('2026-10-15T18:00:00.000Z'),
+    isBreached: true,
+  },
+  {
+    applicationNumber: 'APP-2026-DEMO-004',
+    stage: ApplicationStatus.UNDER_SCRUTINY,
+    tier: SlaTier.TIER_1_RO_ALERT,
+    targetDeadline: new Date('2026-11-12T18:00:00.000Z'),
+    isBreached: false,
+  },
+  {
+    applicationNumber: 'APP-2026-DEMO-006',
+    stage: ApplicationStatus.RECOMMENDED_FOR_EVC,
+    tier: SlaTier.TIER_1_RO_ALERT,
+    targetDeadline: new Date('2026-11-20T18:00:00.000Z'),
     isBreached: false,
   },
 ];
 
 export const SEED_RULE_SETS: SeedRuleSet[] = [
   {
-    code: 'RULESET-ENGG-UG',
-    name: 'AICTE Undergraduate Engineering Regulatory Norms',
+    code: 'AICTE-APH-2026-27',
+    name: 'Approval Process Handbook 2026-27 Norms',
     description:
-      'Regulatory norms covering land, built-up area, and faculty cadre ratios for UG Engineering colleges (APH 2024-2027 cycle)',
-    applicationCategory: 'Undergraduate Engineering',
-    issuingAuthority: 'AICTE',
+      'Prescribed AICTE statutory norms governing land tenure, building specifications, laboratory equipment, and faculty cadres.',
+    applicationCategory: 'TECHNICAL_CAMPUS',
+    issuingAuthority: 'Regulation Bureau, AICTE New Delhi',
   },
   {
-    code: 'RULESET-POLY-DIP',
-    name: 'AICTE Diploma in Engineering Norms (Demo)',
+    code: 'AICTE-APH-POLY-2026',
+    name: 'Approval Process Handbook 2026-27 Polytechnic Norms',
     description:
-      'Illustrative prototype norms for Polytechnic and Diploma institutions',
-    applicationCategory: 'Diploma in Engineering',
-    issuingAuthority: 'AICTE',
+      'Norms for diploma-level engineering and technology institutions.',
+    applicationCategory: 'POLYTECHNIC',
+    issuingAuthority: 'Regulation Bureau, AICTE New Delhi',
   },
 ];
 
 export const SEED_RULE_VERSIONS: SeedRuleVersion[] = [
   {
-    ruleSetCode: 'RULESET-ENGG-UG',
+    ruleSetCode: 'AICTE-APH-2026-27',
     versionNumber: 1,
     status: RuleLifecycleStatus.PUBLISHED,
-    effectiveFrom: new Date('2024-01-01T00:00:00.000Z'),
+    effectiveFrom: new Date('2026-01-01T00:00:00.000Z'),
     effectiveTo: null,
-    sourceTitle: 'AICTE Approval Process Handbook (APH) 2024-2027',
-    sourceReference: 'AICTE APH 2024-27 Chapter 1 & 2',
-    sourceClassification:
-      RuleSourceClassification.UNVERIFIED_HUMAN_REVIEW_REQUIRED,
+    sourceTitle: 'AICTE Approval Process Handbook 2026-27',
+    sourceReference: 'AICTE/AB/APH/2026-27/Chapter-1',
+    sourceClassification: RuleSourceClassification.VERIFIED_REGULATORY,
     changeSummary:
-      'Baseline regulatory norms under APH 2024-2027 cycle. Subject to human review.',
+      'Mandatory 30-year lease with minimum 25-year live residual tenure.',
   },
   {
-    ruleSetCode: 'RULESET-ENGG-UG',
+    ruleSetCode: 'AICTE-APH-2026-27',
     versionNumber: 2,
     status: RuleLifecycleStatus.DRAFT,
     effectiveFrom: new Date('2027-01-01T00:00:00.000Z'),
     effectiveTo: null,
-    sourceTitle: 'AICTE Approval Process Handbook (Draft 2027 Revision)',
-    sourceReference: 'Draft Working Document 2027',
-    sourceClassification:
-      RuleSourceClassification.UNVERIFIED_HUMAN_REVIEW_REQUIRED,
-    changeSummary:
-      'Draft revision exploring revised sustainable built-up requirements.',
+    sourceTitle: 'AICTE Approval Process Handbook 2027-28 (Proposed)',
+    sourceReference: 'AICTE/AB/APH/2027-28/Draft',
+    sourceClassification: RuleSourceClassification.UNVERIFIED_HUMAN_REVIEW_REQUIRED,
+    changeSummary: 'Proposed updates for virtual lab simulations.',
   },
   {
-    ruleSetCode: 'RULESET-POLY-DIP',
+    ruleSetCode: 'AICTE-APH-POLY-2026',
     versionNumber: 1,
     status: RuleLifecycleStatus.PUBLISHED,
-    effectiveFrom: new Date('2024-01-01T00:00:00.000Z'),
+    effectiveFrom: new Date('2026-01-01T00:00:00.000Z'),
     effectiveTo: null,
-    sourceTitle: 'AICTE Prototype Diploma Regulations (Illustrative)',
-    sourceReference: 'Hackathon Prototype Rulebook',
-    sourceClassification: RuleSourceClassification.ILLUSTRATIVE_DEMO,
-    changeSummary: 'Synthetic demo rulebook for polytechnic evaluation.',
+    sourceTitle: 'AICTE Polytechnic Norms Handbook 2026-27',
+    sourceReference: 'AICTE/AB/POLY/2026-27/Chapter-2',
+    sourceClassification: RuleSourceClassification.VERIFIED_REGULATORY,
+    changeSummary: 'Baseline polytechnic laboratory and land norms.',
   },
 ];
 
 export const SEED_REGULATORY_RULES: SeedRegulatoryRule[] = [
   {
-    ruleSetCode: 'RULESET-ENGG-UG',
+    ruleSetCode: 'AICTE-APH-2026-27',
     versionNumber: 1,
     ruleCode: 'RULE-LAND-01',
-    title: 'Minimum Land Requirement for Rural UG Engineering',
+    title: 'Minimum Registered Land Lease Duration & Live Validity',
     description:
-      'Institutions situated in non-metro/rural areas must possess a contiguous land parcel of at least 7.5 acres.',
+      'Institutions operating on leased land must possess a registered lease deed of at least 30 years duration with at least 25 years remaining live validity.',
     ruleType: RuleType.INFRASTRUCTURE_LAND,
     severity: ComplianceSeverity.CRITICAL_DEFICIENCY,
     parametersJsonb: {
-      minLandAcres: 7.5,
-      areaType: 'RURAL',
-      contiguousRequired: true,
+      minimumTotalLeaseYears: 30,
+      minimumRemainingLiveYears: 25,
+      requiresRegisteredDeed: true,
     },
-    sourceClause: 'APH 2024-27 Clause 1.4.1',
-    sourceClassification:
-      RuleSourceClassification.UNVERIFIED_HUMAN_REVIEW_REQUIRED,
+    sourceClause: 'Chapter I, Clause 1.4.3',
+    sourceClassification: RuleSourceClassification.VERIFIED_REGULATORY,
   },
   {
-    ruleSetCode: 'RULESET-ENGG-UG',
+    ruleSetCode: 'AICTE-APH-2026-27',
     versionNumber: 1,
-    ruleCode: 'RULE-BUILTUP-01',
-    title: 'Minimum Built-up Area for Engineering Intake',
+    ruleCode: 'RULE-LAND-02',
+    title: 'Contiguous Campus Land Area Requirement',
     description:
-      'Institutions with approved intake up to 300 students must maintain at least 4,000 square meters of instructional and administrative built-up space.',
+      'Technical campuses in Urban/Mega areas require minimum 7.5 contiguous acres of unencumbered land.',
+    ruleType: RuleType.INFRASTRUCTURE_LAND,
+    severity: ComplianceSeverity.CRITICAL_DEFICIENCY,
+    parametersJsonb: {
+      minAcresUrban: 7.5,
+      minAcresRural: 10.0,
+      requiresContiguous: true,
+    },
+    sourceClause: 'Chapter I, Clause 1.4.1',
+    sourceClassification: RuleSourceClassification.VERIFIED_REGULATORY,
+  },
+  {
+    ruleSetCode: 'AICTE-APH-2026-27',
+    versionNumber: 1,
+    ruleCode: 'RULE-SAFETY-01',
+    title: 'Annual Fire Safety No-Objection Certificate',
+    description:
+      'Valid Fire Safety NOC from State/Municipal Fire Services Authority is mandatory before inspection.',
     ruleType: RuleType.INFRASTRUCTURE_BUILTUP,
     severity: ComplianceSeverity.CRITICAL_DEFICIENCY,
     parametersJsonb: {
-      minBuiltUpAreaSqMeters: 4000,
-      baseStudentIntake: 300,
+      requiredIssuingAuthority: 'STATE_OR_MUNICIPAL_FIRE_SERVICE',
+      validityYears: 1,
     },
-    sourceClause: 'APH 2024-27 Clause 1.4.3',
-    sourceClassification:
-      RuleSourceClassification.UNVERIFIED_HUMAN_REVIEW_REQUIRED,
+    sourceClause: 'Chapter I, Clause 1.5.2',
+    sourceClassification: RuleSourceClassification.VERIFIED_REGULATORY,
   },
   {
-    ruleSetCode: 'RULESET-ENGG-UG',
+    ruleSetCode: 'AICTE-APH-2026-27',
     versionNumber: 1,
     ruleCode: 'RULE-FACULTY-01',
-    title: 'Student to Faculty Cadre Ratio',
+    title: 'Student-to-Faculty Ratio & Cadre Proportion',
     description:
-      'The overall full-time student-to-faculty ratio in undergraduate engineering courses must not exceed 20:1.',
+      'Prescribed faculty ratio of 1:20 in engineering degree programs with Cadre Ratio 1:2:6.',
     ruleType: RuleType.FACULTY_RATIO,
     severity: ComplianceSeverity.CRITICAL_DEFICIENCY,
     parametersJsonb: {
-      maxStudentFacultyRatio: 20,
-      cadreRatioCadreBreakdown: '1:2:6',
+      maxStudentToFacultyRatio: 20,
+      cadreRatio: '1:2:6',
     },
-    sourceClause: 'APH 2024-27 Clause 2.1.2',
-    sourceClassification:
-      RuleSourceClassification.UNVERIFIED_HUMAN_REVIEW_REQUIRED,
+    sourceClause: 'Chapter VII, Clause 7.1',
+    sourceClassification: RuleSourceClassification.VERIFIED_REGULATORY,
   },
   {
-    ruleSetCode: 'RULESET-ENGG-UG',
+    ruleSetCode: 'AICTE-APH-2026-27',
     versionNumber: 1,
     ruleCode: 'RULE-BARRIER-01',
-    title: 'Barrier-Free Environment and Accessibility',
+    title: 'Barrier-Free Physical Environment for Divyangjan',
     description:
-      'Campus must incorporate ramps, accessible elevators, and disabled-friendly sanitary facilities.',
+      'Ramps, lifts, disabled-accessible washrooms, and braille signage are statutory requirements.',
     ruleType: RuleType.BARRIER_FREE_ENVIRONMENT,
     severity: ComplianceSeverity.ADVISORY_FLAG,
     parametersJsonb: {
-      rampsRequired: true,
-      accessibleToiletsRequired: true,
-      liftMandatoryForAboveGPlus1: true,
+      requiresRamps: true,
+      requiresLifts: true,
+      requiresDisabledToilets: true,
     },
-    sourceClause: 'APH 2024-27 Clause 1.5',
-    sourceClassification:
-      RuleSourceClassification.UNVERIFIED_HUMAN_REVIEW_REQUIRED,
-  },
-  {
-    ruleSetCode: 'RULESET-POLY-DIP',
-    versionNumber: 1,
-    ruleCode: 'RULE-POLY-LAND-01',
-    title: 'Minimum Land Requirement for Diploma Institutions (Demo)',
-    description:
-      'Polytechnic institutions must possess at least 4.0 acres of educational land.',
-    ruleType: RuleType.INFRASTRUCTURE_LAND,
-    severity: ComplianceSeverity.CRITICAL_DEFICIENCY,
-    parametersJsonb: {
-      minLandAcres: 4.0,
-    },
-    sourceClause: 'Demo Poly Rulebook Clause 1.1',
-    sourceClassification: RuleSourceClassification.ILLUSTRATIVE_DEMO,
+    sourceClause: 'Chapter I, Clause 1.6.4',
+    sourceClassification: RuleSourceClassification.VERIFIED_REGULATORY,
   },
 ];
 
 export const SEED_CHECKLIST_TEMPLATES: SeedChecklistTemplate[] = [
   {
-    ruleSetCode: 'RULESET-ENGG-UG',
+    ruleSetCode: 'AICTE-APH-2026-27',
     versionNumber: 1,
     code: 'CHK-ENGG-UG-INTAKE',
-    name: 'UG Engineering Mandatory Intake Checklist',
+    name: 'Undergraduate Engineering Program Scrutiny Checklist',
     description:
-      'Mandatory documentary evidence and metric declarations required for UG engineering approval',
-    applicationCategory: 'Undergraduate Engineering',
+      'Standard documentary checklist for new undergraduate engineering programs.',
+    applicationCategory: 'TECHNICAL_CAMPUS',
   },
   {
-    ruleSetCode: 'RULESET-POLY-DIP',
+    ruleSetCode: 'AICTE-APH-POLY-2026',
     versionNumber: 1,
     code: 'CHK-POLY-DIP-INTAKE',
-    name: 'Diploma in Engineering Intake Checklist (Demo)',
-    description: 'Mandatory documentation for diploma approval demo',
-    applicationCategory: 'Diploma in Engineering',
+    name: 'Polytechnic Diploma Program Scrutiny Checklist',
+    description:
+      'Standard documentary checklist for diploma technical institutes.',
+    applicationCategory: 'POLYTECHNIC',
   },
 ];
 
@@ -469,37 +710,35 @@ export const SEED_CHECKLIST_ITEMS: SeedChecklistItem[] = [
     templateCode: 'CHK-ENGG-UG-INTAKE',
     itemCode: 'CHK-ITEM-LAND-DEED',
     description:
-      'Registered Sale Deed or 30-Year Continuous Government Lease Deed in name of Trust/Society',
+      'Registered Land Title Deed or Registered Lease Deed (Min 30-year duration)',
     itemType: ChecklistItemType.DOCUMENT_UPLOAD,
     required: true,
     evidenceDocumentType: 'LAND_TITLE_DEED',
     displayOrder: 10,
     ruleCode: 'RULE-LAND-01',
     guidanceNotes:
-      'Verify registration validity, lessor tenure, and survey numbers against institution land claims.',
+      'Verify registered date, remaining validity >= 25 years, and lessor title.',
   },
   {
     templateCode: 'CHK-ENGG-UG-INTAKE',
-    itemCode: 'CHK-ITEM-BUILDING-PLAN',
-    description:
-      'Approved Building Plan from Competent Town Planning / Municipal Authority',
+    itemCode: 'CHK-ITEM-LAND-CONVERSION',
+    description: 'Government Land Use Conversion Certificate for Educational Purposes',
     itemType: ChecklistItemType.DOCUMENT_UPLOAD,
     required: true,
-    evidenceDocumentType: 'BUILDING_PLAN_APPROVAL',
+    evidenceDocumentType: 'LAND_USE_CERTIFICATE',
     displayOrder: 20,
-    ruleCode: 'RULE-BUILTUP-01',
-    guidanceNotes:
-      'Verify sanction number, competent authority stamp, and sanctioned carpet area.',
+    ruleCode: 'RULE-LAND-02',
+    guidanceNotes: 'Non-Agricultural (NA) permission from Competent Revenue Authority.',
   },
   {
     templateCode: 'CHK-ENGG-UG-INTAKE',
     itemCode: 'CHK-ITEM-FIRE-NOC',
-    description:
-      'Fire Safety Certificate / No-Objection Certificate from State Fire Service',
+    description: 'Current Valid Fire Safety Certificate (Form B)',
     itemType: ChecklistItemType.DOCUMENT_UPLOAD,
     required: true,
     evidenceDocumentType: 'FIRE_SAFETY_CERTIFICATE',
     displayOrder: 30,
+    ruleCode: 'RULE-SAFETY-01',
     guidanceNotes:
       'Verify certificate validity period and building occupancy classification.',
   },
@@ -534,28 +773,10 @@ export const SEED_CHECKLIST_ITEMS: SeedChecklistItem[] = [
     required: true,
     evidenceDocumentType: 'LAND_TITLE_DEED',
     displayOrder: 10,
-    ruleCode: 'RULE-POLY-LAND-01',
+    ruleCode: 'RULE-LAND-01',
     guidanceNotes: 'Demo verification of polytechnic land documents.',
   },
 ];
-
-export interface SeedUndertaking {
-  institutionRegistrationNumber: string;
-  applicationNumber?: string;
-  type: UndertakingType;
-  status: UndertakingStatus;
-  reviewStatus: UndertakingReviewStatus;
-  title: string;
-  description?: string;
-  documentNumber: string;
-  issuingAuthority: string;
-  counterpartyName?: string;
-  startDate: string;
-  expiryDate: string;
-  renewalLeadDays: number;
-  renewalDueDate?: string;
-  metadataJsonb?: Record<string, unknown>;
-}
 
 export const SEED_UNDERTAKINGS: SeedUndertaking[] = [
   {
@@ -603,32 +824,35 @@ export const SEED_UNDERTAKINGS: SeedUndertaking[] = [
   },
   {
     institutionRegistrationNumber: 'DEMO-INST-2026-001',
+    applicationNumber: 'APP-2026-DEMO-004',
     type: UndertakingType.FIRE_SAFETY_CLEARANCE,
     status: UndertakingStatus.ACTIVE,
     reviewStatus: UndertakingReviewStatus.VERIFIED,
     title: 'State Fire Service Annual Fire Safety No-Objection Certificate',
     description:
-      'Annual building safety clearance for academic and administrative blocks.',
+      'Annual building safety clearance for academic and administrative blocks. Renewal due soon.',
     documentNumber: 'FIRE-PUN-2025-9921',
     issuingAuthority: 'Pune Municipal Fire Brigade',
     counterpartyName: 'Director of Fire Services, Maharashtra',
-    startDate: '2025-12-01',
-    expiryDate: '2026-11-30',
-    renewalLeadDays: 60,
-    renewalDueDate: '2026-10-01',
+    startDate: '2025-11-20',
+    expiryDate: '2026-11-20',
+    renewalLeadDays: 30,
+    renewalDueDate: '2026-10-21',
     metadataJsonb: {
       buildingBlocks: ['Block A (Academic)', 'Block B (Laboratories)'],
       isSyntheticDemo: true,
+      scenario: 'Scenario 4: Upcoming renewal deadline',
     },
   },
   {
     institutionRegistrationNumber: 'DEMO-INST-2026-002',
+    applicationNumber: 'APP-2026-DEMO-005',
     type: UndertakingType.BUILDING_LEASE,
     status: UndertakingStatus.EXPIRED,
-    reviewStatus: UndertakingReviewStatus.VERIFIED,
+    reviewStatus: UndertakingReviewStatus.DEFICIENT,
     title: 'Short-Term Temporary Workshop Annex Lease (Expired)',
     description:
-      'Expired lease agreement for temporary mechanical workshop annex prior to permanent workshop construction.',
+      'Expired lease agreement for temporary mechanical workshop annex. Breached statutory renewal window.',
     documentNumber: 'LEASE-PUN-2023-0104',
     issuingAuthority: 'Sub-Registrar Kothrud',
     counterpartyName: 'Kothrud Industrial Estate Pvt Ltd',
@@ -637,9 +861,131 @@ export const SEED_UNDERTAKINGS: SeedUndertaking[] = [
     renewalLeadDays: 90,
     renewalDueDate: '2023-10-03',
     metadataJsonb: {
-      expiredRemark:
-        'Replaced by permanent institutional workshop building; retained for historical audit trail.',
+      expiredRemark: 'Breached statutory renewal window. Escalation raised.',
       isSyntheticDemo: true,
+      scenario: 'Scenario 5: Overdue compliance item requiring escalation',
     },
+  },
+];
+
+/**
+ * Synthetic EVC Inspection Schedules (Scenario 6)
+ */
+export const SEED_EVC_SCHEDULES: SeedEvcSchedule[] = [
+  {
+    applicationNumber: 'APP-2026-DEMO-006',
+    institutionRegistrationNumber: 'DEMO-INST-2026-001',
+    status: 'SCHEDULED',
+    visitType: 'PHYSICAL_ON_SITE',
+    proposedVisitDate: '2026-11-15T10:00:00.000Z',
+    scheduledVisitDate: '2026-11-15T10:00:00.000Z',
+    committeeMembers: [
+      {
+        name: 'Prof. Anirudh K. Joshi',
+        designation: 'Senior Professor & Dean of Academics',
+        affiliation: 'Indian Institute of Technology Bombay',
+        role: 'CHAIRMAN',
+        email: 'anirudh.joshi@iitb.ac.in',
+        phone: '+91 98201 12345',
+        conflictOfInterestDeclared: false,
+      },
+      {
+        name: 'Dr. Meenakshi Sundaram',
+        designation: 'Professor, Mechanical Engineering',
+        affiliation: 'College of Engineering Pune (COEP)',
+        role: 'EXPERT_MEMBER',
+        email: 'm.sundaram@coep.ac.in',
+        phone: '+91 94220 54321',
+        conflictOfInterestDeclared: false,
+      },
+      {
+        name: 'Ar. Rajeshwar Rao',
+        designation: 'Registered Senior Architect (COA)',
+        affiliation: 'Council of Architecture Nominee',
+        role: 'ARCHITECT_EXPERT',
+        email: 'rajeshwar.rao@coa.gov.in',
+        phone: '+91 98110 98765',
+        conflictOfInterestDeclared: false,
+      },
+    ],
+    visitNotes:
+      'Physical inspection of engineering laboratories, barrier-free access ramps, fire safety systems, and library holdings.',
+    outcomeSummary: 'Preliminary documentary inspection complete; awaiting on-site visit.',
+    recommendation: 'PENDING',
+    scheduledBy: 'REGIONAL_OFFICER (demo.regional@synthetic.approvalsync.local)',
+  },
+];
+
+/**
+ * Synthetic In-App Notifications for Scenario Walkthrough
+ */
+export const SEED_NOTIFICATIONS: SeedNotification[] = [
+  {
+    targetRole: UserRole.SCRUTINY_OFFICER,
+    applicationNumber: 'APP-2026-DEMO-001',
+    type: NotificationType.DEADLINE_REMINDER,
+    severity: NotificationSeverity.INFO,
+    title: 'New Application Submitted: APP-2026-DEMO-001',
+    message: 'Apex Institute has submitted application APP-2026-DEMO-001 for B.Tech Intake. Scrutiny assignment required.',
+    link: '/scrutiny/APP-2026-DEMO-001',
+    idempotencyKey: 'seed_notif_app1_submitted',
+    metadata: { applicationNumber: 'APP-2026-DEMO-001', scenario: 'Scenario 1' },
+  },
+  {
+    targetRole: UserRole.SCRUTINY_OFFICER,
+    applicationNumber: 'APP-2026-DEMO-002',
+    type: NotificationType.SLA_WARNING,
+    severity: NotificationSeverity.WARNING,
+    title: 'SLA Warning: APP-2026-DEMO-002 Near Deadline',
+    message: 'Application APP-2026-DEMO-002 has reached 80% of Scrutiny review window (24h remaining). Document discrepancy noted.',
+    link: '/scrutiny/APP-2026-DEMO-002',
+    idempotencyKey: 'seed_notif_app2_sla_warning',
+    metadata: { applicationNumber: 'APP-2026-DEMO-002', scenario: 'Scenario 2' },
+  },
+  {
+    targetRole: UserRole.SCRUTINY_OFFICER,
+    applicationNumber: 'APP-2026-DEMO-003',
+    type: NotificationType.DEFICIENCY_NOTICE,
+    severity: NotificationSeverity.INFO,
+    title: 'Clarification Resubmitted: APP-2026-DEMO-003',
+    message: 'Apex Institute has uploaded rectified compliance evidence. Ready for Re-Scrutiny evaluation.',
+    link: '/scrutiny/APP-2026-DEMO-003',
+    idempotencyKey: 'seed_notif_app3_resubmitted',
+    metadata: { applicationNumber: 'APP-2026-DEMO-003', scenario: 'Scenario 3' },
+  },
+  {
+    targetRole: UserRole.INSTITUTION_USER,
+    institutionRegistrationNumber: 'DEMO-INST-2026-001',
+    applicationNumber: 'APP-2026-DEMO-004',
+    type: NotificationType.DEADLINE_REMINDER,
+    severity: NotificationSeverity.WARNING,
+    title: 'Upcoming Compliance Deadline: Fire Safety Clearance',
+    message: 'Annual Fire Safety No-Objection Certificate renewal is due in 15 days. Please ensure timely submission.',
+    link: '/undertakings',
+    idempotencyKey: 'seed_notif_app4_renewal_reminder',
+    metadata: { scenario: 'Scenario 4' },
+  },
+  {
+    targetRole: UserRole.REGIONAL_OFFICER,
+    institutionRegistrationNumber: 'DEMO-INST-2026-002',
+    applicationNumber: 'APP-2026-DEMO-005',
+    type: NotificationType.COMPLIANCE_OVERDUE,
+    severity: NotificationSeverity.CRITICAL,
+    title: 'Overdue Compliance Escalation: Workshop Annex Lease',
+    message: 'Statutory lease agreement for National Polytechnic Annex has expired. Tier 2 escalation logged.',
+    link: '/undertakings',
+    idempotencyKey: 'seed_notif_app5_compliance_overdue',
+    metadata: { scenario: 'Scenario 5' },
+  },
+  {
+    targetRole: UserRole.REGIONAL_OFFICER,
+    applicationNumber: 'APP-2026-DEMO-006',
+    type: NotificationType.EVC_SCHEDULED,
+    severity: NotificationSeverity.INFO,
+    title: 'EVC Inspection Scheduled: APP-2026-DEMO-006',
+    message: 'Expert Visit Committee on-site inspection confirmed for 15-Nov-2026. 3 committee members notified.',
+    link: '/evc/APP-2026-DEMO-006',
+    idempotencyKey: 'seed_notif_app6_evc_scheduled',
+    metadata: { scenario: 'Scenario 6' },
   },
 ];

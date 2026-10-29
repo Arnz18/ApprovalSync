@@ -1,6 +1,6 @@
 /**
  * ApprovalSync — Seed Runner
- * Milestone: BE-02
+ * Milestone: BE-02 / AICTE-26262
  *
  * Command-line runner for database seeding.
  */
@@ -44,7 +44,13 @@ async function runSeed(): Promise<void> {
     console.log(
       `  - Undertakings created:        ${report.undertakingsCreated}`,
     );
-    console.log(`  - Existing skipped:            ${report.skippedExisting}`);
+    console.log(
+      `  - EVC schedules created:       ${report.evcSchedulesCreated}`,
+    );
+    console.log(
+      `  - Notifications created:       ${report.notificationsCreated}`,
+    );
+    console.log(`  - Existing skipped/updated:    ${report.skippedExisting}`);
   } catch (error: unknown) {
     console.error('[SeedRunner] Seeding failed:', error);
     process.exit(1);

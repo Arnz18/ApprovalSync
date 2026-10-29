@@ -1,6 +1,6 @@
 /**
  * ApprovalSync — Database Module
- * Milestone: BE-02
+ * Milestone: BE-02 / AICTE-26262
  *
  * Configures PostgreSQL TypeORM connection, entities, connection pooling, and lifecycle.
  */
@@ -25,6 +25,8 @@ import {
   SlaEscalation,
   Undertaking,
   UndertakingHistory,
+  Notification,
+  EvcSchedule,
 } from './entities';
 
 export const coreEntities = [
@@ -44,6 +46,8 @@ export const coreEntities = [
   SlaEscalation,
   Undertaking,
   UndertakingHistory,
+  Notification,
+  EvcSchedule,
 ];
 
 @Module({

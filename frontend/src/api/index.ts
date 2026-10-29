@@ -11,3 +11,4 @@ export * from './services/evcService';
 export * from './services/slaService';
 export * from './services/undertakingsService';
 export * from './services/auditService';
+export * from './services/notificationsService';
