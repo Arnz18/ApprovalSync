@@ -1,12 +1,13 @@
-# AICTE Workflow & Compliance Portal
+# NiyamSetu — Approval & Compliance Management System
 ### Integrated AICTE Approval Workflow Automation, Compliance Monitoring, and Alert Management System
-**Regulation Bureau • All India Council for Technical Education (AICTE)**
+**Regulation Bureau • All India Council for Technical Education (AICTE)** • *Smart India Hackathon — Problem Statement ID: 26262*
 
 [![Backend: NestJS](https://img.shields.io/badge/Backend-NestJS%20%7C%20TypeScript-e0234e.svg)](https://nestjs.com/)
 [![Frontend: React 18](https://img.shields.io/badge/Frontend-React%2018%20%7C%20Vite-61dafb.svg)](https://react.dev/)
 [![Database: PostgreSQL 16](https://img.shields.io/badge/Database-PostgreSQL%2016%20Docker-336791.svg)](https://www.postgresql.org/)
-[![Audit: SHA-256 RFC 6962](https://img.shields.io/badge/Audit-Cryptographic%20SHA--256%20Merkle-10b981.svg)](#5-cryptographic-audit-trail--merkle-ledger)
-[![Architecture: Multi-Tier](https://img.shields.io/badge/Architecture-Cloud--Native%20Multi--Tier-1e3a5f.svg)](#system-architecture)
+[![Audit: SHA-256 RFC 6962](https://img.shields.io/badge/Audit-Cryptographic%20SHA--256%20Merkle-10b981.svg)](#cryptographic-audit-trail--merkle-ledger)
+[![Theme: Persistent Dark Mode](https://img.shields.io/badge/Theme-Persistent%20Near--Black%20Dark-4D8DFF.svg)](#design-system--dark-mode)
+[![Build: CI Verified](https://img.shields.io/badge/CI-GitHub%20Actions%20Passing-success.svg)](https://github.com/Arnz18/ApprovalSync/actions)
 
 ---
 
@@ -14,7 +15,7 @@
 
 | Attribute | Specification |
 | :--- | :--- |
-| **Portal Name** | **AICTE Workflow & Compliance Portal** |
+| **Product Name** | **NiyamSetu (नियमसेतु)** — *The Regulatory Bridge for Academic Governance* |
 | **Problem Statement ID** | **26262** |
 | **Title** | **Integrated AICTE Approval Workflow Automation, Compliance Monitoring and Alert Management System** |
 | **Organization** | **All India Council for Technical Education (AICTE)** |
@@ -23,52 +24,62 @@
 | **Theme** | **Smart Automation** |
 
 ### The Challenge
-The regulatory approval process for technical institutions across India encompasses a rigorous, multi-stage governance lifecycle: application intake, documentary scrutiny, deficiency rectification, Expert Visit Committee (EVC) on-site inspections, Standing Hearing Committee (SHC) reviews, and Executive Committee approvals. Under manual and fragmented processes, administrative pendency, unmonitored undertaking expirations, lack of transparent stage-wise visibility, and communication delays can compromise statutory timelines.
+The regulatory approval process for technical institutions across India encompasses a rigorous, multi-stage governance lifecycle: application drafting, documentary scrutiny, deficiency rectification, Expert Visit Committee (EVC) on-site inspections, Standing Hearing Committee (SHC) reviews, and Executive Committee approvals. Under manual and fragmented processes, administrative pendency, unmonitored undertaking expirations, lack of transparent stage-wise visibility, and communication delays can compromise statutory timelines.
 
-### The Solution
-The **AICTE Workflow & Compliance Portal** delivers an integrated, enterprise-grade digital operating environment that automates, secures, and tracks institution approval workflows from intake to council determination:
+### The Solution: NiyamSetu
+**NiyamSetu** delivers an enterprise-grade digital operating environment that automates, secures, and tracks technical institution approval workflows from initial intake to final council determination:
 1. **Deterministic State Machine Enforcement:** A 16-state Finite State Machine (FSM) enforcing rigorous transition prerequisites and preventing unauthorized stage jumping.
-2. **Multi-Role Portal Desks:** Dedicated, permission-bounded workspaces tailored specifically for Technical Institutions, Scrutiny Officers, Regional Officers, and System Administrators.
-3. **Stage-Wise Pendency & Application Movement Monitoring:** Real-time visibility into application dwell times, pipeline distributions, and bottlenecks across all regulatory stages.
-4. **Time-Bound Undertaking & Lease Expiry Engine:** Automated validity tracking for institutional land deeds, lease covenants (minimum 30-year requirement), and compliance undertakings with proactive expiration alerts.
-5. **EVC Inspection Orchestration:** Committee scheduling with conflict-of-interest declarations, randomized expert rosters, and inspection record management.
-6. **SLA Hierarchy & Proactive Escalation:** Real-time SLA monitoring with multi-tier escalation warnings (Tier 1 approaching, Tier 2 breach, Tier 3 committee escalation) and automated deadline sweeps.
-7. **Tamper-Evident Cryptographic Audit Ledger:** Sequential SHA-256 hash-chaining and Merkle tree roots mathematically detecting any direct database tampering.
+2. **Multi-Role Portal Desks:** Dedicated, permission-bounded workspaces tailored specifically for Technical Institutions, Scrutiny Officers, Regional Officers, System Administrators, and Independent Auditors.
+3. **Application Intake Wizard with Draft Resumption:** 5-step intake wizard with database-persisted progress, step-level auto-saving, and seamless resumption via dashboard shortcuts or deep links.
+4. **Unified Evidence Upload Control:** Single accessible file component enforcing magic-byte inspection (%PDF-, \x89PNG, \xFF\xD8\xFF), 15 MB boundary checks, and one-click file replacement.
+5. **Consolidated Application Dossier & PDF Print:** Unified evidence report integrating institution profiles, document matrices, AI anomaly findings, stage movement timelines, and audit ledgers, with clean `@media print` layout and PDF export.
+6. **Time-Bound Undertaking & Lease Expiry Engine:** Automated validity tracking for institutional land deeds, registered leases (minimum 30-year requirement), and compliance undertakings with proactive expiration alerts.
+7. **EVC Inspection Orchestration:** Committee scheduling with conflict-of-interest declarations, randomized expert rosters, and inspection record management.
+8. **Multi-Tier SLA Hierarchy & Alert Engine:** Real-time SLA monitoring with multi-tier escalation warnings (Tier 1 approaching, Tier 2 breach, Tier 3 committee escalation) and automated deadline sweeps.
+9. **Tamper-Evident Cryptographic Audit Ledger:** Sequential SHA-256 hash-chaining and Merkle tree roots (RFC 6962) mathematically detecting any direct database tampering.
 
 ---
 
-## 2. Quick Demonstration & Role Credentials
+## 2. Design System & Dark Mode
 
-The local stack runs on **PostgreSQL 16 (Docker port 5434)**, **NestJS Backend (`http://localhost:3000`)**, and **React 18 Frontend (`http://localhost:5173`)**.
+NiyamSetu adheres to high-contrast, accessible visual hierarchy standards designed for intensive statutory review workflows:
 
-The login page features **interactive portal selection cards** that pre-fill test credentials and configure post-login routing directly into the role's designated workspace.
-
-| Stakeholder Role | Pre-Seeded Login Email | Password | Designated Post-Login Landing | Primary Workflow Capabilities |
-| :--- | :--- | :--- | :--- | :--- |
-| **Technical Institution** | `demo.institution@synthetic.approvalsync.local` | `DemoPass@123` | `/dashboard` *(My Applications)* | Multi-step application intake wizard, deficiency response, compliance undertakings, document upload |
-| **Scrutiny Officer** | `demo.scrutiny@synthetic.approvalsync.local` | `DemoPass@123` | `/scrutiny` *(Scrutiny Queue)* | Documentary scrutiny queue, checklist evaluation, deficiency notice issuance, re-scrutiny disposition |
-| **Regional Officer** | `demo.regional@synthetic.approvalsync.local` | `DemoPass@123` | `/dashboard` *(Regional Console)* | Regional workload monitoring, EVC inspection scheduling, expert roster assignment, SLA escalation review |
-| **System Administrator** | `demo.admin@synthetic.approvalsync.local` | `DemoPass@123` | `/dashboard` *(Admin Console)* | Global stage pendency monitor, SLA policy configuration, on-demand deadline reconciliation sweep, audit ledger |
-| **Independent Auditor** | `auditor@synthetic.approvalsync.local` | `DemoPass@123` | `/audit` *(Audit Ledger)* | Read-only cryptographic proof inspection, Merkle root verification, tamper detection |
-
-> **Password Note:** All pre-seeded demonstration accounts share the synthetic password `DemoPass@123`.
-
-### Pre-Seeded Test Scenarios
-
-The database includes pre-configured cases showcasing diverse stages of the approval lifecycle:
-
-| Application Number | Stage / Status | Scenario Description | Associated Workflow Demonstration |
+### Color Palette Tokens
+| Token | Light Theme | Dark Theme (`data-theme="dark"`) | Usage |
 | :--- | :--- | :--- | :--- |
-| **APP-2026-DEMO-001** | `SUBMITTED` | Clean intake application by Apex Institute of Technology | Fresh intake awaiting primary scrutiny queue assignment |
-| **APP-2026-DEMO-002** | `UNDER_SCRUTINY` | Case approaching review SLA threshold | Active scrutiny stage with Tier 1 SLA warning badge |
-| **APP-2026-DEMO-003** | `RESUBMITTED` | Re-scrutiny verification after institutional rectification | Institution submitted faculty rectification; awaiting re-scrutiny |
-| **APP-2026-DEMO-004** | `UNDER_SCRUTINY` | Scrutiny Officer issued deficiency notice | 14-day compliance response undertaking active |
-| **APP-2026-DEMO-005** | `DEFICIENCY_ISSUED` | Overdue compliance undertaking | Breached undertaking window triggering Tier 2 Escalation event |
-| **APP-2026-DEMO-006** | `RECOMMENDED_FOR_EVC` | Recommended for ground inspection | Scheduled 3-member EVC committee with conflict-of-interest sign-offs |
+| `--color-background` | `#f8fafc` | `#0A0A0A` | Main page background |
+| `--color-header-bg` | `#ffffff` | `#111111` | Persistent top navigation header |
+| `--color-sidebar-bg` | `#ffffff` | `#111111` | Primary navigation sidebar |
+| `--color-surface` | `#ffffff` | `#181818` | Cards, panels, and modal containers |
+| `--color-muted` | `#f1f5f9` | `#202020` | Secondary wells, inputs, and tab tracks |
+| `--color-foreground` | `#0f172a` | `#F5F5F5` | Primary high-contrast body text |
+| `--color-muted-foreground` | `#64748b` | `#B3B3B3` | Secondary labels and helper text |
+| `--color-border` | `#cbd5e1` | `#303030` | Structural borders and dividers |
+| `--color-primary` | `#1e3a5f` | `#4D8DFF` | Interactive buttons and accent highlights |
+
+### UX Polish Highlights
+- **Persistent Animated Dark Mode Switch:** Accessible slider switch (`role="switch"`, `aria-checked`) with smooth thumb transition, keyboard activation (`Enter` / `Space`), and anti-FOUC inline script in `index.html`.
+- **Focal Login Hierarchy:** Centered sign-in card with prominent brand identity, email/password fields, and submit action, followed by a clearly separated 4-portal selector grid below the form.
+- **Stabilized Sticky Header:** Fixed-height header (`var(--header-height, 4rem)`), solid background with `backdrop-filter: blur(8px)`, zero layout jitter, and overflow prevention on the main content area.
+- **Unified Upload Component:** Single polished file control eliminating duplicate native inputs, featuring file size indicators, upload progress animations, and one-click replacement.
 
 ---
 
-## 3. End-to-End Approval Lifecycle Walkthrough
+## 3. Stakeholder Roles & Access Matrix
+
+| Stakeholder Role | Portal Identifier | Pre-Seeded Login Email | Designated Landing Route | Key Capabilities |
+| :--- | :--- | :--- | :--- | :--- |
+| **Technical Institution** | Applicant Portal | `institution@niyamsetu.gov.in` | `/dashboard` *(My Applications)* | Multi-step intake wizard, draft resumption, deficiency response, undertakings & lease registration |
+| **Scrutiny Officer** | Evaluation Bureau | `scrutiny@niyamsetu.gov.in` | `/scrutiny` *(Scrutiny Desk)* | Documentary scrutiny queue, APH checklist validation, deficiency notice issuance, re-scrutiny |
+| **Regional Officer** | Regional Operations | `regional@niyamsetu.gov.in` | `/dashboard` *(Regional Console)* | Regional case movement oversight, EVC committee scheduling, expert roster management, SLA escalations |
+| **System Administrator** | Administrative Council | `admin@niyamsetu.gov.in` | `/dashboard` *(Admin Console)* | Global stage pendency monitor, SLA policy configuration, on-demand deadline sweeps, audit ledger |
+| **Independent Auditor** | Compliance Vigilance | `auditor@synthetic.approvalsync.local` | `/audit` *(Audit Ledger)* | Read-only cryptographic proof inspection, Merkle root verification, tamper detection |
+
+> **Synthetic Password Note:** All pre-seeded demonstration accounts share the synthetic password `DemoPass@123`.
+
+---
+
+## 4. End-to-End Approval Lifecycle Walkthrough
 
 ```mermaid
 flowchart TD
@@ -89,39 +100,32 @@ flowchart TD
     RECOMMENDED_FOR_SHC -->|Irremediable Violation| REJECTED["10. REJECTED<br/>(Statutory Order)"]
 ```
 
-### Stage Details
-
+### Stage Milestones
 1. **Intake & Draft Preparation (`/applications`):**
-   - Technical institutions complete a 5-step intake wizard covering Basic Details, Programme/Course Selection, Land & Physical Infrastructure, Prescribed Document Uploads, and Statutory Declarations.
-   - Atomic submission locks the application to prevent concurrent modifications.
-
+   - Institutions complete a 5-step intake wizard covering Basic Details, Programme/Course Selection, Land & Physical Infrastructure, Prescribed Document Uploads, and Statutory Declarations.
+   - Saves current step index and form state to PostgreSQL `payload_jsonb` column on each step advance.
 2. **Primary Scrutiny Desk (`/scrutiny`):**
    - AICTE Scrutiny Officers inspect uploaded proofs against versioned Approval Process Handbook (APH) checklists.
    - An advisory Document AI engine provides optical character recognition and duplicate detection assistance while preserving strict **Human Sovereignty (ADR-004)**.
-   - Officers issue formal deficiency notices or recommend the institution for ground inspection.
-
 3. **Deficiency Rectification & Undertaking Management (`/undertakings`):**
    - When deficiencies are communicated, institutions receive an automated notification and a time-bound compliance undertaking window (e.g., 14 days).
    - Institutions upload corrective documentation and statutory affidavits.
-
 4. **Expert Visit Committee Scheduling & Inspection (`/evc`):**
    - Regional Officers review the approved scrutiny dossier and initiate committee scheduling.
    - An expert roster assigns a 3-member committee (Chairman, Subject Expert, Architect/Civil Expert).
    - Mandatory Conflict-of-Interest (COI) declarations prevent institutional bias.
-   - Ground inspections track physical and virtual visit findings, geotagged photographs, and infrastructure validation reports.
-
-5. **Standing Hearing Committee (SHC) & Council Determination:**
-   - Cases with contested deficiencies or infrastructure ambiguities are escalated to the Standing Hearing Committee (SHC) or Standing Appellate Committee (SAC).
-   - Final Council decisions issue digitally tracked approval orders or detailed statutory rejection notices.
+5. **Application Dossier Evidence Report (`/dossier/:id`):**
+   - Comprehensive multi-tab consolidated report combining application profile, documentary evidence matrix, AI findings, chronological audit timeline, and undertakings.
+   - Printable with `@media print` layout and PDF export.
 
 ---
 
-## 4. System Architecture
+## 5. System Architecture
 
 ```
                                   +-------------------------------------------------------------+
                                   |                     Browser Client Layer                    |
-                                  |    React 18 + Vite SPA • Swiss Minimalism • Accessible UI   |
+                                  |         React 18 + Vite SPA • NiyamSetu Design System       |
                                   +------------------------------+------------------------------+
                                                                  | REST / SSE (Port 5173 -> 3000)
                                                                  v
@@ -135,9 +139,9 @@ flowchart TD
                v                       v                         v                         v                       v
 +-----------------------------+ +---------------------+ +---------------------+ +---------------------+ +---------------------+
 |     Applications Module     | |   Workflow & FSM    | |  Notifications/SLA  | |  Undertakings Module| |    Audit Ledger     |
-| - 5-Step Intake Storage     | | - 16-State FSM Core | | - Multi-Tier Alerts | | - Registered Leases | | - SHA-256 Event Chain |
-| - Dynamic JSONB Payload     | | - EVC Scheduling    | | - Deadline Sweeper  | | - Expiry Calculator | | - Merkle Tree RFC6962 |
-| - PDF File Sanitization     | | - Stage Movement    | | - SSE Event Streams | | - Compliance Tracking| | - Immutability Guard |
+| - 5-Step Intake Wizard      | | - 16-State FSM Core | | - Multi-Tier Alerts | | - Registered Leases | | - SHA-256 Event Chain |
+| - Dynamic JSONB Draft State | | - EVC Scheduling    | | - Deadline Sweeper  | | - Expiry Calculator | | - Merkle Tree RFC6962 |
+| - Magic-Byte Sanitization   | | - Stage Movement    | | - SSE Event Streams | | - Compliance Tracking| | - Immutability Guard |
 +--------------+--------------+ +----------+----------+ +----------+----------+ +----------+----------+ +----------+----------+
                |                           |                       |                       |                       |
                +---------------------------+-----------------------+-----------------------+-----------------------+
@@ -150,44 +154,9 @@ flowchart TD
                                   +-------------------------------------------------------------+
 ```
 
-### Technology Stack Justification
-- **Frontend:** React 18, Vite, TypeScript, Lucide Icons. Employs clean Swiss Minimalism typography, responsive layout structures, and accessibility safeguards (ARIA standards, WCAG 2.1 AA compliance).
-- **Backend:** NestJS 10, TypeScript, TypeORM, Passport/JWT, Class-Validator. Modular service architecture separating application domains, SLA background jobs, and security layers.
-- **Database:** PostgreSQL 16 running in isolated Docker container. Leverages JSONB columns for flexible APH category intake, B-Tree indexes on stage identifiers, and append-only trigger defenses on audit ledgers.
-
 ---
 
-## 5. Core Feature Capabilities
-
-### A. Stage-Wise Pendency & Application Movement Monitoring
-- Real-time distribution visualization of cases across every stage (`DRAFT` &rarr; `SUBMITTED` &rarr; `UNDER_SCRUTINY` &rarr; `DEFICIENCY_ISSUED` &rarr; `RESUBMITTED` &rarr; `RECOMMENDED_FOR_EVC` &rarr; `APPROVED` / `REJECTED`).
-- Stage dwell timer calculations tracking average duration and identifying administrative bottlenecks.
-
-### B. Expert Visit Committee (EVC) Scheduling
-- Synchronized scheduling module for Regional Officers.
-- 3-member roster management (Chairman, Subject Expert, Structural/Infrastructure Specialist).
-- Formal Conflict of Interest (COI) declarations and visit modality configuration (Physical, Virtual, Hybrid).
-
-### C. Institutional Undertakings & Prescribed Document Management
-- Dedicated `/undertakings` portal managing institutional affidavits, NOCs, and registered land deeds.
-- Minimum 30-year lease validity enforcement under AICTE APH norms (flagging leases with fewer than 25 years remaining).
-- Automated expiration status categorization (`ACTIVE`, `EXPIRING_SOON`, `EXPIRED`, `SUPERSEDED`).
-
-### D. Multi-Tier SLA Tracking & Proactive Alert Engine
-- Continuous SLA timer evaluation across regulatory stages.
-- **Tier 1 Warning:** Emitted when application dwell time reaches 70% of allowed stage SLA.
-- **Tier 2 Breach:** Emitted when target SLA is exceeded, triggering administrative alerts to Regional Directors.
-- **Tier 3 Escalation:** Emitted upon non-resolution, escalating case to Bureau Head and Central Vigilance.
-- In-app notification center bell with real-time badges and on-demand deadline sweep trigger.
-
-### E. Cryptographic Audit Trail & Merkle Ledger
-- Every state transition, deficiency issuance, and committee action generates an immutable audit entry.
-- SHA-256 block hashing links each event to its predecessor (`parentHash`).
-- Built-in verification engine validates chain continuity and detects any out-of-band SQL modification attempts.
-
----
-
-## 6. Local Development Setup
+## 6. Local Quickstart
 
 ### Prerequisites
 - **Node.js:** v18.x or v20.x LTS
@@ -195,20 +164,20 @@ flowchart TD
 - **Docker Desktop:** v4.20+ with Docker Compose
 - **Git**
 
-### Step 1: Clone Repository & Start PostgreSQL
+### Step 1: Start PostgreSQL Container
 ```bash
 # Clone the repository
-git clone https://github.com/Ojaswi-Joshi/ApprovalSync.git
+git clone https://github.com/Arnz18/ApprovalSync.git
 cd ApprovalSync
 
-# Start the PostgreSQL 16 container via Docker Compose
+# Start PostgreSQL 16 container via Docker Compose
 docker compose up -d
 
-# Verify container health (configured on port 5434)
+# Verify container health (running on port 5434)
 docker compose ps
 ```
 
-### Step 2: Configure & Start Backend
+### Step 2: Start Backend
 ```bash
 cd backend
 
@@ -218,14 +187,14 @@ npm ci
 # Run database migrations
 npm run migration:run
 
-# Populate seed demonstration data (creates demo accounts and test applications)
+# Populate seed demonstration data
 npm run seed
 
-# Start NestJS development server (runs on port 3000)
+# Start NestJS development server (http://localhost:3000)
 npm run start:dev
 ```
 
-### Step 3: Configure & Start Frontend
+### Step 3: Start Frontend
 ```bash
 # Open a separate terminal
 cd frontend
@@ -233,12 +202,12 @@ cd frontend
 # Install dependencies
 npm ci
 
-# Start Vite development server (runs on port 5173)
+# Start Vite development server (http://localhost:5173)
 npm run dev
 ```
 
 ### Step 4: Access the Application
-- **Frontend Portal:** [http://localhost:5173](http://localhost:5173)
+- **NiyamSetu Portal:** [http://localhost:5173](http://localhost:5173)
 - **Backend API:** [http://localhost:3000](http://localhost:3000)
 - **Swagger Documentation:** [http://localhost:3000/api/docs](http://localhost:3000/api/docs)
 - **Health Check:** [http://localhost:3000/api/v1/health](http://localhost:3000/api/v1/health)
@@ -248,7 +217,7 @@ npm run dev
 ## 7. Environment Variables Configuration
 
 ### Backend (`backend/.env`)
-| Variable | Default Value | Description |
+| Variable | Value | Description |
 | :--- | :--- | :--- |
 | `PORT` | `3000` | Port for the NestJS HTTP server |
 | `DB_HOST` | `127.0.0.1` | Database host address |
@@ -260,10 +229,10 @@ npm run dev
 | `JWT_EXPIRES_IN` | `24h` | Token expiration duration |
 
 ### Frontend (`frontend/.env`)
-| Variable | Default Value | Description |
+| Variable | Value | Description |
 | :--- | :--- | :--- |
 | `VITE_API_BASE_URL` | `http://localhost:3000` | Target backend REST API base URL |
-| `VITE_ENABLE_DEMO_PANEL` | `true` | Enables pre-fill credentials helper on login page |
+| `VITE_ENABLE_DEMO_PANEL` | `true` | Enables role pre-fill selector cards on login page |
 
 ---
 
@@ -275,8 +244,11 @@ npm run dev
 | `GET` | `/api/v1/auth/me` | Authenticated | Retrieves profile of currently authenticated user |
 | `GET` | `/api/v1/applications` | Role-bounded | Lists applications accessible to the authenticated role |
 | `POST` | `/api/v1/applications` | Institution | Creates and saves a new application draft |
+| `PATCH` | `/api/v1/applications/:id` | Institution | Updates application draft and persists step state |
+| `GET` | `/api/v1/applications/:id` | Tenant-bounded | Retrieves full application details and JSONB payload |
 | `POST` | `/api/v1/applications/:id/submit` | Institution | Submits application and transitions state to `SUBMITTED` |
-| `GET` | `/api/v1/applications/:id/stage-pendency` | Authenticated | Retrieves stage pendency distribution metrics |
+| `GET` | `/api/v1/applications/:id/dossier-report` | Authenticated | Retrieves consolidated multi-pipeline dossier verification report |
+| `POST` | `/api/v1/applications/:id/dossier-report` | Officer / Admin | Triggers explicit multi-pipeline dossier orchestration |
 | `GET` | `/api/v1/scrutiny/queue` | Scrutiny / Regional | Retrieves worklist of cases pending documentary scrutiny |
 | `POST` | `/api/v1/scrutiny/:id/decision` | Scrutiny Officer | Records scrutiny determination (Deficiency or Clear) |
 | `GET` | `/api/v1/evc/schedule/:id` | Regional / Officer | Retrieves scheduled EVC inspection details and expert roster |
@@ -288,10 +260,9 @@ npm run dev
 
 ---
 
-## 9. Production & Cloud Deployment (AWS EC2 / Docker)
+## 9. Production & Cloud Deployment Safeguards
 
 The repository preserves the production deployment model utilizing multi-container Docker Compose and AWS EC2:
-
 - **Compose Configuration:** `compose.production.yaml` defines the production topology.
 - **Reverse Proxy:** Nginx edge terminates SSL/TLS and routes requests between the static React build and the NestJS cluster.
 - **Storage:** Sensitive assets and PDF uploads are backed by Docker volume mounts or Amazon S3 buckets with server-side AES-256 encryption.
@@ -308,7 +279,7 @@ docker compose -f compose.production.yaml up -d --build
 
 > [!IMPORTANT]
 > **Advisory Nature & Synthetic Demonstration Data:**
-> The AICTE Workflow & Compliance Portal operates strictly as a regulatory decision-support and workflow automation platform. All pre-configured institutions, personnel, application IDs, and document attachments are synthetic demonstration artifacts created for evaluation purposes.
+> NiyamSetu operates strictly as a regulatory decision-support and workflow automation platform. All pre-configured institutions, personnel, application IDs, and document attachments are synthetic demonstration artifacts created for evaluation purposes.
 > 
 > Under **ADR-004 (Human Sovereignty Principle)**, automated algorithms, OCR extraction, and SLA timers provide decision assistance only. All statutory determinations—including deficiency notices, committee recommendations, and final approval orders—remain sovereign with authorized human regulatory officers under AICTE Approval Process Handbook (APH) norms.
 
