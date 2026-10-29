@@ -216,7 +216,8 @@ export const CaseHeader: React.FC<CaseHeaderProps> = ({ application, onRefresh, 
             border: '1px solid var(--color-border-subtle)',
             borderRadius: 'var(--radius-md)',
             padding: 'var(--space-3) var(--space-4)',
-            minWidth: '260px',
+            minWidth: 'min(100%, 260px)',
+            maxWidth: '100%',
           }}
         >
           <div

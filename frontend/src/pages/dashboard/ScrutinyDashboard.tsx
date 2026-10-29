@@ -145,6 +145,8 @@ export function ScrutinyDashboard({
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: 'var(--space-2)',
               marginBottom: 'var(--space-3)',
             }}
           >
@@ -176,7 +178,7 @@ export function ScrutinyDashboard({
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))',
               gap: 'var(--space-4)',
             }}
           >

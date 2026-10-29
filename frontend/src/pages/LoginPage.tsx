@@ -395,6 +395,7 @@ export function LoginPage(): React.ReactElement {
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     gap: '0.5rem',
+                    flexWrap: 'wrap',
                     backgroundColor: '#ffffff',
                     padding: '0.5rem 0.625rem',
                     borderRadius: 'var(--radius-sm)',
@@ -402,8 +403,14 @@ export function LoginPage(): React.ReactElement {
                     marginBottom: '0.5rem',
                   }}
                 >
-                  <div style={{ overflow: 'hidden' }}>
-                    <div style={{ fontWeight: 600, color: 'var(--color-text-main)' }}>
+                  <div style={{ overflow: 'hidden', minWidth: 0, flex: '1 1 180px' }}>
+                    <div
+                      style={{
+                        fontWeight: 600,
+                        color: 'var(--color-text-main)',
+                        wordBreak: 'break-all',
+                      }}
+                    >
                       demo.institution@synthetic.approvalsync.local
                     </div>
                     <div style={{ color: 'var(--color-text-muted)', fontSize: '0.6875rem' }}>

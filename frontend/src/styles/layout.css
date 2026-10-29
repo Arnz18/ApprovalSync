@@ -8,6 +8,9 @@
   display: flex;
   flex-direction: column;
   background-color: var(--color-background);
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
 }
 
 /* ==========================================================================
@@ -48,8 +51,11 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 var(--space-4);
+  padding: 0 var(--space-3);
   box-shadow: var(--shadow-sm);
+  width: 100%;
+  max-width: 100vw;
+  box-sizing: border-box;
 }
 
 @media (min-width: 768px) {
@@ -137,6 +143,31 @@
 @media (min-width: 1024px) {
   .header-mobile-toggle {
     display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .header-subtitle {
+    display: none;
+  }
+  .header-prototype-badge {
+    display: none !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-brand {
+    gap: var(--space-2);
+  }
+  .header-title {
+    font-size: 0.9375rem;
+  }
+  .header-logo-icon {
+    width: 1.875rem;
+    height: 1.875rem;
+  }
+  .header-actions {
+    gap: var(--space-2);
   }
 }
 
@@ -277,6 +308,15 @@
   border-bottom: 1px solid var(--color-border);
 }
 
+.mobile-nav-drawer .app-sidebar {
+  display: flex !important;
+  width: 100%;
+  height: auto;
+  position: static;
+  border-right: none;
+  flex: 1 1 auto;
+}
+
 /* ==========================================================================
    Main Content Region
    ========================================================================== */
@@ -284,10 +324,12 @@
   flex: 1 1 auto;
   display: flex;
   flex-direction: column;
-  padding: var(--space-4);
+  padding: var(--space-3);
   max-width: var(--max-content-width);
   width: 100%;
+  min-width: 0;
   margin: 0 auto;
+  box-sizing: border-box;
 }
 
 @media (min-width: 768px) {
@@ -298,6 +340,8 @@
 
 .app-content {
   flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
 }
 
 /* ==========================================================================
@@ -306,10 +350,18 @@
 .app-footer {
   background-color: var(--color-surface);
   border-top: 1px solid var(--color-border);
-  padding: var(--space-4) var(--space-6);
+  padding: var(--space-4) var(--space-4);
   font-size: var(--font-size-xs);
   color: var(--color-muted-foreground);
   margin-top: auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (min-width: 768px) {
+  .app-footer {
+    padding: var(--space-4) var(--space-6);
+  }
 }
 
 .footer-inner {
@@ -336,6 +388,7 @@
 .footer-links {
   display: flex;
   align-items: center;
-  gap: var(--space-4);
+  gap: var(--space-3);
   flex-shrink: 0;
+  flex-wrap: wrap;
 }

@@ -535,6 +535,44 @@
   animation: modal-enter 200ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+.modal-container.modal-wide {
+  max-width: 48rem;
+}
+
+@media (max-width: 640px) {
+  .modal-backdrop {
+    padding: var(--space-2);
+  }
+
+  .modal-container,
+  .modal-container.modal-wide {
+    max-width: 100%;
+    width: 100%;
+    max-height: calc(100vh - 1rem);
+    border-radius: var(--radius-lg);
+    margin: 0;
+  }
+
+  .modal-header {
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .modal-content {
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .modal-footer {
+    padding: var(--space-3) var(--space-4);
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .modal-footer > * {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+}
+
 @keyframes modal-enter {
   from {
     opacity: 0;
@@ -726,10 +764,15 @@
 }
 
 @media (max-width: 768px) {
+  .wizard-stepper-container {
+    padding: var(--space-3) var(--space-3);
+    margin-bottom: var(--space-4);
+  }
+
   .wizard-stepper-list {
     flex-direction: column;
     align-items: flex-start;
-    gap: var(--space-4);
+    gap: var(--space-3);
   }
 
   .wizard-step-connector {
@@ -740,29 +783,37 @@
 /* ==========================================================================
    Data Table & Scrutiny Queue Styles (FE-04)
    ========================================================================== */
-.data-table-container {
+.data-table-container,
+.scrutiny-table-container {
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: var(--shadow-sm);
   margin-top: var(--space-4);
+  width: 100%;
 }
 
-.data-table-scroll {
+.data-table-scroll,
+.table-responsive,
+.table-responsive-wrapper {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  width: 100%;
 }
 
-.data-table {
+.data-table,
+.scrutiny-table {
   width: 100%;
   border-collapse: collapse;
   font-family: var(--font-family-body);
   font-size: var(--font-size-sm);
   text-align: left;
+  min-width: 620px;
 }
 
-.data-table th {
+.data-table th,
+.scrutiny-table th {
   background-color: var(--color-muted);
   color: var(--color-foreground);
   font-weight: var(--font-weight-semibold);
@@ -774,18 +825,21 @@
   white-space: nowrap;
 }
 
-.data-table td {
+.data-table td,
+.scrutiny-table td {
   padding: var(--space-3) var(--space-4);
   border-bottom: 1px solid var(--color-border-subtle);
   color: var(--color-foreground);
   vertical-align: middle;
 }
 
-.data-table tbody tr:last-child td {
+.data-table tbody tr:last-child td,
+.scrutiny-table tbody tr:last-child td {
   border-bottom: none;
 }
 
-.data-table tbody tr:hover td {
+.data-table tbody tr:hover td,
+.scrutiny-table tbody tr:hover td {
   background-color: var(--color-background);
 }
 
@@ -802,6 +856,21 @@
   color: var(--color-muted-foreground);
 }
 
+@media (max-width: 640px) {
+  .data-table-pagination {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-3);
+  }
+
+  .data-table-pagination > div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+}
+
 .scrutiny-filter-bar {
   display: flex;
   align-items: flex-end;
@@ -812,6 +881,24 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
+}
+
+@media (max-width: 640px) {
+  .scrutiny-filter-bar {
+    padding: var(--space-3);
+    gap: var(--space-2);
+  }
+
+  .scrutiny-filter-group {
+    flex: 1 1 100% !important;
+    width: 100%;
+  }
+
+  .scrutiny-filter-bar > div:last-child {
+    margin-left: 0 !important;
+    width: 100%;
+    justify-content: flex-end;
+  }
 }
 
 .scrutiny-filter-group {
@@ -992,10 +1079,19 @@
   grid-template-columns: repeat(1, minmax(0, 1fr));
 }
 .grid-cols-2 {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(1, minmax(0, 1fr));
 }
 .grid-cols-3 {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+@media (min-width: 640px) {
+  .grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 @media (min-width: 640px) {
@@ -1409,10 +1505,20 @@
 /* ==========================================================================
    Table Density & Identification Styling (DEF-UI-04)
    ========================================================================== */
-.table-responsive-wrapper {
+.table-responsive-wrapper,
+.table-responsive,
+.data-table-scroll,
+.table-container {
   width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+}
+
+.table-responsive-wrapper > table,
+.table-responsive > table,
+.data-table-scroll > table,
+.table-container > table {
+  min-width: 600px;
 }
 
 .app-id-cell {
@@ -1434,4 +1540,60 @@
   color: var(--color-muted-foreground);
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
+}
+
+/* ==========================================================================
+   Tab Navigation & Horizontal Touch Scroller (FE-04, FE-06)
+   ========================================================================== */
+[role='tablist'] {
+  display: flex;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  max-width: 100%;
+}
+
+[role='tablist']::-webkit-scrollbar {
+  display: none;
+}
+
+[role='tablist'] > [role='tab'],
+[role='tablist'] > button {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   Responsive Page Header & Card Layout
+   ========================================================================== */
+@media (max-width: 640px) {
+  .page-header {
+    margin-bottom: var(--space-4);
+  }
+
+  .page-header-actions {
+    width: 100%;
+  }
+
+  .page-header-actions > div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    width: 100%;
+  }
+
+  .page-header-title {
+    font-size: clamp(1.25rem, 5vw, 1.75rem);
+    word-break: break-word;
+  }
+
+  .card {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .wizard-nav-footer > .btn,
+  .wizard-nav-footer > button {
+    width: 100%;
+  }
 }

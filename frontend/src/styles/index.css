@@ -119,6 +119,8 @@ code,
 pre {
   font-family: var(--font-family-mono);
   font-size: var(--font-size-sm);
+  word-break: break-all;
+  overflow-wrap: anywhere;
 }
 
 /* Screen reader utility */
