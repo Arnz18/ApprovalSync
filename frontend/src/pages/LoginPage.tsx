@@ -103,7 +103,7 @@ const PORTALS: PortalOption[] = [
 ];
 
 export function LoginPage(): React.ReactElement {
-  const { login, isAuthenticated, status } = useAuth();
+  const { login, isAuthenticated, status, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
