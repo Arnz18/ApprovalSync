@@ -1,4 +1,4 @@
-# ApprovalSync — NiyamSetu
+# NiyamSetu
 
 ### Integrated AICTE Approval Workflow Automation, Scrutiny Management, and Compliance Monitoring System
 **Regulation Bureau • All India Council for Technical Education (AICTE)**  
@@ -44,7 +44,7 @@
 
 | Attribute | Specification |
 | :--- | :--- |
-| **Project Code / Repository** | **ApprovalSync** (`Arnz18/ApprovalSync`) |
+| **Project Code / Repository** | **NiyamSetu** (`Arnz18/NiyamSetu`) |
 | **Solution Brand** | **NiyamSetu (नियमसेतु)** — *Regulatory Bridge for Academic Governance* |
 | **Problem Statement ID** | **26262** |
 | **Title** | **Integrated AICTE Approval Workflow Automation, Compliance Monitoring and Alert Management System** |
@@ -56,7 +56,7 @@
 The regulatory approval process for technical institutions across India encompasses a multi-stage governance lifecycle: application drafting, documentary scrutiny, deficiency rectification, Expert Visit Committee (EVC) on-site inspections, Standing Hearing Committee (SHC) reviews, and Executive Council determinations. Under traditional, manual, or fragmented systems, administrative pendency, unmonitored land lease expirations, lack of stage-wise visibility, and communication delays compromise statutory timelines and institutional accountability.
 
 ### The Solution: NiyamSetu
-**ApprovalSync (NiyamSetu)** provides an enterprise-grade digital operating environment engineered specifically for the AICTE Approval Process Handbook (APH) governance lifecycle:
+**NiyamSetu** provides an enterprise-grade digital operating environment engineered specifically for the AICTE Approval Process Handbook (APH) governance lifecycle:
 - **Deterministic 11-State FSM Engine:** Strict state machine preventing unauthorized phase skipping and enforcing required documentary preconditions.
 - **Role-Bounded Stakeholder Desks:** Dedicated interfaces for Technical Institutions, Scrutiny Officers, Regional Officers, System Administrators, and Independent Auditors.
 - **Draft Resumption & Dynamic Intake:** 5-step application wizard with database-persisted draft progress in PostgreSQL JSONB and instant step resumption.
@@ -72,7 +72,7 @@ The regulatory approval process for technical institutions across India encompas
 
 ## 2. Live Production Deployment
 
-The current production release of ApprovalSync is deployed and accessible on an isolated AWS EC2 production host:
+The current production release of NiyamSetu is deployed and accessible on an isolated AWS EC2 production host:
 
 - **Public Web Application:** [http://15.252.122.13:8080](http://15.252.122.13:8080)
 - **Nginx Health Probe:** [http://15.252.122.13:8080/healthz](http://15.252.122.13:8080/healthz)
@@ -80,7 +80,7 @@ The current production release of ApprovalSync is deployed and accessible on an 
 - **Backend Liveness Probe:** [http://15.252.122.13:8080/api/v1/health/liveness](http://15.252.122.13:8080/api/v1/health/liveness)
 
 *Deployment Details:*
-- Configured via `compose.production.yaml` under project name `approvalsync`.
+- Configured via `compose.production.yaml` under project name `niyamsetu`.
 - Published on host port `8080` to safely coexist with existing EC2 services without port collisions.
 - PostgreSQL engine (port 5432) and NestJS backend API (port 3000) are internal-only within the isolated Docker bridge network.
 - For complete infrastructure maintenance and deployment procedures, see [DEPLOYMENT_AWS_EC2.md](DEPLOYMENT_AWS_EC2.md).
