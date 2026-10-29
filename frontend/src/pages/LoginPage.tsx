@@ -118,15 +118,17 @@ export function LoginPage(): React.ReactElement {
 
   // Determine return target from router location state
   const rawFrom = (location.state as { from?: { pathname?: string } | string } | null)?.from;
-  const returnTarget = rawFrom
+  const parsedTarget = rawFrom
     ? typeof rawFrom === 'string'
       ? getSafeReturnUrl(rawFrom)
       : getSafeReturnUrl(rawFrom.pathname)
     : null;
+  const returnTarget = parsedTarget && parsedTarget !== '/' ? parsedTarget : null;
 
   // If already authenticated, redirect to role designated landing
   if (isAuthenticated && status === 'AUTHENTICATED') {
-    const destination = returnTarget || selectedPortal.landingPath;
+    const destination =
+      returnTarget || (user ? getDefaultRouteForRole(user.role) : selectedPortal.landingPath);
     return <Navigate to={destination} replace />;
   }
 

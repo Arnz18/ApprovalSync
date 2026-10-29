@@ -72,14 +72,21 @@ describe('Role Permissions & Safe Navigation Helpers (FE-02)', () => {
   it('determines primary landing route and role display title per role', () => {
     expect(getDefaultRouteForRole(UserRole.INSTITUTION_USER)).toBe('/dashboard');
     expect(getDefaultRouteForRole(UserRole.SCRUTINY_OFFICER)).toBe('/scrutiny');
+    expect(getDefaultRouteForRole(UserRole.REGIONAL_OFFICER)).toBe('/dashboard');
     expect(getDefaultRouteForRole(UserRole.AUDITOR)).toBe('/audit');
     expect(getDefaultRouteForRole(UserRole.EVC_INSPECTOR)).toBe('/evc');
     expect(getDefaultRouteForRole(UserRole.SYSTEM_ADMIN)).toBe('/dashboard');
+    expect(getDefaultRouteForRole(UserRole.BUREAU_HEAD)).toBe('/dashboard');
+    expect(getDefaultRouteForRole(UserRole.SHC_SAC_MEMBER)).toBe('/dashboard');
 
     expect(formatRoleName(UserRole.INSTITUTION_USER)).toBe('Institution Representative');
     expect(formatRoleName(UserRole.SCRUTINY_OFFICER)).toBe('Scrutiny Officer');
+    expect(formatRoleName(UserRole.REGIONAL_OFFICER)).toBe('Regional Officer');
     expect(formatRoleName(UserRole.SYSTEM_ADMIN)).toBe('System Administrator');
     expect(formatRoleName(UserRole.AUDITOR)).toBe('Independent Auditor');
+    expect(formatRoleName(UserRole.EVC_INSPECTOR)).toBe('EVC Inspector');
+    expect(formatRoleName(UserRole.BUREAU_HEAD)).toBe('Bureau Head');
+    expect(formatRoleName(UserRole.SHC_SAC_MEMBER)).toBe('SHC / SAC Member');
   });
 });
 
