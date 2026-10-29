@@ -1698,3 +1698,97 @@ table td {
 .thumb-icon {
   color: var(--color-foreground);
 }
+
+/* ==========================================================================
+   Print Stylesheet — Application Dossier & Executive PDF Print Layout
+   ========================================================================== */
+@media print {
+  /* Suppress non-printable interface chrome and interactive elements */
+  .app-header,
+  .app-sidebar,
+  .mobile-nav-backdrop,
+  .mobile-nav-drawer,
+  .app-footer,
+  .skip-to-content,
+  .btn,
+  button,
+  .breadcrumbs,
+  nav[aria-label='Breadcrumb'],
+  nav[aria-label='Breadcrumbs'],
+  div[role='tablist'],
+  .theme-toggle,
+  .header-actions,
+  .header-mobile-toggle,
+  .advisory-notice,
+  .human-sovereignty-notice,
+  .modal-backdrop,
+  .review-actions-bar {
+    display: none !important;
+  }
+
+  /* Reset layout constraints for standard page flow */
+  html,
+  body,
+  .app-root,
+  .app-body,
+  .app-main,
+  .app-content {
+    background: #ffffff !important;
+    color: #111827 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: auto !important;
+    overflow: visible !important;
+    box-shadow: none !important;
+  }
+
+  /* Ensure dossier cards and tables have clean printing borders and no page breaks across cards */
+  .card,
+  .dossier-report-container,
+  .table-container,
+  .table-responsive-wrapper {
+    box-shadow: none !important;
+    border: 1px solid #d1d5db !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    margin-bottom: 1rem !important;
+    background: #ffffff !important;
+    color: #111827 !important;
+  }
+
+  table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+  }
+
+  th,
+  td {
+    border: 1px solid #e5e7eb !important;
+    padding: 6px 10px !important;
+    color: #111827 !important;
+    background: #ffffff !important;
+  }
+
+  th {
+    background-color: #f3f4f6 !important;
+    font-weight: 600 !important;
+  }
+
+  /* Force exact color reproduction on print devices */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Clean print heading styling */
+  h1,
+  h2,
+  h3,
+  h4 {
+    color: #111827 !important;
+    page-break-after: avoid;
+    break-after: avoid;
+  }
+}

@@ -8,6 +8,7 @@ import {
   Clock,
   RefreshCw,
   ChevronRight,
+  Printer,
 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
@@ -148,6 +149,18 @@ export const CaseHeader: React.FC<CaseHeaderProps> = ({ application, onRefresh, 
         </Button>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => window.print()}
+            aria-label="Print or download dossier PDF"
+            title="Print or download dossier evidence report as PDF"
+          >
+            <Printer size={14} aria-hidden="true" />
+            <span>Print Dossier PDF</span>
+          </Button>
+
           <Button
             type="button"
             variant="ghost"
