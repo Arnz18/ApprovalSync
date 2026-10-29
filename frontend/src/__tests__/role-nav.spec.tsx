@@ -25,11 +25,13 @@ describe('Role Permissions & Safe Navigation Helpers (FE-02)', () => {
     // INSTITUTION_USER
     expect(canRoleAccessRoute(UserRole.INSTITUTION_USER, '/applications')).toBe(true);
     expect(canRoleAccessRoute(UserRole.INSTITUTION_USER, '/')).toBe(true);
+    expect(canRoleAccessRoute(UserRole.INSTITUTION_USER, '/dossier')).toBe(true);
     expect(canRoleAccessRoute(UserRole.INSTITUTION_USER, '/scrutiny')).toBe(false);
     expect(canRoleAccessRoute(UserRole.INSTITUTION_USER, '/audit')).toBe(false);
 
     // SCRUTINY_OFFICER
     expect(canRoleAccessRoute(UserRole.SCRUTINY_OFFICER, '/scrutiny')).toBe(true);
+    expect(canRoleAccessRoute(UserRole.SCRUTINY_OFFICER, '/dossier')).toBe(true);
     expect(canRoleAccessRoute(UserRole.SCRUTINY_OFFICER, '/verification')).toBe(true);
     expect(canRoleAccessRoute(UserRole.SCRUTINY_OFFICER, '/rules')).toBe(true);
     expect(canRoleAccessRoute(UserRole.SCRUTINY_OFFICER, '/audit')).toBe(false);

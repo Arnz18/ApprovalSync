@@ -70,6 +70,22 @@ export const ROUTE_PERMISSIONS: Record<string, RoutePermissionConfig> = {
     ],
     description: 'Documentary scrutiny, AI anomaly review, and officer disposition.',
   },
+  '/dossier': {
+    path: '/dossier',
+    label: 'Application Dossier',
+    allowedRoles: [
+      UserRole.INSTITUTION_USER,
+      UserRole.SCRUTINY_OFFICER,
+      UserRole.REGIONAL_OFFICER,
+      UserRole.EVC_INSPECTOR,
+      UserRole.SHC_SAC_MEMBER,
+      UserRole.BUREAU_HEAD,
+      UserRole.SYSTEM_ADMIN,
+      UserRole.AUDITOR,
+    ],
+    description:
+      'Consolidated application dossier, document verification matrix, and audit proofs.',
+  },
   '/verification': {
     path: '/verification',
     label: 'Document AI & Checks',

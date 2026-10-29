@@ -84,6 +84,15 @@ export function AppRoutes(): React.ReactElement {
         />
 
         <Route
+          path="dossier/:applicationId"
+          element={
+            <ProtectedRoute allowedRoles={ROUTE_PERMISSIONS['/dossier'].allowedRoles}>
+              <CaseDetailPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
           path="verification"
           element={
             <ProtectedRoute allowedRoles={ROUTE_PERMISSIONS['/verification'].allowedRoles}>
