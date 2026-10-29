@@ -426,7 +426,7 @@ export function DocumentUploadStep({
                       <div className="text-right">
                         <div className="flex items-center justify-end gap-1.5 text-success font-medium text-xs">
                           <CheckCircle2 size={14} />
-                          <span>Uploaded & Stored</span>
+                          <span>Uploaded &amp; Stored</span>
                         </div>
                         <span className="text-[11px] text-muted-foreground block font-mono">
                           {uploaded.fileName} ({formatBytes(uploaded.fileSizeBytes)})
@@ -435,6 +435,33 @@ export function DocumentUploadStep({
                           SHA: {uploaded.sha256Checksum?.slice(0, 16)}...
                         </span>
                       </div>
+                      <input
+                        type="file"
+                        ref={(el) => {
+                          fileInputRefs.current[req.documentType] = el;
+                        }}
+                        onChange={(e) => {
+                          const file = e.target.files?.[0] || null;
+                          handleFileChange(req.documentType, file);
+                        }}
+                        accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+                        style={{ display: 'none' }}
+                        tabIndex={-1}
+                        aria-hidden="true"
+                        id={`file-upload-${req.documentType}`}
+                        disabled={isUploading || isSaving}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => fileInputRefs.current[req.documentType]?.click()}
+                        disabled={isSaving}
+                        title="Replace document"
+                        aria-label={`Replace document for ${req.displayName}`}
+                      >
+                        Replace
+                      </Button>
                       <Button
                         type="button"
                         variant="ghost"
@@ -449,7 +476,7 @@ export function DocumentUploadStep({
                     </div>
                   ) : (
                     <div>
-                      {/* Hidden native input */}
+                      {/* Single accessible file input hidden from visual layout */}
                       <input
                         type="file"
                         ref={(el) => {
@@ -460,7 +487,9 @@ export function DocumentUploadStep({
                           handleFileChange(req.documentType, file);
                         }}
                         accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
-                        className="hidden"
+                        style={{ display: 'none' }}
+                        tabIndex={-1}
+                        aria-hidden="true"
                         id={`file-upload-${req.documentType}`}
                         disabled={isUploading || isSaving}
                       />
@@ -499,7 +528,7 @@ export function DocumentUploadStep({
                           onClick={() => fileInputRefs.current[req.documentType]?.click()}
                           disabled={isSaving}
                         >
-                          Select & Upload
+                          Select &amp; Upload
                         </Button>
                       )}
                     </div>
