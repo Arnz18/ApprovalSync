@@ -185,7 +185,24 @@ export function AuditorAdminDashboard({
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
+        <div style={{ display: 'flex', gap: 'var(--space-2)', flexWrap: 'wrap' }}>
+          {isAuditor && (
+            <Link to="/audit" className="btn btn-outline btn-sm">
+              <Shield size={14} aria-hidden="true" />
+              <span>Audit Ledger &amp; Proofs</span>
+            </Link>
+          )}
+          {isAdmin && (
+            <>
+              <Link to="/scrutiny" className="btn btn-outline btn-sm">
+                <span>Scrutiny Desk</span>
+              </Link>
+              <Link to="/audit" className="btn btn-outline btn-sm">
+                <Shield size={14} aria-hidden="true" />
+                <span>Audit Ledger</span>
+              </Link>
+            </>
+          )}
           {isEvc && (
             <Link to="/evc" className="btn btn-primary btn-sm">
               <MapPin size={14} aria-hidden="true" />

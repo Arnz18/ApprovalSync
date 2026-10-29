@@ -203,6 +203,8 @@ describe('DashboardPage & Role Dashboards (FE-05)', () => {
       expect(screen.getByText('AICTE-2026-MGMT-002')).toBeInTheDocument();
       expect(screen.getByText('AICTE-2026-POLY-003')).toBeInTheDocument();
       expect(screen.getByText(/Regulatory Clarification Required/i)).toBeInTheDocument();
+      expect(screen.getByText(/Draft Resumption/i)).toBeInTheDocument();
+      expect(screen.getByText(/Resume AICTE-2026-POLY-003/i)).toBeInTheDocument();
     });
 
     // Escalation list should NOT be rendered for institution users

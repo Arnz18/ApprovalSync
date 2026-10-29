@@ -74,6 +74,8 @@ export function InstitutionDashboard({
   const actionRequiredApps = applications.filter(
     (a) => a.status === ApplicationStatus.DEFICIENCY_ISSUED,
   );
+  // Draft applications available for resumption
+  const draftApps = applications.filter((a) => a.status === ApplicationStatus.DRAFT);
 
   const [copiedId, setCopiedId] = React.useState<string | null>(null);
 
@@ -137,6 +139,31 @@ export function InstitutionDashboard({
           {actionRequiredApps.length === 1 ? 'application' : 'applications'} with active deficiency
           notices. Please inspect the deficiencies and submit required documents before the
           statutory window expires.
+        </Alert>
+      )}
+
+      {/* Active Draft Resumption Notice */}
+      {draftApps.length > 0 && (
+        <Alert variant="info" title={`Draft Resumption (${draftApps.length} saved)`}>
+          <div>
+            <p style={{ margin: '0 0 var(--space-2) 0' }}>
+              You have incomplete application drafts saved in the system. Select a draft to continue
+              uploading documents and finalizing category checklists.
+            </p>
+            <div style={{ display: 'flex', gap: 'var(--space-2)', flexWrap: 'wrap' }}>
+              {draftApps.slice(0, 3).map((draft) => (
+                <Link
+                  key={draft.id}
+                  to={`/applications?draftId=${draft.id}`}
+                  className="btn btn-primary btn-sm"
+                  style={{ textDecoration: 'none' }}
+                >
+                  <FileCheck size={14} aria-hidden="true" />
+                  <span>Resume {draft.applicationNumber}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
         </Alert>
       )}
 
@@ -386,7 +413,7 @@ export function InstitutionDashboard({
                             >
                               {app.status === ApplicationStatus.DRAFT ? (
                                 <Link
-                                  to="/applications"
+                                  to={`/applications?draftId=${app.id}`}
                                   className="btn btn-outline btn-sm"
                                   style={{ padding: '2px 8px', fontSize: '0.6875rem' }}
                                 >
