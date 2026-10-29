@@ -43,6 +43,7 @@
    ========================================================================== */
 .app-header {
   height: var(--header-height);
+  flex-shrink: 0;
   background-color: var(--color-header-bg, var(--color-surface));
   border-bottom: 1px solid var(--color-border);
   position: sticky;
@@ -56,6 +57,7 @@
   width: 100%;
   max-width: 100vw;
   box-sizing: border-box;
+  backdrop-filter: blur(8px);
 }
 
 @media (min-width: 768px) {
@@ -177,6 +179,9 @@
 .app-body {
   display: flex;
   flex: 1 1 auto;
+  min-height: calc(100vh - var(--header-height));
+  width: 100%;
+  max-width: 100vw;
 }
 
 .app-sidebar {
@@ -330,6 +335,7 @@
   min-width: 0;
   margin: 0 auto;
   box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 @media (min-width: 768px) {
