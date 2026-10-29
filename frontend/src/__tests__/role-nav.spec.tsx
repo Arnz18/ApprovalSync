@@ -40,8 +40,8 @@ describe('Role Permissions & Safe Navigation Helpers (FE-02)', () => {
     expect(canRoleAccessRoute(UserRole.AUDITOR, '/rules')).toBe(true);
     expect(canRoleAccessRoute(UserRole.AUDITOR, '/applications')).toBe(false);
 
-    // SYSTEM_ADMIN has access to all operational workspaces
-    expect(canRoleAccessRoute(UserRole.SYSTEM_ADMIN, '/applications')).toBe(true);
+    // SYSTEM_ADMIN has access to all operational review workspaces (applications intake is restricted to institutions)
+    expect(canRoleAccessRoute(UserRole.SYSTEM_ADMIN, '/applications')).toBe(false);
     expect(canRoleAccessRoute(UserRole.SYSTEM_ADMIN, '/scrutiny')).toBe(true);
     expect(canRoleAccessRoute(UserRole.SYSTEM_ADMIN, '/audit')).toBe(true);
 
@@ -70,11 +70,11 @@ describe('Role Permissions & Safe Navigation Helpers (FE-02)', () => {
   });
 
   it('determines primary landing route and role display title per role', () => {
-    expect(getDefaultRouteForRole(UserRole.INSTITUTION_USER)).toBe('/applications');
+    expect(getDefaultRouteForRole(UserRole.INSTITUTION_USER)).toBe('/dashboard');
     expect(getDefaultRouteForRole(UserRole.SCRUTINY_OFFICER)).toBe('/scrutiny');
     expect(getDefaultRouteForRole(UserRole.AUDITOR)).toBe('/audit');
     expect(getDefaultRouteForRole(UserRole.EVC_INSPECTOR)).toBe('/evc');
-    expect(getDefaultRouteForRole(UserRole.SYSTEM_ADMIN)).toBe('/');
+    expect(getDefaultRouteForRole(UserRole.SYSTEM_ADMIN)).toBe('/dashboard');
 
     expect(formatRoleName(UserRole.INSTITUTION_USER)).toBe('Institution Representative');
     expect(formatRoleName(UserRole.SCRUTINY_OFFICER)).toBe('Scrutiny Officer');
@@ -164,7 +164,7 @@ describe('Header User Identity & Logout Action (FE-02)', () => {
     expect(screen.getByText('Dr. Jane Scrutiny')).toBeInTheDocument();
     expect(screen.getByText('Scrutiny Officer')).toBeInTheDocument();
 
-    const logoutBtn = screen.getByRole('button', { name: /Sign out of ApprovalSync/i });
+    const logoutBtn = screen.getByRole('button', { name: /Sign out/i });
     expect(logoutBtn).toBeInTheDocument();
 
     fireEvent.click(logoutBtn);

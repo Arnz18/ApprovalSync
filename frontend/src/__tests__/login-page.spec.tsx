@@ -1,5 +1,5 @@
 /**
- * ApprovalSync — LoginPage Component & Form Validation Tests
+ * NiyamSetu / AICTE Approval Portal — LoginPage Component & Form Validation Tests
  * Milestone: FE-02
  * Tests form rendering, accessibility, client-side validation, demo credentials,
  * pending states, and error envelopes.
@@ -55,33 +55,36 @@ describe('LoginPage Component (FE-02)', () => {
   it('renders institutional login branding, fields, and accessible labels', () => {
     renderLoginPage();
 
-    expect(screen.getByRole('heading', { name: /Institutional Sign In/i })).toBeInTheDocument();
-    expect(screen.getByLabelText(/Official Email Address/i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /Sign In/i })).toBeInTheDocument();
+    expect(screen.getByLabelText(/Official.*Email/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/^Password/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Sign In to Workspace/i })).toBeInTheDocument();
-    expect(screen.getByText(/Prototype/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Sign In|Enter/i })).toBeInTheDocument();
+    expect(screen.getByText(/Regulation Bureau/i)).toBeInTheDocument();
   });
 
   it('validates required fields inline on empty submit', async () => {
     renderLoginPage();
 
-    const submitBtn = screen.getByRole('button', { name: /Sign In to Workspace/i });
+    fireEvent.change(screen.getByLabelText(/Official.*Email/i), { target: { value: '' } });
+    fireEvent.change(screen.getByLabelText(/^Password/i), { target: { value: '' } });
+
+    const submitBtn = screen.getByRole('button', { name: /Sign In|Enter/i });
     fireEvent.click(submitBtn);
 
-    expect(await screen.findByText(/Official email address is required/i)).toBeInTheDocument();
+    expect(await screen.findByText(/email address is required/i)).toBeInTheDocument();
     expect(screen.getByText(/Password is required/i)).toBeInTheDocument();
   });
 
   it('validates email format before submitting to backend', async () => {
     renderLoginPage();
 
-    const emailInput = screen.getByLabelText(/Official Email Address/i);
+    const emailInput = screen.getByLabelText(/Official.*Email/i);
     fireEvent.change(emailInput, { target: { value: 'not-an-email' } });
 
     const passwordInput = screen.getByLabelText(/^Password/i);
     fireEvent.change(passwordInput, { target: { value: 'SomePass123' } });
 
-    fireEvent.click(screen.getByRole('button', { name: /Sign In to Workspace/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Sign In|Enter/i }));
 
     expect(await screen.findByText(/Please enter a valid email address/i)).toBeInTheDocument();
   });
@@ -105,10 +108,10 @@ describe('LoginPage Component (FE-02)', () => {
   it('fills synthetic development credentials on click', () => {
     renderLoginPage();
 
-    const fillBtn = screen.getByRole('button', { name: /Use Account/i });
+    const fillBtn = screen.getByRole('button', { name: /Reload Demo Defaults/i });
     fireEvent.click(fillBtn);
 
-    const emailInput = screen.getByLabelText(/Official Email Address/i);
+    const emailInput = screen.getByLabelText(/Official.*Email/i);
     const passwordInput = screen.getByLabelText(/^Password/i);
 
     expect(emailInput).toHaveValue('demo.institution@synthetic.approvalsync.local');
@@ -128,8 +131,8 @@ describe('LoginPage Component (FE-02)', () => {
     const mockLogin = vi.fn().mockResolvedValue(mockUser);
     renderLoginPage({ login: mockLogin });
 
-    fireEvent.click(screen.getByRole('button', { name: /Use Account/i }));
-    fireEvent.click(screen.getByRole('button', { name: /Sign In to Workspace/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Reload Demo Defaults/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Sign In|Enter/i }));
 
     await waitFor(() => {
       expect(mockLogin).toHaveBeenCalledWith({
@@ -150,14 +153,14 @@ describe('LoginPage Component (FE-02)', () => {
 
     renderLoginPage({ login: mockLogin });
 
-    fireEvent.change(screen.getByLabelText(/Official Email Address/i), {
+    fireEvent.change(screen.getByLabelText(/Official.*Email/i), {
       target: { value: 'wrong@example.com' },
     });
     fireEvent.change(screen.getByLabelText(/^Password/i), {
       target: { value: 'WrongPass' },
     });
 
-    fireEvent.click(screen.getByRole('button', { name: /Sign In to Workspace/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Sign In|Enter/i }));
 
     await waitFor(() => {
       expect(screen.getByText('Authentication Failed')).toBeInTheDocument();
@@ -177,8 +180,8 @@ describe('LoginPage Component (FE-02)', () => {
 
     renderLoginPage({ login: mockLogin });
 
-    fireEvent.click(screen.getByRole('button', { name: /Use Account/i }));
-    fireEvent.click(screen.getByRole('button', { name: /Sign In to Workspace/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Reload Demo Defaults/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Sign In|Enter/i }));
 
     await waitFor(() => {
       expect(

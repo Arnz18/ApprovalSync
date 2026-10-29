@@ -121,8 +121,8 @@ export function SubmissionConfirmationStep({
               <span>Next Steps: Regulatory Scrutiny & Evaluation Workflow</span>
             </div>
             <p className="leading-relaxed">
-              In accordance with AICTE governance norms and the portal Human Sovereignty
-              principle (ADR-004):
+              In accordance with AICTE governance norms and the portal Human Sovereignty principle
+              (ADR-004):
             </p>
             <ol className="list-decimal list-inside space-y-1.5 pl-1">
               <li>

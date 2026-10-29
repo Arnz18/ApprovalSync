@@ -69,4 +69,3 @@ export const notificationsService = {
     return apiClient.post<SweepResult>('/notifications/sweep', {});
   },
 };
-

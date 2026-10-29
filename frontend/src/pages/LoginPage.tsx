@@ -411,7 +411,9 @@ export function LoginPage(): React.ReactElement {
         <div style={{ maxWidth: '480px', margin: '0 auto' }}>
           <Card>
             <CardHeader style={{ padding: '1.25rem 1.5rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+              >
                 <h2
                   style={{
                     fontSize: '1.125rem',
@@ -443,7 +445,8 @@ export function LoginPage(): React.ReactElement {
                   marginBottom: 0,
                 }}
               >
-                Lands on: <strong>{selectedPortal.landingLabel}</strong> ({selectedPortal.landingPath})
+                Lands on: <strong>{selectedPortal.landingLabel}</strong> (
+                {selectedPortal.landingPath})
               </p>
             </CardHeader>
 
@@ -566,9 +569,7 @@ export function LoginPage(): React.ReactElement {
                     leftIcon={<Lock size={16} aria-hidden="true" />}
                     rightIcon={<ArrowRight size={16} aria-hidden="true" />}
                   >
-                    {isSubmitting
-                      ? 'Authenticating...'
-                      : `Enter ${selectedPortal.portalName}`}
+                    {isSubmitting ? 'Authenticating...' : `Enter ${selectedPortal.portalName}`}
                   </Button>
                 </div>
               </form>

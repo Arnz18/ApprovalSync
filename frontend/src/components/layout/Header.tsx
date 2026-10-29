@@ -107,7 +107,7 @@ export function Header({ onToggleMobileNav, isMobileNavOpen }: HeaderProps): Rea
             }}
             aria-hidden="true"
           />
-          <span>{apiStatus === 'online' ? 'System Active' : 'System Standby'}</span>
+          <span>{apiStatus === 'online' ? 'API Online' : 'API Standby'}</span>
         </div>
 
         <span

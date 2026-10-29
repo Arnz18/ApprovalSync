@@ -152,7 +152,7 @@ export function HomePage(): React.ReactElement {
               style={{ fontSize: 'var(--font-size-xs)', justifyContent: 'space-between' }}
             >
               <span style={{ color: 'var(--color-muted-foreground)' }}>Institutional Dossier</span>
-              <Link to={isInstitution ? "/applications" : "/dashboard"} style={{ fontWeight: 600 }}>
+              <Link to={isInstitution ? '/applications' : '/dashboard'} style={{ fontWeight: 600 }}>
                 View Details &rarr;
               </Link>
             </CardFooter>

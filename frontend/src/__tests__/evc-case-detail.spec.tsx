@@ -193,6 +193,7 @@ describe('EVC Case Detail & Inspection Workspace (FE-06)', () => {
     vi.spyOn(complianceService, 'getApplicationCompliance').mockResolvedValue(mockCompliance);
     vi.spyOn(complianceService, 'evaluateCompliance').mockResolvedValue(mockCompliance);
     vi.spyOn(workflowService, 'getAllowedTransitions').mockResolvedValue(mockAllowedTransitions);
+    vi.spyOn(workflowService, 'getEvcSchedule').mockResolvedValue(null);
     vi.spyOn(workflowService, 'getTimeline').mockResolvedValue({
       items: mockTimelineEvents,
       pagination: {
@@ -319,20 +320,11 @@ describe('EVC Case Detail & Inspection Workspace (FE-06)', () => {
     await user.click(schedulingTab);
 
     await waitFor(() => {
-      expect(
-        screen.getByText(/Expert Roster & Scheduling Persistence Boundary/i),
-      ).toBeInTheDocument();
-      expect(screen.getByText('EVC Inspection Assignment Overview')).toBeInTheDocument();
+      expect(screen.getAllByText(/Expert Visit Committee \(EVC\)/i).length).toBeGreaterThan(0);
+      expect(screen.getByText(/Expert Committee Members/i)).toBeInTheDocument();
     });
 
-    // Check disabled button with lock explanation
-    const scheduleBtn = screen.getByRole('button', { name: /schedule specific expert visit/i });
-    expect(scheduleBtn).toBeDisabled();
-
-    // Check proposed backend contract
-    expect(
-      screen.getByText(/Proposed Backend Contract Proposal: Expert Roster & Assignment API/i),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Persist EVC Schedule/i })).toBeInTheDocument();
   });
 
   it('switches to Committee Review & Hearing (SHC) tab and verifies authorized decisions and escalation provenance', async () => {

@@ -45,7 +45,9 @@ export const ExpertSchedulingView: React.FC<ExpertSchedulingViewProps> = ({
 
   // Form state
   const [visitDate, setVisitDate] = useState<string>('');
-  const [visitType, setVisitType] = useState<'PHYSICAL_VISIT' | 'VIRTUAL_VISIT' | 'HYBRID'>('PHYSICAL_VISIT');
+  const [visitType, setVisitType] = useState<'PHYSICAL_VISIT' | 'VIRTUAL_VISIT' | 'HYBRID'>(
+    'PHYSICAL_VISIT',
+  );
   const [committeeMembers, setCommitteeMembers] = useState<CommitteeExpertMember[]>([
     {
       name: 'Prof. Ramesh K. Verma',
@@ -74,32 +76,39 @@ export const ExpertSchedulingView: React.FC<ExpertSchedulingViewProps> = ({
     'PENDING' | 'RECOMMENDED' | 'DEFICIENCIES_NOTED' | 'REJECTED'
   >('PENDING');
 
-  const loadSchedule = async () => {
-    try {
-      setLoading(true);
-      const data = await workflowService.getEvcSchedule(application.id);
-      if (data) {
-        setSchedule(data);
-        setVisitDate(data.visitDate ? data.visitDate.substring(0, 10) : '');
-        setVisitType(data.visitType || 'PHYSICAL_VISIT');
-        setCommitteeMembers(data.committeeMembers && data.committeeMembers.length > 0 ? data.committeeMembers : committeeMembers);
-        setVisitNotes(data.visitNotes || '');
-        setOutcomeRecommendation(data.outcomeRecommendation || 'PENDING');
-      } else {
-        const nextWeek = new Date();
-        nextWeek.setDate(nextWeek.getDate() + 7);
-        setVisitDate(nextWeek.toISOString().substring(0, 10));
-        setIsEditing(true);
-      }
-    } catch {
-      setErrorMessage('Failed to load authoritative EVC schedule.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    loadSchedule();
+    let isMounted = true;
+    const fetchSchedule = async () => {
+      try {
+        setLoading(true);
+        const data = await workflowService.getEvcSchedule(application.id);
+        if (!isMounted) return;
+        if (data) {
+          setSchedule(data);
+          setVisitDate(data.visitDate ? data.visitDate.substring(0, 10) : '');
+          setVisitType(data.visitType || 'PHYSICAL_VISIT');
+          if (data.committeeMembers && data.committeeMembers.length > 0) {
+            setCommitteeMembers(data.committeeMembers);
+          }
+          setVisitNotes(data.visitNotes || '');
+          setOutcomeRecommendation(data.outcomeRecommendation || 'PENDING');
+        } else {
+          const nextWeek = new Date();
+          nextWeek.setDate(nextWeek.getDate() + 7);
+          setVisitDate(nextWeek.toISOString().substring(0, 10));
+          setIsEditing(true);
+        }
+      } catch {
+        if (isMounted) setErrorMessage('Failed to load authoritative EVC schedule.');
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    fetchSchedule();
+    return () => {
+      isMounted = false;
+    };
   }, [application.id]);
 
   const handleAddMember = () => {
@@ -119,7 +128,11 @@ export const ExpertSchedulingView: React.FC<ExpertSchedulingViewProps> = ({
     setCommitteeMembers(committeeMembers.filter((_, i) => i !== index));
   };
 
-  const handleMemberChange = (index: number, field: keyof CommitteeExpertMember, value: unknown) => {
+  const handleMemberChange = (
+    index: number,
+    field: keyof CommitteeExpertMember,
+    value: unknown,
+  ) => {
     const updated = [...committeeMembers];
     updated[index] = { ...updated[index], [field]: value };
     setCommitteeMembers(updated);
@@ -160,7 +173,9 @@ export const ExpertSchedulingView: React.FC<ExpertSchedulingViewProps> = ({
       const saved = await workflowService.saveEvcSchedule(application.id, payload);
       setSchedule(saved);
       setIsEditing(false);
-      setSuccessMessage('EVC Committee visit and roster scheduled successfully. Alert notification issued.');
+      setSuccessMessage(
+        'EVC Committee visit and roster scheduled successfully. Alert notification issued.',
+      );
       if (onScheduleUpdated) {
         onScheduleUpdated();
       }
@@ -191,13 +206,21 @@ export const ExpertSchedulingView: React.FC<ExpertSchedulingViewProps> = ({
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
       {/* 1. Regulatory Context Banner */}
       <div>
-        <Alert variant="info" title="AICTE Regulation Bureau • Expert Visit Committee (EVC) Administration">
+        <Alert
+          variant="info"
+          title="AICTE Regulation Bureau • Expert Visit Committee (EVC) Administration"
+        >
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--space-2)' }}>
-            <Compass size={18} aria-hidden="true" style={{ flexShrink: 0, marginTop: '2px', color: '#0284c7' }} />
+            <Compass
+              size={18}
+              aria-hidden="true"
+              style={{ flexShrink: 0, marginTop: '2px', color: '#0284c7' }}
+            />
             <span>
-              <strong>Expert Visit Committee (EVC) Module:</strong> Synchronized physical and virtual inspection
-              scheduling, expert roster conflict-of-interest declarations, and statutory committee recommendation logging.
-              All assignments issue real-time notifications to the regional inspection cell and applicant institution.
+              <strong>Expert Visit Committee (EVC) Module:</strong> Synchronized physical and
+              virtual inspection scheduling, expert roster conflict-of-interest declarations, and
+              statutory committee recommendation logging. All assignments issue real-time
+              notifications to the regional inspection cell and applicant institution.
             </span>
           </div>
         </Alert>
@@ -271,7 +294,13 @@ export const ExpertSchedulingView: React.FC<ExpertSchedulingViewProps> = ({
               border: '1px solid var(--color-border)',
             }}
           >
-            <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-muted-foreground)', marginBottom: '4px' }}>
+            <div
+              style={{
+                fontSize: 'var(--font-size-xs)',
+                color: 'var(--color-muted-foreground)',
+                marginBottom: '4px',
+              }}
+            >
               APPLICATION NUMBER
             </div>
             <div style={{ fontWeight: 600, fontSize: 'var(--font-size-sm)' }}>
@@ -287,10 +316,24 @@ export const ExpertSchedulingView: React.FC<ExpertSchedulingViewProps> = ({
               border: '1px solid var(--color-border)',
             }}
           >
-            <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-muted-foreground)', marginBottom: '4px' }}>
+            <div
+              style={{
+                fontSize: 'var(--font-size-xs)',
+                color: 'var(--color-muted-foreground)',
+                marginBottom: '4px',
+              }}
+            >
               SCHEDULED VISIT DATE
             </div>
-            <div style={{ fontWeight: 600, fontSize: 'var(--font-size-sm)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <div
+              style={{
+                fontWeight: 600,
+                fontSize: 'var(--font-size-sm)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+              }}
+            >
               <Calendar size={14} style={{ color: 'var(--color-primary)' }} />
               {schedule?.visitDate
                 ? new Date(schedule.visitDate).toLocaleDateString('en-IN', {
@@ -311,7 +354,13 @@ export const ExpertSchedulingView: React.FC<ExpertSchedulingViewProps> = ({
               border: '1px solid var(--color-border)',
             }}
           >
-            <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-muted-foreground)', marginBottom: '4px' }}>
+            <div
+              style={{
+                fontSize: 'var(--font-size-xs)',
+                color: 'var(--color-muted-foreground)',
+                marginBottom: '4px',
+              }}
+            >
               INSPECTION MODE
             </div>
             <div style={{ fontWeight: 600, fontSize: 'var(--font-size-sm)' }}>
@@ -327,7 +376,13 @@ export const ExpertSchedulingView: React.FC<ExpertSchedulingViewProps> = ({
               border: '1px solid var(--color-border)',
             }}
           >
-            <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-muted-foreground)', marginBottom: '4px' }}>
+            <div
+              style={{
+                fontSize: 'var(--font-size-xs)',
+                color: 'var(--color-muted-foreground)',
+                marginBottom: '4px',
+              }}
+            >
               OUTCOME RECOMMENDATION
             </div>
             <div style={{ fontWeight: 600, fontSize: 'var(--font-size-sm)' }}>
@@ -338,10 +393,10 @@ export const ExpertSchedulingView: React.FC<ExpertSchedulingViewProps> = ({
                       schedule.outcomeRecommendation === 'RECOMMENDED'
                         ? '#16a34a'
                         : schedule.outcomeRecommendation === 'DEFICIENCIES_NOTED'
-                        ? '#d97706'
-                        : schedule.outcomeRecommendation === 'REJECTED'
-                        ? '#dc2626'
-                        : '#475569',
+                          ? '#d97706'
+                          : schedule.outcomeRecommendation === 'REJECTED'
+                            ? '#dc2626'
+                            : '#475569',
                   }}
                 >
                   {schedule.outcomeRecommendation}
@@ -368,7 +423,11 @@ export const ExpertSchedulingView: React.FC<ExpertSchedulingViewProps> = ({
             size="sm"
             onClick={() => setIsEditing(!isEditing)}
           >
-            {isEditing ? 'Cancel Edit' : schedule ? 'Update Visit & Committee Details' : 'Schedule EVC Committee Visit'}
+            {isEditing
+              ? 'Cancel Edit'
+              : schedule
+                ? 'Update Visit & Committee Details'
+                : 'Schedule EVC Committee Visit'}
           </Button>
         </div>
       </Card>
@@ -376,7 +435,14 @@ export const ExpertSchedulingView: React.FC<ExpertSchedulingViewProps> = ({
       {/* 3. Existing Committee Summary (When Not Editing and Schedule Exists) */}
       {!isEditing && schedule && (
         <Card style={{ padding: 'var(--space-5)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', marginBottom: 'var(--space-4)' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 'var(--space-2)',
+              marginBottom: 'var(--space-4)',
+            }}
+          >
             <Users size={20} style={{ color: 'var(--color-primary)' }} />
             <h3 style={{ fontSize: 'var(--font-size-base)', fontWeight: 600, margin: 0 }}>
               Assigned Expert Committee Roster ({schedule.committeeMembers.length} Members)
@@ -390,7 +456,9 @@ export const ExpertSchedulingView: React.FC<ExpertSchedulingViewProps> = ({
                   <th style={{ padding: '8px 12px', fontWeight: 600 }}>Role</th>
                   <th style={{ padding: '8px 12px', fontWeight: 600 }}>Expert Name</th>
                   <th style={{ padding: '8px 12px', fontWeight: 600 }}>Designation</th>
-                  <th style={{ padding: '8px 12px', fontWeight: 600 }}>Institution / Organization</th>
+                  <th style={{ padding: '8px 12px', fontWeight: 600 }}>
+                    Institution / Organization
+                  </th>
                   <th style={{ padding: '8px 12px', fontWeight: 600 }}>COI Status</th>
                 </tr>
               </thead>
@@ -408,22 +476,26 @@ export const ExpertSchedulingView: React.FC<ExpertSchedulingViewProps> = ({
                             member.roleInCommittee === 'CHAIRMAN'
                               ? '#dbeafe'
                               : member.roleInCommittee === 'ARCHITECTURAL_EXPERT'
-                              ? '#fef3c7'
-                              : '#f1f5f9',
+                                ? '#fef3c7'
+                                : '#f1f5f9',
                           color:
                             member.roleInCommittee === 'CHAIRMAN'
                               ? '#1e40af'
                               : member.roleInCommittee === 'ARCHITECTURAL_EXPERT'
-                              ? '#92400e'
-                              : '#334155',
+                                ? '#92400e'
+                                : '#334155',
                         }}
                       >
                         {member.roleInCommittee.replace('_', ' ')}
                       </span>
                     </td>
                     <td style={{ padding: '8px 12px', fontWeight: 600 }}>{member.name}</td>
-                    <td style={{ padding: '8px 12px', color: 'var(--color-text-muted)' }}>{member.designation}</td>
-                    <td style={{ padding: '8px 12px', color: 'var(--color-text-muted)' }}>{member.organization}</td>
+                    <td style={{ padding: '8px 12px', color: 'var(--color-text-muted)' }}>
+                      {member.designation}
+                    </td>
+                    <td style={{ padding: '8px 12px', color: 'var(--color-text-muted)' }}>
+                      {member.organization}
+                    </td>
                     <td style={{ padding: '8px 12px' }}>
                       <span
                         style={{
@@ -436,7 +508,9 @@ export const ExpertSchedulingView: React.FC<ExpertSchedulingViewProps> = ({
                         }}
                       >
                         <ShieldCheck size={14} />
-                        {member.conflictOfInterestDeclared ? 'No Conflict Declared' : 'Pending Declaration'}
+                        {member.conflictOfInterestDeclared
+                          ? 'No Conflict Declared'
+                          : 'Pending Declaration'}
                       </span>
                     </td>
                   </tr>
@@ -455,7 +529,14 @@ export const ExpertSchedulingView: React.FC<ExpertSchedulingViewProps> = ({
                 border: '1px solid var(--color-border)',
               }}
             >
-              <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--color-text-muted)', marginBottom: '4px' }}>
+              <div
+                style={{
+                  fontSize: '0.75rem',
+                  fontWeight: 600,
+                  color: 'var(--color-text-muted)',
+                  marginBottom: '4px',
+                }}
+              >
                 VISIT NOTES &amp; GROUND OBSERVATIONS
               </div>
               <p style={{ margin: 0, fontSize: '0.8125rem', whiteSpace: 'pre-wrap' }}>
@@ -475,7 +556,8 @@ export const ExpertSchedulingView: React.FC<ExpertSchedulingViewProps> = ({
             }}
           >
             <Clock size={12} />
-            Scheduled by {schedule.scheduledByName} on {new Date(schedule.updatedAt).toLocaleDateString('en-IN')}
+            Scheduled by {schedule.scheduledByName} on{' '}
+            {new Date(schedule.updatedAt).toLocaleDateString('en-IN')}
           </div>
         </Card>
       )}
@@ -484,7 +566,14 @@ export const ExpertSchedulingView: React.FC<ExpertSchedulingViewProps> = ({
       {isEditing && (
         <Card style={{ padding: 'var(--space-5)' }}>
           <form onSubmit={handleSaveSchedule}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', marginBottom: 'var(--space-4)' }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 'var(--space-2)',
+                marginBottom: 'var(--space-4)',
+              }}
+            >
               <UserCheck size={20} style={{ color: 'var(--color-primary)' }} />
               <h3 style={{ fontSize: 'var(--font-size-base)', fontWeight: 600, margin: 0 }}>
                 {schedule ? 'Modify EVC Inspection & Roster' : 'Schedule New EVC Inspection Visit'}
@@ -500,7 +589,14 @@ export const ExpertSchedulingView: React.FC<ExpertSchedulingViewProps> = ({
               }}
             >
               <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, marginBottom: '4px' }}>
+                <label
+                  style={{
+                    display: 'block',
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    marginBottom: '4px',
+                  }}
+                >
                   Inspection Date *
                 </label>
                 <input
@@ -519,12 +615,21 @@ export const ExpertSchedulingView: React.FC<ExpertSchedulingViewProps> = ({
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, marginBottom: '4px' }}>
+                <label
+                  style={{
+                    display: 'block',
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    marginBottom: '4px',
+                  }}
+                >
                   Visit Type *
                 </label>
                 <select
                   value={visitType}
-                  onChange={(e) => setVisitType(e.target.value as 'PHYSICAL_VISIT' | 'VIRTUAL_VISIT' | 'HYBRID')}
+                  onChange={(e) =>
+                    setVisitType(e.target.value as 'PHYSICAL_VISIT' | 'VIRTUAL_VISIT' | 'HYBRID')
+                  }
                   style={{
                     width: '100%',
                     padding: '8px 12px',
@@ -540,14 +645,22 @@ export const ExpertSchedulingView: React.FC<ExpertSchedulingViewProps> = ({
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, marginBottom: '4px' }}>
+                <label
+                  style={{
+                    display: 'block',
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    marginBottom: '4px',
+                  }}
+                >
                   Outcome Recommendation
                 </label>
                 <select
                   value={outcomeRecommendation}
                   onChange={(e) =>
                     setOutcomeRecommendation(
-                      e.target.value as 'PENDING' | 'RECOMMENDED' | 'DEFICIENCIES_NOTED' | 'REJECTED',
+                      e.target.value as
+                        'PENDING' | 'RECOMMENDED' | 'DEFICIENCIES_NOTED' | 'REJECTED',
                     )
                   }
                   style={{
@@ -676,7 +789,9 @@ export const ExpertSchedulingView: React.FC<ExpertSchedulingViewProps> = ({
                       <input
                         type="checkbox"
                         checked={member.conflictOfInterestDeclared}
-                        onChange={(e) => handleMemberChange(idx, 'conflictOfInterestDeclared', e.target.checked)}
+                        onChange={(e) =>
+                          handleMemberChange(idx, 'conflictOfInterestDeclared', e.target.checked)
+                        }
                       />
                       No COI
                     </label>
@@ -702,7 +817,14 @@ export const ExpertSchedulingView: React.FC<ExpertSchedulingViewProps> = ({
 
             {/* Visit Notes */}
             <div style={{ marginBottom: 'var(--space-5)' }}>
-              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, marginBottom: '4px' }}>
+              <label
+                style={{
+                  display: 'block',
+                  fontSize: '0.75rem',
+                  fontWeight: 600,
+                  marginBottom: '4px',
+                }}
+              >
                 Visit Notes &amp; Committee Instructions
               </label>
               <textarea

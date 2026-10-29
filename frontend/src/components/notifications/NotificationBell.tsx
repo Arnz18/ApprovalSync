@@ -63,7 +63,9 @@ export const NotificationBell: React.FC = () => {
     try {
       await notificationsService.markAsRead(id);
       setNotifications((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, isRead: true, readAt: new Date().toISOString() } : n)),
+        prev.map((n) =>
+          n.id === id ? { ...n, isRead: true, readAt: new Date().toISOString() } : n,
+        ),
       );
       setUnreadCount((prev) => Math.max(0, prev - 1));
     } catch {
@@ -127,16 +129,25 @@ export const NotificationBell: React.FC = () => {
   });
 
   const getSeverityIcon = (item: AppNotification) => {
-    if (item.type === NotificationType.SLA_BREACH || item.severity === NotificationSeverity.CRITICAL) {
+    if (
+      item.type === NotificationType.SLA_BREACH ||
+      item.severity === NotificationSeverity.CRITICAL
+    ) {
       return <AlertOctagon size={16} style={{ color: '#dc2626' }} />;
     }
-    if (item.type === NotificationType.SLA_WARNING || item.severity === NotificationSeverity.WARNING) {
+    if (
+      item.type === NotificationType.SLA_WARNING ||
+      item.severity === NotificationSeverity.WARNING
+    ) {
       return <AlertTriangle size={16} style={{ color: '#d97706' }} />;
     }
     if (item.type === NotificationType.EVC_SCHEDULED) {
       return <Calendar size={16} style={{ color: '#2563eb' }} />;
     }
-    if (item.type === NotificationType.UNDERTAKING_EXPIRING || item.type === NotificationType.DOCUMENT_EXPIRING) {
+    if (
+      item.type === NotificationType.UNDERTAKING_EXPIRING ||
+      item.type === NotificationType.DOCUMENT_EXPIRING
+    ) {
       return <FileText size={16} style={{ color: '#b45309' }} />;
     }
     return <Info size={16} style={{ color: '#0284c7' }} />;
@@ -224,7 +235,13 @@ export const NotificationBell: React.FC = () => {
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <ShieldAlert size={18} style={{ color: 'var(--color-primary)' }} />
               <div>
-                <div style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--color-text-main)' }}>
+                <div
+                  style={{
+                    fontSize: '0.8125rem',
+                    fontWeight: 600,
+                    color: 'var(--color-text-main)',
+                  }}
+                >
                   Regulatory Alerts &amp; Escalations Feed
                 </div>
                 <div style={{ fontSize: '0.6875rem', color: 'var(--color-text-muted)' }}>
@@ -303,11 +320,16 @@ export const NotificationBell: React.FC = () => {
                   color: activeTab === tab ? 'var(--color-primary)' : 'var(--color-text-muted)',
                   backgroundColor: activeTab === tab ? '#ffffff' : 'transparent',
                   borderRadius: 'var(--radius-sm)',
-                  border: activeTab === tab ? '1px solid var(--color-border)' : '1px solid transparent',
+                  border:
+                    activeTab === tab ? '1px solid var(--color-border)' : '1px solid transparent',
                   cursor: 'pointer',
                 }}
               >
-                {tab === 'ALL' ? 'All Alerts' : tab === 'UNREAD' ? `Unread (${unreadCount})` : 'Urgent & SLA'}
+                {tab === 'ALL'
+                  ? 'All Alerts'
+                  : tab === 'UNREAD'
+                    ? `Unread (${unreadCount})`
+                    : 'Urgent & SLA'}
               </button>
             ))}
           </div>
@@ -322,11 +344,25 @@ export const NotificationBell: React.FC = () => {
             }}
           >
             {loading && notifications.length === 0 ? (
-              <div style={{ padding: '2rem 1rem', textAlign: 'center', color: 'var(--color-text-muted)', fontSize: '0.75rem' }}>
+              <div
+                style={{
+                  padding: '2rem 1rem',
+                  textAlign: 'center',
+                  color: 'var(--color-text-muted)',
+                  fontSize: '0.75rem',
+                }}
+              >
                 Checking compliance and SLA alerts...
               </div>
             ) : filteredNotifications.length === 0 ? (
-              <div style={{ padding: '2.5rem 1rem', textAlign: 'center', color: 'var(--color-text-muted)', fontSize: '0.75rem' }}>
+              <div
+                style={{
+                  padding: '2.5rem 1rem',
+                  textAlign: 'center',
+                  color: 'var(--color-text-muted)',
+                  fontSize: '0.75rem',
+                }}
+              >
                 No notifications matching current view.
               </div>
             ) : (
@@ -407,7 +443,14 @@ export const NotificationBell: React.FC = () => {
                         color: 'var(--color-text-muted)',
                       }}
                     >
-                      <span>{new Date(item.createdAt).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                      <span>
+                        {new Date(item.createdAt).toLocaleDateString('en-IN', {
+                          month: 'short',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </span>
                       {(item.linkUrl || item.applicationId) && (
                         <span
                           style={{
@@ -446,4 +489,3 @@ export const NotificationBell: React.FC = () => {
     </div>
   );
 };
-

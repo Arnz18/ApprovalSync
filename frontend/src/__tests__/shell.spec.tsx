@@ -22,9 +22,8 @@ describe('Application Shell Layout (FE-01)', () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByText('ApprovalSync')).toBeInTheDocument();
-    expect(screen.getByText(/prototype/i)).toBeInTheDocument();
-    expect(screen.getByText(/SIMULATED \/ MOCK DATA/i)).toBeInTheDocument();
+    expect(screen.getByText(/AICTE Workflow & Compliance Portal|NiyamSetu/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/Regulation Bureau/i).length).toBeGreaterThan(0);
 
     const toggleBtn = screen.getByRole('button', { name: /Open navigation menu/i });
     fireEvent.click(toggleBtn);

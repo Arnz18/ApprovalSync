@@ -12,16 +12,76 @@ interface StageConfig {
 }
 
 const STAGES: StageConfig[] = [
-  { key: 'DRAFT', label: 'Draft Preparation', color: '#64748b', badgeBg: '#f1f5f9', group: 'Intake' },
-  { key: 'SUBMITTED', label: 'Submitted / Intake Queue', color: '#0284c7', badgeBg: '#e0f2fe', group: 'Intake' },
-  { key: 'UNDER_SCRUTINY', label: 'Under Primary Scrutiny', color: '#2563eb', badgeBg: '#dbeafe', group: 'Scrutiny' },
-  { key: 'DEFICIENCY_ISSUED', label: 'Deficiency Communicated', color: '#d97706', badgeBg: '#fef3c7', group: 'Scrutiny' },
-  { key: 'RESUBMITTED', label: 'Re-Scrutiny Verification', color: '#7c3aed', badgeBg: '#ede9fe', group: 'Scrutiny' },
-  { key: 'RECOMMENDED_FOR_EVC', label: 'Awaiting EVC Committee', color: '#0891b2', badgeBg: '#cffafe', group: 'EVC/Inspection' },
-  { key: 'EVC_IN_PROGRESS', label: 'EVC Ground Inspection Active', color: '#0d9488', badgeBg: '#ccfbf1', group: 'EVC/Inspection' },
-  { key: 'RECOMMENDED_FOR_SHC', label: 'Standing Hearing Committee (SHC)', color: '#dc2626', badgeBg: '#fee2e2', group: 'Final Committee' },
-  { key: 'APPROVED', label: 'AICTE Approval Accorded', color: '#16a34a', badgeBg: '#dcfce7', group: 'Final Committee' },
-  { key: 'REJECTED', label: 'Statutory Rejection Issued', color: '#b91c1c', badgeBg: '#fef2f2', group: 'Final Committee' },
+  {
+    key: 'DRAFT',
+    label: 'Draft Preparation',
+    color: '#64748b',
+    badgeBg: '#f1f5f9',
+    group: 'Intake',
+  },
+  {
+    key: 'SUBMITTED',
+    label: 'Submitted / Intake Queue',
+    color: '#0284c7',
+    badgeBg: '#e0f2fe',
+    group: 'Intake',
+  },
+  {
+    key: 'UNDER_SCRUTINY',
+    label: 'Under Primary Scrutiny',
+    color: '#2563eb',
+    badgeBg: '#dbeafe',
+    group: 'Scrutiny',
+  },
+  {
+    key: 'DEFICIENCY_ISSUED',
+    label: 'Deficiency Communicated',
+    color: '#d97706',
+    badgeBg: '#fef3c7',
+    group: 'Scrutiny',
+  },
+  {
+    key: 'RESUBMITTED',
+    label: 'Re-Scrutiny Verification',
+    color: '#7c3aed',
+    badgeBg: '#ede9fe',
+    group: 'Scrutiny',
+  },
+  {
+    key: 'RECOMMENDED_FOR_EVC',
+    label: 'Awaiting EVC Committee',
+    color: '#0891b2',
+    badgeBg: '#cffafe',
+    group: 'EVC/Inspection',
+  },
+  {
+    key: 'EVC_IN_PROGRESS',
+    label: 'EVC Ground Inspection Active',
+    color: '#0d9488',
+    badgeBg: '#ccfbf1',
+    group: 'EVC/Inspection',
+  },
+  {
+    key: 'RECOMMENDED_FOR_SHC',
+    label: 'Standing Hearing Committee (SHC)',
+    color: '#dc2626',
+    badgeBg: '#fee2e2',
+    group: 'Final Committee',
+  },
+  {
+    key: 'APPROVED',
+    label: 'AICTE Approval Accorded',
+    color: '#16a34a',
+    badgeBg: '#dcfce7',
+    group: 'Final Committee',
+  },
+  {
+    key: 'REJECTED',
+    label: 'Statutory Rejection Issued',
+    color: '#b91c1c',
+    badgeBg: '#fef2f2',
+    group: 'Final Committee',
+  },
 ];
 
 export const StagePendencyChart: React.FC = () => {
@@ -76,7 +136,13 @@ export const StagePendencyChart: React.FC = () => {
             <h3 style={{ fontSize: 'var(--font-size-base)', fontWeight: 600, margin: 0 }}>
               Stage-Wise Pendency &amp; Application Movement Monitor
             </h3>
-            <p style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-muted-foreground)', margin: 0 }}>
+            <p
+              style={{
+                fontSize: 'var(--font-size-xs)',
+                color: 'var(--color-muted-foreground)',
+                margin: 0,
+              }}
+            >
               Real-time distribution of applications across approval lifecycle stages
             </p>
           </div>
@@ -100,7 +166,14 @@ export const StagePendencyChart: React.FC = () => {
       </div>
 
       {loading ? (
-        <div style={{ padding: '2rem 0', textAlign: 'center', fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
+        <div
+          style={{
+            padding: '2rem 0',
+            textAlign: 'center',
+            fontSize: '0.75rem',
+            color: 'var(--color-text-muted)',
+          }}
+        >
           Computing stage pendency metrics...
         </div>
       ) : (
@@ -129,7 +202,9 @@ export const StagePendencyChart: React.FC = () => {
                         display: 'inline-block',
                       }}
                     />
-                    <span style={{ fontWeight: 500, color: 'var(--color-text-main)' }}>{stage.label}</span>
+                    <span style={{ fontWeight: 500, color: 'var(--color-text-main)' }}>
+                      {stage.label}
+                    </span>
                     <span
                       style={{
                         fontSize: '0.625rem',
@@ -145,8 +220,17 @@ export const StagePendencyChart: React.FC = () => {
                   </div>
 
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ fontWeight: 600, color: 'var(--color-text-main)' }}>{count}</span>
-                    <span style={{ fontSize: '0.6875rem', color: 'var(--color-text-muted)', minWidth: '32px', textAlign: 'right' }}>
+                    <span style={{ fontWeight: 600, color: 'var(--color-text-main)' }}>
+                      {count}
+                    </span>
+                    <span
+                      style={{
+                        fontSize: '0.6875rem',
+                        color: 'var(--color-text-muted)',
+                        minWidth: '32px',
+                        textAlign: 'right',
+                      }}
+                    >
                       {pct}%
                     </span>
                   </div>

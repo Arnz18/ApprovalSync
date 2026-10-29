@@ -74,6 +74,32 @@ describe('Routing & Navigation (FE-01 & FE-02)', () => {
   });
 
   it('renders ApplicationWizardPage for "/applications" (FE-03)', async () => {
+    globalThis.fetch = vi.fn().mockImplementation(async (url: string) => {
+      if (String(url).includes('/auth/me')) {
+        return {
+          ok: true,
+          status: 200,
+          text: async () =>
+            JSON.stringify({
+              success: true,
+              data: {
+                id: 'mock-inst-id',
+                email: 'demo.institution@synthetic.approvalsync.local',
+                name: 'Apex Institute User',
+                role: 'INSTITUTION_USER',
+                isActive: true,
+                createdAt: '2026-10-25T00:00:00.000Z',
+              },
+            }),
+        } as unknown as Response;
+      }
+      return {
+        ok: true,
+        status: 200,
+        text: async () => JSON.stringify({ success: true, data: { status: 'ok' } }),
+      } as unknown as Response;
+    });
+
     render(
       <MemoryRouter initialEntries={['/applications']}>
         <AppRoutes />
@@ -133,7 +159,7 @@ describe('Routing & Navigation (FE-01 & FE-02)', () => {
       expect(
         screen.getByRole('heading', { name: /Document AI & Duplicate Detection Engine/i }),
       ).toBeInTheDocument();
-      expect(screen.getByText(/Chunk DOC-04 — COMMITTED/i)).toBeInTheDocument();
+      expect(screen.getByText(/Module Spec DOC-04 — COMMITTED/i)).toBeInTheDocument();
       expect(screen.getByText('API Online')).toBeInTheDocument();
     });
   });
@@ -168,8 +194,8 @@ describe('Routing & Navigation (FE-01 & FE-02)', () => {
 
     // Should redirect to LoginPage
     await waitFor(() => {
-      expect(screen.getByRole('heading', { name: /Institutional Sign In/i })).toBeInTheDocument();
-      expect(screen.getByLabelText(/Official Email Address/i)).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: /Sign in/i })).toBeInTheDocument();
+      expect(screen.getByLabelText(/Official Account Email/i)).toBeInTheDocument();
     });
   });
 
