@@ -7,5 +7,6 @@
     "^.+\\.(t|j)s$": "ts-jest"
   },
   "setupFiles": ["<rootDir>/e2e-isolation-guard.ts"],
-  "testTimeout": 45000
+  "testTimeout": 45000,
+  "maxWorkers": 1
 }

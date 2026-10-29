@@ -564,12 +564,25 @@ describe('Institution Profiles & Application Intake (e2e)', () => {
       draftAppId = newDraft.id;
 
       // Seeded submitted application
-      const submitted = (await appRepo.findOne({
+      let submitted = await appRepo.findOne({
         where: {
           institutionId: institutionB.id,
           status: ApplicationStatus.SUBMITTED,
         },
-      }))!;
+      });
+      if (!submitted) {
+        submitted = await appRepo.save(
+          appRepo.create({
+            applicationNumber: 'APP-2026-SUBMITTED-DEMO',
+            institutionId: institutionB.id,
+            academicYear: '2026-2027',
+            status: ApplicationStatus.SUBMITTED,
+            programType: 'Undergraduate Engineering',
+            payloadJsonb: { facultyCount: 30 },
+            submittedAt: new Date(),
+          }),
+        );
+      }
       submittedAppId = submitted.id;
     });
 

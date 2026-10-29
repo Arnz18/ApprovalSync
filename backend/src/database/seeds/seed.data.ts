@@ -558,6 +558,22 @@ export const SEED_SLA_TIMERS: SeedSlaTimer[] = [
 
 export const SEED_RULE_SETS: SeedRuleSet[] = [
   {
+    code: 'RULESET-ENGG-UG',
+    name: 'AICTE Undergraduate Engineering Regulatory Norms',
+    description:
+      'Regulatory norms covering land, built-up area, and faculty cadre ratios for UG Engineering colleges (APH 2024-2027 cycle)',
+    applicationCategory: 'Undergraduate Engineering',
+    issuingAuthority: 'AICTE',
+  },
+  {
+    code: 'RULESET-POLY-DIP',
+    name: 'AICTE Diploma in Engineering Norms (Demo)',
+    description:
+      'Illustrative prototype norms for Polytechnic and Diploma institutions',
+    applicationCategory: 'Diploma in Engineering',
+    issuingAuthority: 'AICTE',
+  },
+  {
     code: 'AICTE-APH-2026-27',
     name: 'Approval Process Handbook 2026-27 Norms',
     description:
@@ -577,6 +593,43 @@ export const SEED_RULE_SETS: SeedRuleSet[] = [
 
 export const SEED_RULE_VERSIONS: SeedRuleVersion[] = [
   {
+    ruleSetCode: 'RULESET-ENGG-UG',
+    versionNumber: 1,
+    status: RuleLifecycleStatus.PUBLISHED,
+    effectiveFrom: new Date('2024-01-01T00:00:00.000Z'),
+    effectiveTo: null,
+    sourceTitle: 'AICTE Approval Process Handbook (APH) 2024-2027',
+    sourceReference: 'AICTE APH 2024-27 Chapter 1 & 2',
+    sourceClassification:
+      RuleSourceClassification.UNVERIFIED_HUMAN_REVIEW_REQUIRED,
+    changeSummary:
+      'Baseline regulatory norms under APH 2024-2027 cycle. Subject to human review.',
+  },
+  {
+    ruleSetCode: 'RULESET-ENGG-UG',
+    versionNumber: 2,
+    status: RuleLifecycleStatus.DRAFT,
+    effectiveFrom: new Date('2027-01-01T00:00:00.000Z'),
+    effectiveTo: null,
+    sourceTitle: 'AICTE Approval Process Handbook (Draft 2027 Revision)',
+    sourceReference: 'Draft Working Document 2027',
+    sourceClassification:
+      RuleSourceClassification.UNVERIFIED_HUMAN_REVIEW_REQUIRED,
+    changeSummary:
+      'Draft revision exploring revised sustainable built-up requirements.',
+  },
+  {
+    ruleSetCode: 'RULESET-POLY-DIP',
+    versionNumber: 1,
+    status: RuleLifecycleStatus.PUBLISHED,
+    effectiveFrom: new Date('2024-01-01T00:00:00.000Z'),
+    effectiveTo: null,
+    sourceTitle: 'AICTE Prototype Diploma Regulations (Illustrative)',
+    sourceReference: 'Hackathon Prototype Rulebook',
+    sourceClassification: RuleSourceClassification.ILLUSTRATIVE_DEMO,
+    changeSummary: 'Synthetic demo rulebook for polytechnic evaluation.',
+  },
+  {
     ruleSetCode: 'AICTE-APH-2026-27',
     versionNumber: 1,
     status: RuleLifecycleStatus.PUBLISHED,
@@ -587,18 +640,6 @@ export const SEED_RULE_VERSIONS: SeedRuleVersion[] = [
     sourceClassification: RuleSourceClassification.VERIFIED_REGULATORY,
     changeSummary:
       'Mandatory 30-year lease with minimum 25-year live residual tenure.',
-  },
-  {
-    ruleSetCode: 'AICTE-APH-2026-27',
-    versionNumber: 2,
-    status: RuleLifecycleStatus.DRAFT,
-    effectiveFrom: new Date('2027-01-01T00:00:00.000Z'),
-    effectiveTo: null,
-    sourceTitle: 'AICTE Approval Process Handbook 2027-28 (Proposed)',
-    sourceReference: 'AICTE/AB/APH/2027-28/Draft',
-    sourceClassification:
-      RuleSourceClassification.UNVERIFIED_HUMAN_REVIEW_REQUIRED,
-    changeSummary: 'Proposed updates for virtual lab simulations.',
   },
   {
     ruleSetCode: 'AICTE-APH-POLY-2026',
@@ -614,6 +655,91 @@ export const SEED_RULE_VERSIONS: SeedRuleVersion[] = [
 ];
 
 export const SEED_REGULATORY_RULES: SeedRegulatoryRule[] = [
+  {
+    ruleSetCode: 'RULESET-ENGG-UG',
+    versionNumber: 1,
+    ruleCode: 'RULE-LAND-01',
+    title: 'Minimum Land Requirement for Rural UG Engineering',
+    description:
+      'Institutions situated in non-metro/rural areas must possess a contiguous land parcel of at least 7.5 acres.',
+    ruleType: RuleType.INFRASTRUCTURE_LAND,
+    severity: ComplianceSeverity.CRITICAL_DEFICIENCY,
+    parametersJsonb: {
+      minLandAcres: 7.5,
+      areaType: 'RURAL',
+      contiguousRequired: true,
+    },
+    sourceClause: 'APH 2024-27 Clause 1.4.1',
+    sourceClassification:
+      RuleSourceClassification.UNVERIFIED_HUMAN_REVIEW_REQUIRED,
+  },
+  {
+    ruleSetCode: 'RULESET-ENGG-UG',
+    versionNumber: 1,
+    ruleCode: 'RULE-BUILTUP-01',
+    title: 'Minimum Built-up Area for Engineering Intake',
+    description:
+      'Institutions with approved intake up to 300 students must maintain at least 4,000 square meters of instructional and administrative built-up space.',
+    ruleType: RuleType.INFRASTRUCTURE_BUILTUP,
+    severity: ComplianceSeverity.CRITICAL_DEFICIENCY,
+    parametersJsonb: {
+      minBuiltUpAreaSqMeters: 4000,
+      baseStudentIntake: 300,
+    },
+    sourceClause: 'APH 2024-27 Clause 1.4.3',
+    sourceClassification:
+      RuleSourceClassification.UNVERIFIED_HUMAN_REVIEW_REQUIRED,
+  },
+  {
+    ruleSetCode: 'RULESET-ENGG-UG',
+    versionNumber: 1,
+    ruleCode: 'RULE-FACULTY-01',
+    title: 'Student to Faculty Cadre Ratio',
+    description:
+      'The overall full-time student-to-faculty ratio in undergraduate engineering courses must not exceed 20:1.',
+    ruleType: RuleType.FACULTY_RATIO,
+    severity: ComplianceSeverity.CRITICAL_DEFICIENCY,
+    parametersJsonb: {
+      maxStudentFacultyRatio: 20,
+      cadreRatioCadreBreakdown: '1:2:6',
+    },
+    sourceClause: 'APH 2024-27 Clause 2.1.2',
+    sourceClassification:
+      RuleSourceClassification.UNVERIFIED_HUMAN_REVIEW_REQUIRED,
+  },
+  {
+    ruleSetCode: 'RULESET-ENGG-UG',
+    versionNumber: 1,
+    ruleCode: 'RULE-BARRIER-01',
+    title: 'Barrier-Free Environment and Accessibility',
+    description:
+      'Campus must incorporate ramps, accessible elevators, and disabled-friendly sanitary facilities.',
+    ruleType: RuleType.BARRIER_FREE_ENVIRONMENT,
+    severity: ComplianceSeverity.ADVISORY_FLAG,
+    parametersJsonb: {
+      rampsRequired: true,
+      accessibleToiletsRequired: true,
+      liftMandatoryForAboveGPlus1: true,
+    },
+    sourceClause: 'APH 2024-27 Clause 1.5',
+    sourceClassification:
+      RuleSourceClassification.UNVERIFIED_HUMAN_REVIEW_REQUIRED,
+  },
+  {
+    ruleSetCode: 'RULESET-POLY-DIP',
+    versionNumber: 1,
+    ruleCode: 'RULE-POLY-LAND-01',
+    title: 'Minimum Land Requirement for Diploma Institutions (Demo)',
+    description:
+      'Polytechnic institutions must possess at least 4.0 acres of educational land.',
+    ruleType: RuleType.INFRASTRUCTURE_LAND,
+    severity: ComplianceSeverity.CRITICAL_DEFICIENCY,
+    parametersJsonb: {
+      minLandAcres: 4.0,
+    },
+    sourceClause: 'Demo Poly Rulebook Clause 1.1',
+    sourceClassification: RuleSourceClassification.ILLUSTRATIVE_DEMO,
+  },
   {
     ruleSetCode: 'AICTE-APH-2026-27',
     versionNumber: 1,
@@ -701,21 +827,36 @@ export const SEED_REGULATORY_RULES: SeedRegulatoryRule[] = [
 
 export const SEED_CHECKLIST_TEMPLATES: SeedChecklistTemplate[] = [
   {
-    ruleSetCode: 'AICTE-APH-2026-27',
+    ruleSetCode: 'RULESET-ENGG-UG',
     versionNumber: 1,
     code: 'CHK-ENGG-UG-INTAKE',
-    name: 'Undergraduate Engineering Program Scrutiny Checklist',
+    name: 'UG Engineering Mandatory Intake Checklist',
     description:
-      'Standard documentary checklist for new undergraduate engineering programs.',
+      'Mandatory documentary evidence and metric declarations required for UG engineering approval',
+    applicationCategory: 'Undergraduate Engineering',
+  },
+  {
+    ruleSetCode: 'RULESET-POLY-DIP',
+    versionNumber: 1,
+    code: 'CHK-POLY-DIP-INTAKE',
+    name: 'Diploma in Engineering Intake Checklist (Demo)',
+    description: 'Mandatory documentation for diploma approval demo',
+    applicationCategory: 'Diploma in Engineering',
+  },
+  {
+    ruleSetCode: 'AICTE-APH-2026-27',
+    versionNumber: 1,
+    code: 'CHK-APH-2026-INTAKE',
+    name: 'Approval Process Handbook Technical Campus Intake Checklist',
+    description: 'Statutory documentary checklist for Technical Campus intake.',
     applicationCategory: 'TECHNICAL_CAMPUS',
   },
   {
     ruleSetCode: 'AICTE-APH-POLY-2026',
     versionNumber: 1,
-    code: 'CHK-POLY-DIP-INTAKE',
-    name: 'Polytechnic Diploma Program Scrutiny Checklist',
-    description:
-      'Standard documentary checklist for diploma technical institutes.',
+    code: 'CHK-APH-POLY-INTAKE',
+    name: 'Approval Process Handbook Polytechnic Intake Checklist',
+    description: 'Statutory documentary checklist for Polytechnic intake.',
     applicationCategory: 'POLYTECHNIC',
   },
 ];
@@ -725,37 +866,37 @@ export const SEED_CHECKLIST_ITEMS: SeedChecklistItem[] = [
     templateCode: 'CHK-ENGG-UG-INTAKE',
     itemCode: 'CHK-ITEM-LAND-DEED',
     description:
-      'Registered Land Title Deed or Registered Lease Deed (Min 30-year duration)',
+      'Registered Sale Deed or 30-Year Continuous Government Lease Deed in name of Trust/Society',
     itemType: ChecklistItemType.DOCUMENT_UPLOAD,
     required: true,
     evidenceDocumentType: 'LAND_TITLE_DEED',
     displayOrder: 10,
     ruleCode: 'RULE-LAND-01',
     guidanceNotes:
-      'Verify registered date, remaining validity >= 25 years, and lessor title.',
+      'Verify registration validity, lessor tenure, and survey numbers against institution land claims.',
   },
   {
     templateCode: 'CHK-ENGG-UG-INTAKE',
-    itemCode: 'CHK-ITEM-LAND-CONVERSION',
+    itemCode: 'CHK-ITEM-BUILDING-PLAN',
     description:
-      'Government Land Use Conversion Certificate for Educational Purposes',
+      'Approved Building Plan from Competent Town Planning / Municipal Authority',
     itemType: ChecklistItemType.DOCUMENT_UPLOAD,
     required: true,
-    evidenceDocumentType: 'LAND_USE_CERTIFICATE',
+    evidenceDocumentType: 'BUILDING_PLAN_APPROVAL',
     displayOrder: 20,
-    ruleCode: 'RULE-LAND-02',
+    ruleCode: 'RULE-BUILTUP-01',
     guidanceNotes:
-      'Non-Agricultural (NA) permission from Competent Revenue Authority.',
+      'Verify sanction number, competent authority stamp, and sanctioned carpet area.',
   },
   {
     templateCode: 'CHK-ENGG-UG-INTAKE',
     itemCode: 'CHK-ITEM-FIRE-NOC',
-    description: 'Current Valid Fire Safety Certificate (Form B)',
+    description:
+      'Fire Safety Certificate / No-Objection Certificate from State Fire Service',
     itemType: ChecklistItemType.DOCUMENT_UPLOAD,
     required: true,
     evidenceDocumentType: 'FIRE_SAFETY_CERTIFICATE',
     displayOrder: 30,
-    ruleCode: 'RULE-SAFETY-01',
     guidanceNotes:
       'Verify certificate validity period and building occupancy classification.',
   },
@@ -790,7 +931,7 @@ export const SEED_CHECKLIST_ITEMS: SeedChecklistItem[] = [
     required: true,
     evidenceDocumentType: 'LAND_TITLE_DEED',
     displayOrder: 10,
-    ruleCode: 'RULE-LAND-01',
+    ruleCode: 'RULE-POLY-LAND-01',
     guidanceNotes: 'Demo verification of polytechnic land documents.',
   },
 ];

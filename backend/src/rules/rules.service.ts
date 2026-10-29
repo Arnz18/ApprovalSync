@@ -792,9 +792,15 @@ export class RulesService {
       );
     }
 
-    const ruleSet = await this.ruleSetRepository.findOne({
+    let ruleSet = await this.ruleSetRepository.findOne({
       where: { applicationCategory: query.category },
     });
+
+    if (!ruleSet && query.category === 'Undergraduate Engineering (B.Tech)') {
+      ruleSet = await this.ruleSetRepository.findOne({
+        where: { applicationCategory: 'Undergraduate Engineering' },
+      });
+    }
 
     if (!ruleSet) {
       throw new NotFoundException(
